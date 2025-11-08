@@ -21,7 +21,7 @@
 // automatique de l'hibernation pour les projets à faible énergie.
 // Mise à jour de la version : inclut l’auto‑priorisation des actions
 // et le flux Red‑Team automatisé avec intégration des entrées Red‑Team
-const APP_VERSION = '3.4.26';
+const APP_VERSION = '3.5.0';
 
   // Exposer la version de l’application sur l’objet global afin d’y accéder
   // facilement depuis la console ou d’autres scripts. Permet aussi aux
@@ -62,6 +62,15 @@ const APP_VERSION = '3.4.26';
   };
   const defaultThresholds = { varRed:-0.10, varAmber:-0.03, spiRed:0.90, spiAmber:0.98, dueSoonDays:7 };
   const defaultCaps = { "Florian": 20, "Equipe A": 20, "Equipe B": 20, "Freelance": 15, "Partenaire": 10 };
+
+  const OBJECTIVE_TYPES = [
+    { value:'temporal', label:'Temporel' },
+    { value:'result', label:'Résultat' },
+    { value:'method', label:'Méthode' },
+    { value:'quality', label:'Qualité' },
+    { value:'learning', label:'Apprentissage' }
+  ];
+  const REQUIRED_OBJECTIVE_TYPES = ['temporal','result','method'];
 
   // Filtres appliqués au tableau de bord (période, projet, responsable). Ces valeurs
   // sont définies via la barre de filtres du dashboard et utilisées pour filtrer
@@ -167,6 +176,19 @@ const APP_VERSION = '3.4.26';
   const fmtNum = (x,d=0) => (isFinite(x) ? Number(x).toFixed(d) : '—');
   const fmtDate = d => d ? new Date(d).toISOString().slice(0,10) : '';
   const escapeHtml = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function formatDurationMinutes(minutes){
+    const total = Math.max(0, Math.round(Number(minutes) || 0));
+    if (!total) return '—';
+    const hours = Math.floor(total / 60);
+    const mins = total % 60;
+    if (hours && mins){
+      return `${hours} h ${mins}`;
+    }
+    if (hours){
+      return `${hours} h`;
+    }
+    return `${mins} min`;
+  }
   function showToast(msg){ const t = $('#toast'); if (!t) return; t.textContent = msg; t.hidden=false; setTimeout(()=>t.hidden=true, 1600); }
 
   // --------- Validation différée pour les nouveaux éléments (hors actions) ---------
@@ -440,6 +462,16 @@ const APP_VERSION = '3.4.26';
   // ---------- State ----------
   let theme = (localStorage.getItem('theme') || 'dark');
   document.documentElement.setAttribute('data-theme', theme);
+  let timerInterval = null;
+  let timerDeadline = 0;
+  let timerRemainingMs = 0;
+  let timerInitialMs = 0;
+  let timerRunning = false;
+  let timerCurrentLabel = '';
+  let timerReturnFocus = null;
+
+  const HIERARCHY_STATE_KEY = 'klaro:projectHierarchy';
+  const projectHierarchyState = loadProjectHierarchyState();
 
   // ---------- Init ----------
   window.addEventListener('load', init);
@@ -504,6 +536,8 @@ const APP_VERSION = '3.4.26';
     initNoEndDateHandlers($('#formAction'));
     // Activer le basculement des options avancées sur les formulaires.
     bindAdvancedToggles();
+    initObjectiveEditors();
+    bindTimerControls();
     refreshAll();
 
     // Mettre à jour dynamiquement la version affichée dans l'entête pour qu'elle corresponde
@@ -727,6 +761,7 @@ const APP_VERSION = '3.4.26';
     $('#bulkProjects').addEventListener('click', handleBulkProjects);
     $('#selAllActions').addEventListener('change', (e)=>{ $$('#tblActions tbody input[type=checkbox]').forEach(c=>c.checked=e.target.checked); updateBulkBar('actions'); });
     $('#bulkActions').addEventListener('click', handleBulkActions);
+    bindProjectHierarchyControls();
   }
   function bindDataOps(){
     // Templates
@@ -743,6 +778,10 @@ const APP_VERSION = '3.4.26';
     $('#btnImportJSON').addEventListener('click', importJSON);
     $('#btnImportProjectsCSV').addEventListener('click', ()=> importCSV('projects'));
     $('#btnImportActionsCSV').addEventListener('click', ()=> importCSV('actions'));
+    const formCustomExport = document.getElementById('formCustomExport');
+    if (formCustomExport){ formCustomExport.addEventListener('submit', handleCustomExport); }
+    const formCustomImport = document.getElementById('formCustomImport');
+    if (formCustomImport){ formCustomImport.addEventListener('submit', handleCustomImport); }
     // Integrity & snapshots
     $('#btnScanIntegrity').addEventListener('click', scanIntegrity);
     $('#btnSnapshot').addEventListener('click', createSnapshot);
@@ -751,14 +790,53 @@ const APP_VERSION = '3.4.26';
   }
   function bindViews(){
     // tabs in Params
-    if (document.getElementById('paramsTabs')){
-      document.querySelectorAll('#paramsTabs .tab').forEach(btn=> btn.addEventListener('click', ()=>{
-        document.querySelectorAll('#paramsTabs .tab').forEach(b=>{ b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
-        document.querySelectorAll('.tabpanel').forEach(p=> p.classList.remove('show'));
-        btn.classList.add('active'); btn.setAttribute('aria-selected','true');
-        document.getElementById(btn.dataset.tab).classList.add('show');
-        if (btn.dataset.tab==='p-data'){ refreshData(); }
-      }));
+    const tabsRoot = document.getElementById('paramsTabs');
+    if (tabsRoot){
+      const tabs = Array.from(tabsRoot.querySelectorAll('.tab'));
+      const panels = tabs.map(tab => document.getElementById(tab.dataset.tab)).filter(Boolean);
+      const activateTab = (tab) => {
+        tabs.forEach(btn => {
+          const isActive = btn === tab;
+          btn.classList.toggle('active', isActive);
+          btn.setAttribute('aria-selected', String(isActive));
+          btn.setAttribute('tabindex', isActive ? '0' : '-1');
+        });
+        panels.forEach(panel => {
+          const isActive = panel.id === tab.dataset.tab;
+          panel.classList.toggle('show', isActive);
+          panel.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+        });
+        const targetPanel = document.getElementById(tab.dataset.tab);
+        if (targetPanel){
+          if (!targetPanel.hasAttribute('tabindex')) targetPanel.setAttribute('tabindex','-1');
+          if (tab.dataset.tab === 'p-data'){ refreshData(); }
+          setTimeout(() => targetPanel.focus(), 0);
+        }
+      };
+      tabs.forEach(btn => {
+        btn.addEventListener('click', () => activateTab(btn));
+        const isActive = btn.classList.contains('active');
+        btn.setAttribute('aria-selected', String(isActive));
+        btn.setAttribute('tabindex', isActive ? '0' : '-1');
+      });
+      panels.forEach(panel => {
+        if (!panel.hasAttribute('tabindex')) panel.setAttribute('tabindex','-1');
+        panel.setAttribute('aria-hidden', panel.classList.contains('show') ? 'false' : 'true');
+      });
+      tabsRoot.addEventListener('keydown', ev => {
+        if (ev.key !== 'ArrowRight' && ev.key !== 'ArrowLeft' && ev.key !== 'Home' && ev.key !== 'End') return;
+        ev.preventDefault();
+        const currentIndex = tabs.indexOf(document.activeElement);
+        if (currentIndex === -1) return;
+        let nextIndex = currentIndex;
+        if (ev.key === 'ArrowRight') nextIndex = (currentIndex + 1) % tabs.length;
+        else if (ev.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+        else if (ev.key === 'Home') nextIndex = 0;
+        else if (ev.key === 'End') nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        nextTab.focus();
+        activateTab(nextTab);
+      });
     }
     // watchlist
     const addBtn = $('#wl-add-btn');
@@ -849,6 +927,394 @@ const APP_VERSION = '3.4.26';
           btn.textContent = '+ Options avancées';
         }
       });
+    });
+  }
+
+  function ensureObjectiveBaseline(targetId){
+    const container = document.getElementById(targetId);
+    if (!container) return;
+    const currentTypes = Array.from(container.querySelectorAll('select[data-field=type]')).map(sel => sel.value);
+    for (const req of REQUIRED_OBJECTIVE_TYPES){
+      if (!currentTypes.includes(req)){
+        addObjectiveRow(targetId, { type:req });
+      }
+    }
+    while (container.children.length < 3){
+      addObjectiveRow(targetId, {});
+    }
+  }
+
+  function addObjectiveRow(targetId, data={}){
+    const container = document.getElementById(targetId);
+    if (!container) return;
+    const row = document.createElement('div');
+    row.className = 'objective-item';
+    const existingTypes = Array.from(container.querySelectorAll('select[data-field=type]')).map(sel => sel.value);
+    let type = data.type || REQUIRED_OBJECTIVE_TYPES.find(t => !existingTypes.includes(t)) || 'quality';
+    if (!OBJECTIVE_TYPES.some(o => o.value === type)) type = 'quality';
+    const select = document.createElement('select');
+    select.dataset.field = 'type';
+    OBJECTIVE_TYPES.forEach(optData => {
+      const opt = document.createElement('option');
+      opt.value = optData.value;
+      opt.textContent = optData.label;
+      if (opt.value === type) opt.selected = true;
+      select.appendChild(opt);
+    });
+    const input = document.createElement('input');
+    input.dataset.field = 'description';
+    input.placeholder = 'Décrire l’objectif…';
+    input.value = data.description || '';
+    input.required = true;
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'secondary';
+    removeBtn.textContent = '🗑️';
+    removeBtn.title = 'Supprimer cet objectif';
+    removeBtn.addEventListener('click', () => {
+      row.remove();
+      ensureObjectiveBaseline(targetId);
+    });
+    row.appendChild(select);
+    row.appendChild(input);
+    row.appendChild(removeBtn);
+    container.appendChild(row);
+  }
+
+  function resetObjectives(targetId, objectives){
+    const container = document.getElementById(targetId);
+    if (!container) return;
+    container.innerHTML = '';
+    if (Array.isArray(objectives) && objectives.length){
+      for (const obj of objectives){
+        if (!obj) continue;
+        addObjectiveRow(targetId, { type: obj.type, description: obj.description || obj.label || '' });
+      }
+    }
+    ensureObjectiveBaseline(targetId);
+  }
+
+  function collectObjectives(targetId){
+    const container = document.getElementById(targetId);
+    if (!container) return [];
+    const rows = Array.from(container.querySelectorAll('.objective-item'));
+    return rows.map(row => {
+      const typeSel = row.querySelector('select[data-field=type]');
+      const descInput = row.querySelector('input[data-field=description]');
+      return {
+        type: (typeSel?.value || '').trim(),
+        description: (descInput?.value || '').trim()
+      };
+    }).filter(obj => obj.description);
+  }
+
+  function validateObjectives(list){
+    if (!Array.isArray(list) || list.length < 3) return false;
+    const types = new Set(list.map(obj => obj.type));
+    return REQUIRED_OBJECTIVE_TYPES.every(t => types.has(t));
+  }
+
+  function initObjectiveEditors(){
+    document.querySelectorAll('[data-add-objective]').forEach(btn => {
+      const targetId = btn.getAttribute('data-add-objective');
+      if (!targetId) return;
+      btn.addEventListener('click', () => {
+        addObjectiveRow(targetId, {});
+      });
+    });
+    ['systemObjectives','actionObjectives','routineObjectives'].forEach(id => ensureObjectiveBaseline(id));
+  }
+
+  function resetAdvancedSections(form){
+    if (!form) return;
+    form.querySelectorAll('.advanced-options').forEach(section => {
+      section.setAttribute('hidden','');
+    });
+    form.querySelectorAll('.toggle-advanced').forEach(btn => {
+      btn.setAttribute('aria-expanded','false');
+      btn.textContent = '+ Options avancées';
+    });
+  }
+
+  function normalizeIdList(val){
+    if (Array.isArray(val)) return val.map(v => String(v));
+    if (val==null) return [];
+    return [String(val)];
+  }
+
+  function loadProjectHierarchyState(){
+    try {
+      const stored = JSON.parse(localStorage.getItem(HIERARCHY_STATE_KEY) || '{}');
+      return {
+        focus: stored.focus || '__all',
+        includeDescendants: stored.includeDescendants !== false
+      };
+    } catch(err){
+      return { focus:'__all', includeDescendants:true };
+    }
+  }
+  function saveProjectHierarchyState(){
+    localStorage.setItem(HIERARCHY_STATE_KEY, JSON.stringify(projectHierarchyState));
+  }
+  function syncProjectHierarchyControls(){
+    const select = document.getElementById('projectHierarchySelect');
+    if (select){
+      const options = Array.from(select.options).map(opt => opt.value);
+      if (!options.includes(projectHierarchyState.focus)){
+        projectHierarchyState.focus = '__all';
+        saveProjectHierarchyState();
+      }
+      select.value = projectHierarchyState.focus;
+    }
+    const cb = document.getElementById('projectHierarchyIncludeDesc');
+    if (cb){
+      cb.checked = projectHierarchyState.includeDescendants;
+    }
+  }
+  function resetProjectHierarchyState(){
+    projectHierarchyState.focus = '__all';
+    projectHierarchyState.includeDescendants = true;
+    saveProjectHierarchyState();
+    syncProjectHierarchyControls();
+    refreshProjects();
+  }
+  function setProjectHierarchyFocus(value, includeDesc = projectHierarchyState.includeDescendants){
+    projectHierarchyState.focus = value || '__all';
+    projectHierarchyState.includeDescendants = includeDesc;
+    saveProjectHierarchyState();
+    syncProjectHierarchyControls();
+    refreshProjects();
+  }
+  function createAncestorResolver(projects){
+    const rawMap = new Map((projects||[]).map(p => [p.id, p]));
+    const memo = new Map();
+    function ancestors(id, stack = new Set()){
+      if (memo.has(id)) return memo.get(id);
+      const proj = rawMap.get(id);
+      if (!proj) return [];
+      const parents = normalizeIdList(proj.parentProjects).map(v => v.trim()).filter(Boolean);
+      let result = [];
+      for (const parentId of parents){
+        if (stack.has(parentId)) continue;
+        const nextStack = new Set(stack);
+        nextStack.add(parentId);
+        const parentAnc = ancestors(parentId, nextStack);
+        result = result.concat(parentAnc);
+        result.push(parentId);
+      }
+      const uniq = result.filter((v,i,arr) => arr.indexOf(v) === i);
+      memo.set(id, uniq);
+      return uniq;
+    }
+    return { ancestors, rawMap };
+  }
+  function collectDescendantsFromMap(id, childMap){
+    const visited = new Set();
+    const stack = [...(childMap.get(id) || [])];
+    const out = [];
+    while (stack.length){
+      const current = stack.pop();
+      if (visited.has(current)) continue;
+      visited.add(current);
+      out.push(current);
+      const children = childMap.get(current) || [];
+      children.forEach(childId => {
+        if (!visited.has(childId)) stack.push(childId);
+      });
+    }
+    return out;
+  }
+  function paintProjectHierarchySelect(projects, titleById, childMap){
+    const select = document.getElementById('projectHierarchySelect');
+    if (!select) return;
+    const visited = new Set();
+    const options = [
+      { value:'__all', label:'Tous les projets' },
+      { value:'__root', label:'Racine (sans parent)' }
+    ];
+    const sorted = (projects||[]).slice().sort((a,b)=> (a.title||a.id||'').localeCompare(b.title||b.id||'', 'fr', { numeric:true, sensitivity:'base' }));
+    const roots = sorted.filter(p => normalizeIdList(p.parentProjects).length === 0);
+    const addNode = (id, depth=0) => {
+      if (!id || visited.has(id)) return;
+      visited.add(id);
+      const label = titleById.get(id) || id;
+      const prefix = depth ? ' '.repeat(depth*2) + '↳ ' : '';
+      options.push({ value:id, label: prefix + label });
+      const children = (childMap.get(id) || []).slice().sort((a,b)=> (titleById.get(a)||a).localeCompare(titleById.get(b)||b, 'fr', { numeric:true, sensitivity:'base' }));
+      children.forEach(childId => addNode(childId, depth+1));
+    };
+    roots.forEach(root => addNode(root.id, 0));
+    sorted.forEach(p => addNode(p.id, 0));
+    select.innerHTML = '';
+    options.forEach(opt => {
+      const option = document.createElement('option');
+      option.value = opt.value;
+      option.textContent = opt.label;
+      select.appendChild(option);
+    });
+    syncProjectHierarchyControls();
+  }
+  function bindProjectHierarchyControls(){
+    const select = document.getElementById('projectHierarchySelect');
+    if (select){
+      select.addEventListener('change', () => {
+        setProjectHierarchyFocus(select.value);
+      });
+    }
+    const cb = document.getElementById('projectHierarchyIncludeDesc');
+    if (cb){
+      cb.addEventListener('change', () => {
+        projectHierarchyState.includeDescendants = cb.checked;
+        saveProjectHierarchyState();
+        refreshProjects();
+      });
+    }
+    const resetBtn = document.getElementById('projectHierarchyReset');
+    if (resetBtn){
+      resetBtn.addEventListener('click', () => resetProjectHierarchyState());
+    }
+    syncProjectHierarchyControls();
+  }
+
+  // ---------- Timer helpers ----------
+  function handleTimerActivation(cell){
+    if (!cell) return;
+    const minutes = Number(cell.dataset.minutes || 0);
+    if (!minutes) return;
+    const label = cell.dataset.label || 'Action';
+    openTimerModal(label, minutes);
+  }
+  function handleTimeCellClick(event){
+    event.preventDefault();
+    handleTimerActivation(event.currentTarget);
+  }
+  function handleTimeCellKey(event){
+    if (event.key === 'Enter' || event.key === ' '){
+      event.preventDefault();
+      handleTimerActivation(event.currentTarget);
+    }
+  }
+  function openTimerModal(label, minutes){
+    const modal = document.getElementById('timerModal');
+    if (!modal) return;
+    timerCurrentLabel = label || 'Action';
+    const active = document.activeElement;
+    timerReturnFocus = (active && typeof active.focus === 'function') ? active : null;
+    const title = document.getElementById('timerTitle');
+    if (title) title.textContent = `Chronomètre — ${timerCurrentLabel}`;
+    const toggle = document.getElementById('timerToggle');
+    if (toggle){
+      toggle.dataset.state = 'running';
+      toggle.textContent = '⏸️ Pause';
+    }
+    const msg = document.getElementById('timerMessage');
+    if (msg) msg.textContent = '';
+    const minutesValue = Math.max(0, Number(minutes) || 0);
+    timerInitialMs = Math.max(1000, Math.round(minutesValue * 60000));
+    timerRemainingMs = timerInitialMs;
+    modal.hidden = false;
+    modal.setAttribute('aria-hidden','false');
+    updateTimerDisplay();
+    startTimerCountdown();
+    toggle?.focus();
+  }
+  function startTimerCountdown(){
+    clearInterval(timerInterval);
+    timerDeadline = Date.now() + timerRemainingMs;
+    timerRunning = true;
+    updateTimerDisplay();
+    timerInterval = setInterval(() => {
+      timerRemainingMs = Math.max(0, timerDeadline - Date.now());
+      updateTimerDisplay();
+      if (timerRemainingMs <= 0){
+        clearInterval(timerInterval);
+        timerInterval = null;
+        timerRunning = false;
+        const toggle = document.getElementById('timerToggle');
+        if (toggle){ toggle.dataset.state = 'paused'; toggle.textContent = '▶️ Reprendre'; }
+        const msg = document.getElementById('timerMessage');
+        if (msg) msg.textContent = 'Temps écoulé !';
+      }
+    }, 500);
+  }
+  function pauseTimer(updateToggle=true){
+    if (timerInterval){
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+    if (timerRunning){
+      timerRemainingMs = Math.max(0, timerDeadline - Date.now());
+      timerRunning = false;
+    }
+    if (updateToggle){
+      const toggle = document.getElementById('timerToggle');
+      if (toggle){ toggle.dataset.state = 'paused'; toggle.textContent = '▶️ Reprendre'; }
+    }
+  }
+  function resumeTimer(){
+    if (timerRemainingMs <= 0){
+      timerRemainingMs = timerInitialMs > 0 ? timerInitialMs : 60000;
+    }
+    const msg = document.getElementById('timerMessage');
+    if (msg) msg.textContent = '';
+    const toggle = document.getElementById('timerToggle');
+    if (toggle){ toggle.dataset.state = 'running'; toggle.textContent = '⏸️ Pause'; }
+    startTimerCountdown();
+  }
+  function restartTimer(){
+    timerRemainingMs = timerInitialMs > 0 ? timerInitialMs : 60000;
+    const msg = document.getElementById('timerMessage');
+    if (msg) msg.textContent = '';
+    const toggle = document.getElementById('timerToggle');
+    if (toggle){ toggle.dataset.state = 'running'; toggle.textContent = '⏸️ Pause'; }
+    startTimerCountdown();
+  }
+  function closeTimerModal(){
+    const modal = document.getElementById('timerModal');
+    if (!modal) return;
+    pauseTimer(false);
+    modal.hidden = true;
+    modal.setAttribute('aria-hidden','true');
+    if (timerReturnFocus && typeof timerReturnFocus.focus === 'function'){
+      try { timerReturnFocus.focus(); } catch(e){}
+    }
+    timerReturnFocus = null;
+  }
+  function updateTimerDisplay(){
+    const countdownEl = document.getElementById('timerCountdown');
+    if (!countdownEl) return;
+    const remaining = Math.max(0, Math.round(timerRemainingMs / 1000));
+    const minutes = Math.floor(remaining / 60);
+    const seconds = remaining % 60;
+    countdownEl.textContent = `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+  }
+  function bindTimerControls(){
+    const toggle = document.getElementById('timerToggle');
+    if (toggle){
+      toggle.dataset.state = 'running';
+      toggle.addEventListener('click', () => {
+        if (toggle.dataset.state === 'running'){
+          pauseTimer();
+        } else {
+          resumeTimer();
+        }
+      });
+    }
+    const resetBtn = document.getElementById('timerReset');
+    if (resetBtn){ resetBtn.addEventListener('click', restartTimer); }
+    const closeBtn = document.getElementById('timerClose');
+    if (closeBtn){ closeBtn.addEventListener('click', closeTimerModal); }
+    const modal = document.getElementById('timerModal');
+    if (modal){
+      modal.addEventListener('click', (ev) => { if (ev.target === modal) closeTimerModal(); });
+    }
+    document.addEventListener('keydown', ev => {
+      if (ev.key === 'Escape'){
+        const modalEl = document.getElementById('timerModal');
+        if (modalEl && !modalEl.hidden){
+          closeTimerModal();
+        }
+      }
     });
   }
 
@@ -964,6 +1430,7 @@ const APP_VERSION = '3.4.26';
     if (kind==='global'){
       fillGlobalSelects();
       const form = $('#formGlobal');
+      resetAdvancedSections(form);
       form.classList.remove('collapsed');
       $('#titleGlobalForm').textContent = data?`Modifier ${data.id}`:'Nouvel objectif global';
       formSet(form, data||{});
@@ -972,14 +1439,18 @@ const APP_VERSION = '3.4.26';
     }else if(kind==='system'){
       fillSystemSelects();
       const form = $('#formSystem');
+      resetAdvancedSections(form);
       form.classList.remove('collapsed');
       $('#titleSystemForm').textContent = data?`Modifier ${data.id}`:'Nouvel objectif système';
       formSet(form, data||{});
       form.dataset.editing = data?data.id:'';
+      resetObjectives('systemObjectives', data?.objectives || []);
       updateNoEndDateState(form);
     }else if(kind==='project'){
-      fillProjectSelects();
       const form = $('#formProject');
+      form.dataset.editing = data?data.id:'';
+      fillProjectSelects(form.dataset.editing || '');
+      resetAdvancedSections(form);
       form.classList.remove('collapsed');
       $('#titleProjectForm').textContent = data?`Modifier ${data.id}`:'Nouveau projet';
       formSet(form, data||{});
@@ -988,10 +1459,12 @@ const APP_VERSION = '3.4.26';
     }else if(kind==='action'){
       fillActionSelects();
       const form = $('#formAction');
+      resetAdvancedSections(form);
       form.classList.remove('collapsed');
       $('#titleActionForm').textContent = data?`Modifier ${data.id}`:'Nouvelle action';
       formSet(form, data||{});
       form.dataset.editing = data?data.id:'';
+      resetObjectives('actionObjectives', data?.objectives || []);
       updateNoEndDateState(form);
       // Définir la date d'échéance par défaut à aujourd'hui pour les nouvelles actions
       if (!data){
@@ -1002,8 +1475,38 @@ const APP_VERSION = '3.4.26';
     window.scrollTo({ top: 0, behavior:'smooth' });
   }
 
-  function formGet(form){ const o={}; new FormData(form).forEach((v,k)=>o[k]=v); return o; }
-  function formSet(form,data){ for (const el of Array.from(form.elements)){ if(!el.name) continue; if (data[el.name]!=null) el.value=data[el.name]; } }
+  function formGet(form){
+    const o={};
+    const fd = new FormData(form);
+    for (const [k,v] of fd.entries()){
+      if (o[k]===undefined){
+        o[k]=v;
+      } else if (Array.isArray(o[k])){
+        o[k].push(v);
+      } else {
+        o[k] = [o[k], v];
+      }
+    }
+    return o;
+  }
+  function formSet(form,data){
+    for (const el of Array.from(form.elements)){
+      if (!el.name) continue;
+      const val = data[el.name];
+      if (val==null) continue;
+      if (el.type === 'checkbox'){
+        if (Array.isArray(val)) el.checked = val.includes(el.value);
+        else el.checked = val === true || val === 'true' || val === el.value;
+      } else if (el.type === 'radio'){
+        el.checked = val === el.value;
+      } else if (el.tagName === 'SELECT' && el.multiple){
+        const values = Array.isArray(val) ? val.map(String) : [String(val)];
+        Array.from(el.options).forEach(opt => { opt.selected = values.includes(opt.value); });
+      } else {
+        el.value = val;
+      }
+    }
+  }
 
   async function handleGlobalSubmit(e){
     e.preventDefault(); const f=e.currentTarget, g=formGet(f);
@@ -1023,9 +1526,12 @@ const APP_VERSION = '3.4.26';
     const existing = editingId ? await idb.get(db,'systems', editingId) : null;
     const id = editingId || await nextId('S','systems');
     const obj = existing ? { ...existing } : {};
+    const objectives = collectObjectives('systemObjectives');
+    if (!validateObjectives(objectives)) return alert('Ajoutez au moins trois objectifs (temps, résultat, méthode) pour ce système.');
     Object.assign(obj, { id, idGlobal:s.idGlobal||'', title:s.title||'', description:s.description||'', kpi:s.kpi||'', baseline:Number(s.baseline)||0, target:Number(s.target)||0, unit:s.unit||'', current:Number(s.current)||0, owner:s.owner||'', status:s.status||'', priority:s.priority||'', startDate:s.startDate||'', targetDate:s.targetDate||'' });
+    obj.objectives = objectives;
     ensureValidationMetadata('systems', existing, obj);
-    await idb.put(db,'systems', obj); await audit(editingId?'update':'create','systems', id); f.classList.add('collapsed'); f.reset(); showToast('Objectif système enregistré'); refreshSystems();
+    await idb.put(db,'systems', obj); await audit(editingId?'update':'create','systems', id); f.classList.add('collapsed'); f.reset(); resetObjectives('systemObjectives', []); showToast('Objectif système enregistré'); refreshSystems();
   }
   async function handleProjectSubmit(e){
     e.preventDefault(); const f=e.currentTarget, p=formGet(f);
@@ -1049,12 +1555,16 @@ const APP_VERSION = '3.4.26';
       currentLevel:p.currentLevel||'',
       criticalMass:Number(p.criticalMass)||0
     });
+    const parentRaw = Array.isArray(p.parentProjects) ? p.parentProjects : (p.parentProjects ? [p.parentProjects] : []);
+    obj.parentProjects = Array.from(new Set(parentRaw.map(String).map(x => x.trim()).filter(x => x && x !== id)));
     ensureValidationMetadata('projects', existing, obj);
     await idb.put(db,'projects', obj); await audit(editingId?'update':'create','projects', id); f.classList.add('collapsed'); f.reset(); showToast('Projet enregistré'); refreshProjects();
   }
   async function handleActionSubmit(e){
     e.preventDefault(); const f=e.currentTarget, a=formGet(f);
     const id = f.dataset.editing || await nextId('A','actions');
+    const objectives = collectObjectives('actionObjectives');
+    if (!validateObjectives(objectives)) return alert('Chaque action doit comporter au minimum un objectif temporel, un objectif de résultat et un objectif de méthode.');
     // Enregistrer les nouvelles propriétés utilisées pour l’auto‑priorisation (impact, urgence, effort, énergie requise)
     const obj = {
       id,
@@ -1089,7 +1599,8 @@ const APP_VERSION = '3.4.26';
         return valid;
       })()
     };
-    await idb.put(db,'actions', obj); await audit(f.dataset.editing?'update':'create','actions', id); f.classList.add('collapsed'); f.reset(); showToast('Action enregistrée'); refreshActions();
+    obj.objectives = objectives;
+    await idb.put(db,'actions', obj); await audit(f.dataset.editing?'update':'create','actions', id); f.classList.add('collapsed'); f.reset(); resetObjectives('actionObjectives', []); showToast('Action enregistrée'); refreshActions();
   }
 
   // Selects
@@ -1104,16 +1615,34 @@ const APP_VERSION = '3.4.26';
     sel(f, 'status', enums.statuses);
     sel(f, 'priority', enums.priorities);
   }
-  async function fillProjectSelects(){
+  async function fillProjectSelects(currentId=''){
     const f = $('#formProject');
-    const gls = (await idb.getAll(db,'globals')).map(g => ({ value: g.id, label: (g.title && g.title.trim()) ? g.title.trim() : g.id }));
-    const sys = (await idb.getAll(db,'systems')).map(s => ({ value: s.id, label: (s.title && s.title.trim()) ? s.title.trim() : s.id }));
+    const [globals, systems, projects] = await Promise.all([
+      idb.getAll(db,'globals'),
+      idb.getAll(db,'systems'),
+      idb.getAll(db,'projects')
+    ]);
+    const gls = (globals||[]).map(g => ({ value: g.id, label: (g.title && g.title.trim()) ? g.title.trim() : g.id }));
+    const sys = (systems||[]).map(s => ({ value: s.id, label: (s.title && s.title.trim()) ? s.title.trim() : s.id }));
     sel(f, 'idGlobal', gls);
     sel(f, 'idSystem', sys);
     sel(f, 'unit', enums.units);
     sel(f, 'owner', enums.collaborators);
     sel(f, 'status', enums.statuses);
     sel(f, 'priority', enums.priorities);
+    const parentSelect = f?.querySelector('select[name=parentProjects]');
+    if (parentSelect){
+      parentSelect.innerHTML = '';
+      (projects||[])
+        .filter(p => p.id && p.id !== currentId)
+        .sort((a,b) => (a.title||a.id||'').localeCompare(b.title||b.id||'', 'fr', { numeric:true, sensitivity:'base' }))
+        .forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.id;
+          opt.textContent = p.title ? `${p.title} (${p.id})` : p.id;
+          parentSelect.appendChild(opt);
+        });
+    }
   }
   async function fillActionSelects(){
     const f = $('#formAction');
@@ -1129,7 +1658,9 @@ const APP_VERSION = '3.4.26';
     const s = form[name];
     if (!s) return;
     s.innerHTML = '';
-    s.append(new Option('—',''));
+    if (!s.multiple){
+      s.append(new Option('—',''));
+    }
     (arr || []).forEach(v => {
       if (v && typeof v === 'object' && 'value' in v && 'label' in v) {
         s.append(new Option(v.label, v.value));
@@ -1240,7 +1771,7 @@ const APP_VERSION = '3.4.26';
   function setSavedViews(arr){ localStorage.setItem(SAVED_VIEWS_KEY, JSON.stringify(arr||[])); }
 
   const FIELD_DEFS={
-    projects:{ title:'text', status:'enum', owner:'enum', priority:'enum', plannedEnd:'date', ICE:'number', SPI:'number', id:'text' },
+    projects:{ title:'text', status:'enum', owner:'enum', priority:'enum', plannedEnd:'date', ICE:'number', SPI:'number', id:'text', parentChain:'text', parentIds:'text', childIds:'text', rootId:'text', hasParent:'text' },
     actions:{ task:'text', statusTask:'enum', owner:'enum', dueDate:'date', points:'number', idProject:'text', id:'text' },
     globals:{ title:'text', status:'enum', owner:'enum', domain:'enum', priority:'enum', id:'text' },
     systems:{ title:'text', status:'enum', owner:'enum', domain:'enum', idGlobal:'text', priority:'enum', id:'text' }
@@ -1851,25 +2382,95 @@ async function refreshSystems(){
 async function refreshProjects(){
     const [projects, actions] = await Promise.all([ idb.getAll(db,'projects'), idb.getAll(db,'actions') ]);
     const actBy = groupBy(actions,'idProject');
-    let projs = projects.map(p=> computeProject(p, actBy[p.id]||[]));
+    const titleById = new Map((projects||[]).map(p => [p.id, p.title || p.id]));
+    const computedMap = new Map();
+    (projects||[]).forEach(p => {
+      const base = computeProject(p, actBy[p.id]||[]);
+      base.parentProjects = normalizeIdList(p.parentProjects).map(v => v.trim()).filter(Boolean);
+      computedMap.set(p.id, base);
+    });
+    const childMap = new Map();
+    (projects||[]).forEach(p => {
+      normalizeIdList(p.parentProjects).map(v => v.trim()).filter(Boolean).forEach(parentId => {
+        if (!childMap.has(parentId)) childMap.set(parentId, []);
+        if (!childMap.get(parentId).includes(p.id)) childMap.get(parentId).push(p.id);
+      });
+    });
+    paintProjectHierarchySelect(projects || [], titleById, childMap);
+    const ancestorResolver = createAncestorResolver(projects || []);
+    const focusId = projectHierarchyState.focus;
+    const highlightSets = { focus:new Set(), ancestors:new Set(), descendants:new Set() };
+    if (focusId && focusId !== '__all' && focusId !== '__root'){
+      highlightSets.focus.add(focusId);
+      ancestorResolver.ancestors(focusId).forEach(id => highlightSets.ancestors.add(id));
+      const descList = projectHierarchyState.includeDescendants ? collectDescendantsFromMap(focusId, childMap) : (childMap.get(focusId) || []);
+      descList.forEach(id => highlightSets.descendants.add(id));
+    }
+    let projs = Array.from(computedMap.values()).map(p => {
+      const enriched = { ...p };
+      const sortedParents = (p.parentProjects || []).slice().sort((a,b) => (titleById.get(a)||a).localeCompare(titleById.get(b)||b, 'fr', { numeric:true, sensitivity:'base' }));
+      enriched.parentProjects = sortedParents;
+      const rawChildren = childMap.get(p.id) || [];
+      enriched.childProjects = rawChildren.slice().sort((a,b) => (titleById.get(a)||a).localeCompare(titleById.get(b)||b, 'fr', { numeric:true, sensitivity:'base' }));
+      const ancestors = ancestorResolver.ancestors(p.id);
+      enriched.ancestorIds = ancestors;
+      enriched.parentChain = ancestors.map(pid => titleById.get(pid) || pid).join(' › ');
+      enriched.parentIds = ancestors.join('|');
+      enriched.childIds = enriched.childProjects.join('|');
+      enriched.hasParent = enriched.parentProjects.length ? 'oui' : 'non';
+      enriched.rootId = ancestors.length ? ancestors[0] : p.id;
+      if (enriched.childProjects.length){
+        const children = enriched.childProjects.map(id => computedMap.get(id)).filter(Boolean);
+        if (children.length){
+          const totalPoints = (enriched.pointsTotal||0) + children.reduce((s,c)=> s + (c.pointsTotal||0), 0);
+          const totalDone = (enriched.pointsDone||0) + children.reduce((s,c)=> s + (c.pointsDone||0), 0);
+          const tasksProgress = totalPoints>0 ? totalDone/totalPoints : enriched.progressTasks;
+          const avgOverall = avg(children.map(c => c.progressOverall||0));
+          const avgValue = avg(children.map(c => c.progressValue||0));
+          enriched.progressTasks = clamp01(tasksProgress);
+          enriched.progressOverall = clamp01((enriched.progressOverall + avgOverall)/2);
+          enriched.progressValue = clamp01(children.length ? (enriched.progressValue + avgValue)/2 : enriched.progressValue);
+        }
+      }
+      return enriched;
+    });
+    if (focusId === '__root'){
+      projs = projs.filter(p => !(p.parentProjects && p.parentProjects.length));
+    } else if (focusId && focusId !== '__all'){
+      const allowed = new Set([focusId]);
+      ancestorResolver.ancestors(focusId).forEach(id => allowed.add(id));
+      if (projectHierarchyState.includeDescendants){
+        collectDescendantsFromMap(focusId, childMap).forEach(id => allowed.add(id));
+      } else {
+        (childMap.get(focusId) || []).forEach(id => allowed.add(id));
+      }
+      projs = projs.filter(p => allowed.has(p.id));
+    }
     projs = applyFiltersToData('projects', projs);
-    projs = filterBySearch(projs, $('#searchProjects').value, ['id','title','owner','status','priority','plannedEnd']);
+    projs = filterBySearch(projs, $('#searchProjects').value, ['id','title','owner','status','priority','plannedEnd','parentChain','parentIds','childIds','rootId']);
     renderFilterBar('projects');
     const srt = getSort('projects'); if (srt && srt.key){ projs = sortBy(projs, srt.key, srt.dir, srt.type); }
     const tb = $('#tblProjects tbody'); tb.innerHTML='';
     for (const p of projs){
       const tr = document.createElement('tr');
-      // Construire manuellement les cellules pour éviter l'injection HTML et intégrer
-      // les indicateurs du noyau Kairos. On met en évidence les projets en hibernation
-      // (faible contribution, énergie faible ou état stagnant) en leur appliquant une classe.
       const lowEnergy = Number(p.energy||0) < 6;
       const lowContribution = Number(p.contribution||0) < 20;
       const stagnant = (p.energyState||'').toLowerCase() === 'stagnant';
       if (lowEnergy || lowContribution || stagnant) tr.classList.add('hibernation');
+      if (focusId === '__root' && !(p.parentProjects && p.parentProjects.length)) tr.classList.add('hier-focus');
+      else if (highlightSets.focus.has(p.id)) tr.classList.add('hier-focus');
+      else if (highlightSets.ancestors.has(p.id)) tr.classList.add('hier-ancestor');
+      else if (highlightSets.descendants.has(p.id)) tr.classList.add('hier-descendant');
+      const parentBadge = p.parentProjects.length ? `<div class="parent-tags">↳ ${p.parentProjects.map(pid => {
+        const label = titleById.get(pid) || pid;
+        return `<button type="button" class="parent-link" data-parent="${escapeHtml(pid)}">${escapeHtml(label)}</button>`;
+      }).join(', ')}</div>` : '';
+      const childCount = p.childProjects.length;
+      const childBadge = childCount ? `<div class="child-tags"><button type="button" class="child-link" data-target="${escapeHtml(p.id)}">${childCount} ${childCount>1?'projets enfants':'projet enfant'}</button></div>` : '';
       tr.innerHTML = `
         <td class="selectcol"><input type="checkbox" value="${escapeHtml(p.id)}"></td>
         <td class="col-id ro">${escapeHtml(p.id)}</td>
-        <td>${escapeHtml(p.title||'')}</td>
+        <td>${escapeHtml(p.title||'')}${parentBadge}${childBadge}</td>
         <td class="ro">${fmtPct(p.progressOverall)}</td>
         <td class="ro">${fmtNum(p.ICE,1)}</td>
         <td class="ro">${p.SPI==null?'—':fmtNum(p.SPI,2)}</td>
@@ -1889,6 +2490,16 @@ async function refreshProjects(){
     tb.querySelectorAll('button[data-edit]').forEach(btn=> btn.addEventListener('click', async ()=> openForm('project', await idb.get(db,'projects', btn.dataset.edit)) ));
     tb.querySelectorAll('button[data-report]').forEach(btn=> btn.addEventListener('click', ()=> openReport(btn.dataset.kind, btn.dataset.report)) );
     tb.querySelectorAll('button[data-del]').forEach(btn=> btn.addEventListener('click', async ()=> { if (confirm(`Supprimer ${btn.dataset.del} ? (corbeille)`)){ const it=await idb.get(db,'projects', btn.dataset.del); await idb.put(db,'trash',{id:'TR-'+it.id, store:'projects', ts:Date.now(), item:it}); await idb.del(db,'projects', btn.dataset.del); await audit('delete','projects',btn.dataset.del); refreshProjects(); refreshTrash(); }}));
+    tb.querySelectorAll('button.parent-link').forEach(btn => btn.addEventListener('click', ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      setProjectHierarchyFocus(btn.dataset.parent || '__all');
+    }));
+    tb.querySelectorAll('button.child-link').forEach(btn => btn.addEventListener('click', ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      setProjectHierarchyFocus(btn.dataset.target || '__all', true);
+    }));
     updateBulkBar('projects');
   }
 
@@ -2141,14 +2752,25 @@ async function refreshProjects(){
             // Determine a ranking for the moment of the day; default to afternoon (2)
             const m = (t.timeOfDay || '').toLowerCase();
             const timeRank = m==='morning' ? 1 : m==='afternoon' ? 2 : m==='evening' ? 3 : 2;
+            let durationMinutes = Number(t.duration || 0);
+            if (!durationMinutes){
+              const short = Number(t.short || 0);
+              const normal = Number(t.normal || 0);
+              const long = Number(t.long || 0);
+              if (sel === 'short' && short) durationMinutes = short;
+              else if (sel === 'normal' && normal) durationMinutes = normal;
+              else if (sel === 'long' && long) durationMinutes = long;
+            }
+            const displayDuration = formatDurationMinutes(durationMinutes);
             actRows.push({ row: [
               escapeHtml(rid3),
               escapeHtml(r.name || r.id),
               escapeHtml(t.title || ''),
               '',
+              escapeHtml(displayDuration),
               'À faire',
               ''
-            ], rank: timeRank });
+            ], rank: timeRank, timeMinutes: durationMinutes, timerLabel: `${r.name || r.id} — ${t.title || ''}` });
           }
         }
         // Ajouter les autres actions (non routinières) qui doivent apparaître aujourd'hui
@@ -2162,26 +2784,53 @@ async function refreshProjects(){
           if (showAct) {
             const m = (a.timeOfDay || '').toLowerCase();
             const timeRank = m==='morning' ? 1 : m==='afternoon' ? 2 : m==='evening' ? 3 : 2;
+            let minutesEstimate = Math.round((Number(a.estHours) || 0) * 60);
+            if (!minutesEstimate){
+              const real = Math.round((Number(a.realHours) || 0) * 60);
+              if (real) minutesEstimate = real;
+            }
+            const displayDuration = formatDurationMinutes(minutesEstimate);
             actRows.push({ row: [
               escapeHtml(a.id),
               escapeHtml(projMap.get(a.idProject) || a.idProject || ''),
               escapeHtml(a.task || ''),
               escapeHtml(a.dueDate || ''),
+              escapeHtml(displayDuration),
               escapeHtml(st || ''),
               escapeHtml(a.owner || '')
-            ], rank: timeRank });
+            ], rank: timeRank, timeMinutes: minutesEstimate, timerLabel: `${projMap.get(a.idProject) || a.idProject || ''} — ${a.task || ''}` });
           }
         }
         // Trier les actions et tâches de routine selon leur rang de moment (1: matin, 2: aprem, 3: soir)
         const sortedAct = actRows.sort((a,b) => (a.rank||2) - (b.rank||2));
-        fillRows(document.querySelector('#tblViewActionToday tbody'), sortedAct.map(item=>item.row));
+        const tbodyAction = document.querySelector('#tblViewActionToday tbody');
+        fillRows(tbodyAction, sortedAct.map(item=>item.row));
         // Ajouter un bouton de fin de tâche à chaque ligne et détecter le type (routine ou action)
         try {
           const tbodyAct = document.querySelector('#tblViewActionToday tbody');
           if (tbodyAct) {
-            tbodyAct.querySelectorAll('tr').forEach(tr => {
+            const rows = Array.from(tbodyAct.querySelectorAll('tr'));
+            rows.forEach((tr, idx) => {
+              const meta = sortedAct[idx] || {};
               const id = (tr.children[0]?.textContent || '').trim();
               const type = id.includes('-RT') ? 'routine' : 'action';
+              const timeCell = tr.children[4];
+              const minutes = Number(meta.timeMinutes || 0);
+              if (timeCell){
+                if (minutes > 0){
+                  timeCell.classList.add('time-cell');
+                  timeCell.dataset.minutes = String(minutes);
+                  timeCell.dataset.label = meta.timerLabel || `${tr.children[2]?.textContent || ''}`;
+                  timeCell.setAttribute('tabindex','0');
+                  timeCell.setAttribute('role','button');
+                  timeCell.setAttribute('aria-label', `Démarrer le chronomètre (${timeCell.textContent.trim()})`);
+                  timeCell.title = 'Cliquer pour lancer le chronomètre';
+                  timeCell.addEventListener('click', handleTimeCellClick);
+                  timeCell.addEventListener('keydown', handleTimeCellKey);
+                } else {
+                  timeCell.classList.remove('time-cell');
+                }
+              }
               const btn = document.createElement('button');
               btn.textContent = '✓';
               btn.title = 'Marquer comme faite';
@@ -3014,6 +3663,7 @@ function saveDoneRoutineToday(){
       // Clear tasks list
       const tb = document.querySelector('#tblRoutineTasks tbody');
       if (tb) tb.innerHTML='';
+      resetObjectives('routineObjectives', []);
       // Reset day-of-week checkboxes and day-of-month
       form.querySelectorAll('input[name=dow]').forEach(cb=> cb.checked=false);
       form.querySelector('input[name=dom]').value='';
@@ -3039,6 +3689,7 @@ function saveDoneRoutineToday(){
           }
           form.querySelector('input[name=autoCreate]').checked = !!routine.autoCreate;
           document.getElementById('titleRoutineForm').textContent = 'Modifier routine';
+          resetObjectives('routineObjectives', routine.objectives || []);
           // Load tasks
           const tasks = await idb.indexGetAll(db,'routineTasks','byRoutine', id);
           tasks.sort((a,b) => (a.order||0)-(b.order||0));
@@ -3064,6 +3715,7 @@ function saveDoneRoutineToday(){
       const tb = document.querySelector('#tblRoutineTasks tbody');
       if (tb) tb.innerHTML='';
       editingRoutineId = null;
+      resetObjectives('routineObjectives', []);
     }
     window.closeRoutineForm = closeRoutineForm;
     function addRoutineTaskRow(task={}){
@@ -3129,6 +3781,11 @@ function saveDoneRoutineToday(){
       const idSystem = form.querySelector('select[name=idSystem]').value || '';
       const frequency = form.querySelector('select[name=frequency]').value || 'daily';
       const autoCreate = form.querySelector('input[name=autoCreate]').checked;
+      const objectives = collectObjectives('routineObjectives');
+      if (!validateObjectives(objectives)){
+        alert('Chaque routine doit comporter au minimum un objectif temporel, un objectif de résultat et un objectif sur la méthode.');
+        return;
+      }
       // day-of-week list
       const dow = [];
       form.querySelectorAll('input[name=dow]:checked').forEach(cb => dow.push(Number(cb.value)));
@@ -3147,6 +3804,7 @@ function saveDoneRoutineToday(){
       routine.name = name;
       routine.frequency = frequency;
       routine.autoCreate = autoCreate ? true : false;
+      routine.objectives = objectives;
       if (!existing) routine.archived = false;
       delete routine.dow;
       delete routine.dom;
@@ -3391,6 +4049,123 @@ function saveDoneRoutineToday(){
   function toCSV(arr){ if (!arr.length) return ''; const keys = Object.keys(arr[0]); const escape = v => `"${String(v??'').replace(/"/g,'""')}"`; const header = keys.map(escape).join(','); const rows = arr.map(o => keys.map(k => escape(o[k])).join(',')); return [header, ...rows].join('\\n'); }
   async function exportCSV(kind){ const arr = await idb.getAll(db, kind); downloadBlob(toCSV(arr), 'text/csv', `${kind}.csv`); }
   async function importCSV(kind){ const file = pickFirstFile(['text/csv','.csv']); if (!file) return alert('Choisis un CSV.'); const text = await file.text(); const rows = text.split(/\\r?\\n/).filter(Boolean).map(line => line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(s => s.replace(/^"|"$/g,'').replace(/""/g,'"'))); const header = rows.shift(); if (!header) return alert('CSV vide'); const items = rows.map(cols => { const o={}; header.forEach((h,i)=>o[h]=cols[i]); return o; }); for (const it of items){ await idb.put(db, kind, it); await audit('import', kind, it.id||''); } showToast(`Import ${kind}: ${items.length} ligne(s)`); if (kind==='projects') refreshProjects(); else refreshActions(); }
+
+  async function handleCustomExport(e){
+    e.preventDefault();
+    const form = e.currentTarget;
+    const stores = Array.from(form.querySelectorAll('input[name=exportStores]:checked')).map(cb => cb.value);
+    if (!stores.length) return alert('Sélectionnez au moins un module à exporter.');
+    const format = form.querySelector('select[name=exportFormat]')?.value || 'klaro';
+    const filterText = form.querySelector('textarea[name=exportFilter]')?.value || '';
+    let filters = {};
+    if (filterText.trim()){
+      try { filters = JSON.parse(filterText); }
+      catch(err){ return alert('Filtre JSON invalide.'); }
+    }
+    const payload = {
+      type: 'klaro-package',
+      version: APP_VERSION,
+      exportedAt: new Date().toISOString(),
+      config: { enums, thresholds, capacities },
+      stores: {}
+    };
+    const storeCounts = [];
+    for (const store of stores){
+      try {
+        const data = await idb.getAll(db, store);
+        const filtered = applyExportFilter(data||[], filters[store]);
+        payload.stores[store] = filtered;
+        storeCounts.push(`${store}: ${filtered.length}`);
+      } catch(err){
+        console.warn('Export personnalisé — store inconnu', store, err);
+      }
+    }
+    const ts = new Date().toISOString().replace(/[:.]/g,'-');
+    if (format === 'klaro'){
+      downloadBlob(JSON.stringify(payload, null, 2), 'application/json', `klaro_pack_${ts}.klaro`);
+    } else {
+      const minimal = { stores: payload.stores, config: payload.config, version: APP_VERSION };
+      downloadBlob(JSON.stringify(minimal, null, 2), 'application/json', `klaro_export_${ts}.json`);
+    }
+    const summary = storeCounts.length ? ` (${storeCounts.join(', ')})` : '';
+    showToast('Export personnalisé généré' + summary);
+  }
+  function matchesExportCriterion(value, expected){
+    if (expected == null){
+      return value == null || value === '';
+    }
+    if (Array.isArray(expected)){
+      if (Array.isArray(value)) return expected.some(v => value.includes(v));
+      return expected.includes(value);
+    }
+    if (typeof expected === 'object'){
+      if (Array.isArray(value)){
+        if (expected.contains != null) return value.includes(expected.contains);
+        if (Array.isArray(expected.containsAny)) return expected.containsAny.some(v => value.includes(v));
+        if (Array.isArray(expected.containsAll)) return expected.containsAll.every(v => value.includes(v));
+      }
+      if (typeof value === 'number'){
+        if (expected.min != null && value < expected.min) return false;
+        if (expected.max != null && value > expected.max) return false;
+      }
+      if (Object.prototype.hasOwnProperty.call(expected,'in')){
+        const list = Array.isArray(expected.in) ? expected.in : [expected.in];
+        if (Array.isArray(value)) return list.some(v => value.includes(v));
+        return list.includes(value);
+      }
+      if (Object.prototype.hasOwnProperty.call(expected,'equals')) return String(value ?? '') === String(expected.equals);
+      if (Object.prototype.hasOwnProperty.call(expected,'not')) return String(value ?? '') !== String(expected.not);
+    }
+    if (Array.isArray(value)){
+      return value.includes(expected);
+    }
+    return String(value ?? '') === String(expected ?? '');
+  }
+  function applyExportFilter(items, criteria){
+    if (!criteria || typeof criteria !== 'object') return items;
+    return items.filter(item => Object.entries(criteria).every(([key, expected]) => matchesExportCriterion(item?.[key], expected)));
+  }
+  async function handleCustomImport(e){
+    e.preventDefault();
+    const form = e.currentTarget;
+    const fileInput = document.getElementById('customImportFile');
+    if (!fileInput || !fileInput.files || !fileInput.files.length) return alert('Sélectionnez un fichier .klaro ou .json.');
+    const file = fileInput.files[0];
+    let payload;
+    try { payload = JSON.parse(await file.text()); }
+    catch(err){ return alert('Fichier invalide ou corrompu.'); }
+    const stores = Array.from(form.querySelectorAll('input[name=importStores]:checked')).map(cb => cb.value);
+    if (!stores.length) return alert('Choisissez au moins un module à importer.');
+    const strategy = form.querySelector('select[name=importStrategy]')?.value || 'merge';
+    const sourceStores = payload.stores || payload;
+    if (!sourceStores || typeof sourceStores !== 'object') return alert('Le fichier ne contient pas de données exploitables.');
+    if (payload.config){
+      if (payload.config.enums) await saveEnums(payload.config.enums);
+      if (payload.config.thresholds) await saveThresholds(payload.config.thresholds);
+      if (payload.config.capacities) await saveCaps(payload.config.capacities);
+    }
+    const storeCounts = [];
+    for (const store of stores){
+      const entries = sourceStores[store];
+      if (!Array.isArray(entries) || !Object.prototype.hasOwnProperty.call(STORES, store)) continue;
+      if (strategy === 'replace'){ await idb.clear(db, store); }
+      const keyPath = STORES[store];
+      let imported = 0;
+      for (const entry of entries){
+        if (!entry || typeof entry !== 'object') continue;
+        if (keyPath && (entry[keyPath] == null || entry[keyPath] === '')){
+          entry[keyPath] = `${store}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+        }
+        await idb.put(db, store, entry);
+        await audit('import', store, entry?.[keyPath] || entry?.id || entry?.name || '');
+        imported++;
+      }
+      storeCounts.push(`${store}: ${imported}`);
+    }
+    const importSummary = storeCounts.length ? ` (${storeCounts.join(', ')})` : '';
+    showToast('Import personnalisé terminé' + importSummary);
+    refreshAll();
+  }
 
   // ---------- Helpers ----------
   function groupBy(arr,key){ const m={}; for (const x of arr){ const k=x[key]; (m[k]||(m[k]=[])).push(x);} return m; }

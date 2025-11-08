@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Mise à jour version : passage à v3.4.25 -->
+  <!-- Mise à jour version : passage à v3.5.0 -->
   <!-- Update the page title to reflect the new application version -->
-  <title>Klaro — Planificateur v3.4.25</title>
+  <title>Klaro — Planificateur v3.5.0</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -13,7 +13,7 @@
   <header class="topbar" role="banner">
     <!-- Affichage de la version dans l'entête -->
     <!-- Update version number displayed in the header when bumping application version. -->
-    <div class="brand" aria-label="Nom de l'application">📈 Klaro — v3.4.25 (offline)</div>
+    <div class="brand" aria-label="Nom de l'application">📈 Klaro — v3.5.0 (offline)</div>
     <nav class="nav" aria-label="Navigation principale">
       <button data-nav="dashboard" class="nav-btn active" aria-pressed="true">Dashboard</button>
       <!-- Regroupement des objectifs dans un onglet principal "Objet". Les anciennes sections
@@ -211,6 +211,12 @@
           <label class="routine-monthly">Jour du mois<input type="number" name="dom" min="1" max="31" /></label>
           <label><input type="checkbox" name="autoCreate" /> Créer automatiquement pour aujourd’hui</label>
         </div>
+        <fieldset class="objective-editor" data-target="routineObjectives">
+          <legend>🎯 Objectifs de la routine</legend>
+          <p id="routineObjectivesHint" class="muted">Précisez les attentes de la routine. Ajoutez au minimum trois objectifs couvrant le temps, le résultat et la méthode.</p>
+          <div id="routineObjectives" class="objective-items" role="list"></div>
+          <button type="button" class="secondary" data-add-objective="routineObjectives">➕ Ajouter un objectif</button>
+        </fieldset>
         <h4>Tâches de la routine</h4>
         <div class="table-wrapper">
           <!-- La table des tâches permet désormais de spécifier un mode (court, normal, long) par tâche -->
@@ -374,6 +380,12 @@
           <label>Date fin cible<input type="date" name="targetDate" /><span class="no-date-wrapper"><input type="checkbox" class="no-end-date" data-target="targetDate" /> Sans date de fin</span></label>
           <label>Description<textarea name="description" rows="2"></textarea></label>
         </div>
+        <fieldset class="objective-editor" data-target="systemObjectives">
+          <legend>🎯 Objectifs du système</legend>
+          <p id="systemObjectivesHint" class="muted">Définissez au minimum trois objectifs dont un temporel, un sur le résultat et un sur la manière de faire.</p>
+          <div id="systemObjectives" class="objective-items" role="list"></div>
+          <button type="button" class="secondary" data-add-objective="systemObjectives">➕ Ajouter un objectif</button>
+        </fieldset>
         <div class="form-actions">
           <button type="submit">💾 Enregistrer</button>
           <button type="button" class="secondary" id="cancelSystem">Annuler</button>
@@ -418,6 +430,16 @@
         </div>
         <div class="sort-row">
           <label>Trier par <select id="sort-projects"></select></label>
+        </div>
+        <div class="hierarchy-toolbar" role="group" aria-label="Navigation hiérarchique des projets">
+          <label>Explorer
+            <select id="projectHierarchySelect" aria-label="Explorer un nœud hiérarchique">
+              <option value="__all">Tous les projets</option>
+              <option value="__root">Racine (sans parent)</option>
+            </select>
+          </label>
+          <label class="inline"><input type="checkbox" id="projectHierarchyIncludeDesc" checked> Inclure les descendants</label>
+          <button type="button" id="projectHierarchyReset" class="secondary" title="Afficher tous les projets">Réinitialiser</button>
         </div>
       </div>
 
@@ -483,6 +505,7 @@
           <label>Date fin réelle<input type="date" name="actualEnd" /><span class="no-date-wrapper"><input type="checkbox" class="no-end-date" data-target="actualEnd" /> Sans date de fin</span></label>
           <label>Commentaires<textarea name="comments" rows="2"></textarea></label>
           <label>Étapes d’escalade<textarea name="escalation" rows="2" placeholder="Listez les étapes (une par ligne)"></textarea></label>
+          <label>Projets parents<select name="parentProjects" multiple size="4"></select><span class="field-hint">Sélectionnez les projets englobants pour créer des systèmes multi-niveaux.</span></label>
         </div>
         <div class="form-actions">
           <button type="submit">💾 Enregistrer</button>
@@ -583,6 +606,12 @@
             <option value="evening">Soir</option>
           </select></label>
         </div>
+        <fieldset class="objective-editor" data-target="actionObjectives">
+          <legend>🎯 Objectifs de l’action</legend>
+          <p id="actionObjectivesHint" class="muted">Minimum requis : un objectif temporel, un objectif de résultat et un objectif sur la manière de faire. Ajoutez-en autant que nécessaire.</p>
+          <div id="actionObjectives" class="objective-items" role="list"></div>
+          <button type="button" class="secondary" data-add-objective="actionObjectives">➕ Ajouter un objectif</button>
+        </fieldset>
         <!-- Champs avancés -->
         <div id="advActionFields" class="grid grid-3 advanced-options" hidden>
           <label>Date début<input type="date" name="startDate" /></label>
@@ -676,37 +705,6 @@
           <!-- Pack d'hypothèses H1→Hn rendu ici -->
           <div id="afPack"></div>
         </div>
-<div class="grid grid-2">
-        <div class="panel">
-          <h3>⭐ Ma sélection de projets</h3>
-          <div class="watchlist">
-            <label>Ajouter un projet
-              <input list="dl-projects" id="wl-add-project" placeholder="Rechercher par titre ou ID">
-              <datalist id="dl-projects"></datalist>
-            </label>
-            <button id="wl-add-btn">Ajouter</button>
-          </div>
-          <ul id="watchlistProjects" class="list chips"></ul>
-        </div>
-        <div class="panel">
-          <h3>📁 Vues enregistrées (filtres + tri)</h3>
-          <div class="form-actions">
-            <label>Nom de la vue <input id="savedViewName" placeholder="Ex: Projets bloqués de Marie"></label>
-            <select id="savedViewTarget">
-              <option value="projects">Projets</option>
-              <option value="actions">Actions</option>
-              <option value="globals">Globaux</option>
-              <option value="systems">Systèmes</option>
-            </select>
-            <button id="btnSaveCurrentView">💾 Enregistrer la vue courante</button>
-          </div>
-          <table class="table compact" id="tblSavedViews">
-            <thead><tr><th>Nom</th><th>Vue</th><th>Critères</th><th></th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-
       <div class="grid grid-2">
         <div class="panel">
           <h3>⏱️ Projets en retard</h3>
@@ -749,6 +747,7 @@
                 <th>Projet</th>
                 <th>Tâche</th>
                 <th>Due</th>
+                <th>Temps</th>
                 <th>Statut</th>
                 <th>Resp.</th>
                 <th>Finir</th>
@@ -822,14 +821,15 @@
     <!-- PARAMS (inclut Données) -->
     <section id="view-params" class="view" aria-labelledby="h-params">
       <div class="tabs" id="paramsTabs" role="tablist">
-        <button class="tab active" data-tab="p-general" aria-selected="true">Général</button>
-        <button class="tab" data-tab="p-data" aria-selected="false">Données</button>
+        <button id="tab-general" class="tab active" role="tab" data-tab="p-general" aria-controls="p-general" aria-selected="true" tabindex="0">Général</button>
+        <button id="tab-data" class="tab" role="tab" data-tab="p-data" aria-controls="p-data" aria-selected="false" tabindex="-1">Données</button>
+        <button id="tab-guide" class="tab" role="tab" data-tab="p-guide" aria-controls="p-guide" aria-selected="false" tabindex="-1">Guide</button>
       </div>
 
   <!-- Overlay de chargement pour feedback de performance -->
   <!-- supprimé de cette position pour être rendu global -->
 
-      <div id="p-general" class="tabpanel show" role="tabpanel">
+      <div id="p-general" class="tabpanel show" role="tabpanel" aria-labelledby="tab-general" aria-hidden="false" tabindex="-1">
         <h1 id="h-params">Paramètres</h1>
         <div class="grid grid-2">
           <form id="formThresholds" class="form" aria-label="Seuils">
@@ -900,7 +900,7 @@ Maquette V1"></textarea></label>
 
       </div>
 
-      <div id="p-data" class="tabpanel" role="tabpanel">
+      <div id="p-data" class="tabpanel" role="tabpanel" aria-labelledby="tab-data" aria-hidden="true" tabindex="-1">
         <h1 id="h-data">Données</h1>
         <div class="grid grid-2">
           <div class="panel">
@@ -919,6 +919,65 @@ Maquette V1"></textarea></label>
               <button id="btnImportProjectsCSV">⬆️ Importer Projets (CSV)</button>
               <button id="btnImportActionsCSV">⬆️ Importer Actions (CSV)</button>
             </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Export / import sur mesure</h3>
+          <div class="grid grid-2">
+            <form id="formCustomExport" class="form" aria-label="Export personnalisé">
+              <h4>Exporter un pack Klaro</h4>
+              <div class="checkbox-grid">
+                <label><input type="checkbox" name="exportStores" value="globals" checked> Objectifs globaux</label>
+                <label><input type="checkbox" name="exportStores" value="systems" checked> Objectifs système</label>
+                <label><input type="checkbox" name="exportStores" value="projects" checked> Projets</label>
+                <label><input type="checkbox" name="exportStores" value="actions" checked> Actions</label>
+                <label><input type="checkbox" name="exportStores" value="routines"> Routines</label>
+                <label><input type="checkbox" name="exportStores" value="routineTasks"> Tâches de routine</label>
+                <label><input type="checkbox" name="exportStores" value="routineRuns"> Exécutions de routine</label>
+                <label><input type="checkbox" name="exportStores" value="files"> Pièces jointes</label>
+                <label><input type="checkbox" name="exportStores" value="templates"> Templates</label>
+                <label><input type="checkbox" name="exportStores" value="audit"> Journal</label>
+              </div>
+              <label>Format
+                <select name="exportFormat">
+                  <option value="klaro">Pack Klaro (.klaro)</option>
+                  <option value="json">JSON classique</option>
+                </select>
+              </label>
+              <label>Filtre JSON (optionnel)
+                <textarea name="exportFilter" rows="3" placeholder='{"projects":{"status":"En cours"}}'></textarea>
+              </label>
+              <div class="form-actions">
+                <button type="submit">⬇️ Exporter sur mesure</button>
+              </div>
+            </form>
+            <form id="formCustomImport" class="form" aria-label="Import personnalisé">
+              <h4>Importer un pack</h4>
+              <p class="muted">Sélectionnez un fichier .klaro ou .json préalablement exporté. Les éléments cochés seront fusionnés ou remplacés suivant la stratégie choisie.</p>
+              <input type="file" id="customImportFile" accept=".klaro,.json,application/json" />
+              <div class="checkbox-grid">
+                <label><input type="checkbox" name="importStores" value="globals" checked> Objectifs globaux</label>
+                <label><input type="checkbox" name="importStores" value="systems" checked> Objectifs système</label>
+                <label><input type="checkbox" name="importStores" value="projects" checked> Projets</label>
+                <label><input type="checkbox" name="importStores" value="actions" checked> Actions</label>
+                <label><input type="checkbox" name="importStores" value="routines"> Routines</label>
+                <label><input type="checkbox" name="importStores" value="routineTasks"> Tâches de routine</label>
+                <label><input type="checkbox" name="importStores" value="routineRuns"> Exécutions de routine</label>
+                <label><input type="checkbox" name="importStores" value="files"> Pièces jointes</label>
+                <label><input type="checkbox" name="importStores" value="templates"> Templates</label>
+                <label><input type="checkbox" name="importStores" value="audit"> Journal</label>
+              </div>
+              <label>Stratégie
+                <select name="importStrategy">
+                  <option value="merge">Fusionner (ajouter / mettre à jour)</option>
+                  <option value="replace">Remplacer (vider et importer)</option>
+                </select>
+              </label>
+              <div class="form-actions">
+                <button type="submit">⬆️ Importer sélection</button>
+              </div>
+            </form>
           </div>
         </div>
 
@@ -974,6 +1033,32 @@ Maquette V1"></textarea></label>
 
         <p class="muted">Données locales, aucune connexion serveur. **Aucun chiffrement** dans cette version.</p>
       </div>
+
+      <div id="p-guide" class="tabpanel" role="tabpanel" aria-labelledby="tab-guide" aria-hidden="true" tabindex="-1">
+        <h1>Guide de démarrage</h1>
+        <div class="panel">
+          <h3>Comprendre Klaro en 5 minutes</h3>
+          <p>Cette section vous accompagne pas à pas pour bâtir votre système d’exécution :</p>
+          <ol>
+            <li><strong>Objectifs globaux</strong> : définissez votre destination stratégique et les indicateurs clés.</li>
+            <li><strong>Systèmes</strong> : traduisez chaque objectif en leviers opérationnels et assignez-leur des objectifs mesurables.</li>
+            <li><strong>Projets</strong> : découpez vos systèmes en initiatives concrètes, reliez-les aux projets parents pour modéliser la hiérarchie.</li>
+            <li><strong>Actions & routines</strong> : planifiez les tâches quotidiennes en précisant systématiquement les objectifs temporels, de résultat et de méthode.</li>
+            <li><strong>Review</strong> : utilisez le tableau de bord, les vues et la Red‑Team pour piloter l’amélioration continue.</li>
+          </ol>
+          <p>Chaque fiche dispose du bouton « Options avancées » pour enrichir vos données (KPI, budgets, risques, etc.). Les exports personnalisés vous permettent de sauvegarder ou partager un sous-ensemble ciblé de données.</p>
+        </div>
+        <div class="panel">
+          <h3>Bonnes pratiques</h3>
+          <ul>
+            <li>Gardez vos objectifs à jour toutes les semaines pour valider les progrès.</li>
+            <li>Exploitez les objectifs obligatoires (temps, résultat, méthode) afin de clarifier les attentes avant d’exécuter une tâche.</li>
+            <li>Activez le chronomètre depuis les vues du jour pour protéger votre temps et mesurer vos estimations.</li>
+            <li>Planifiez des routines Red‑Team pour revoir les actions terminées avant archivage.</li>
+          </ul>
+          <p class="muted">Besoin d’aller plus loin ? Exportez une configuration Klaro personnalisée, partagez-la à votre équipe, puis importez-la partiellement dans un nouvel espace.</p>
+        </div>
+      </div>
     </section>
 
     <!-- RED-TEAM -->
@@ -1021,6 +1106,19 @@ Maquette V1"></textarea></label>
       </form>
     </section>
 
+    <div id="timerModal" class="timer-modal" hidden aria-hidden="true">
+      <div class="timer-dialog" role="dialog" aria-modal="true" aria-labelledby="timerTitle">
+        <h3 id="timerTitle">Chronomètre</h3>
+        <p id="timerCountdown" class="timer-countdown">00:00</p>
+        <p id="timerMessage" class="muted"></p>
+        <div class="timer-controls">
+          <button type="button" id="timerToggle">⏸️ Pause</button>
+          <button type="button" id="timerReset">↺ Réinitialiser</button>
+          <button type="button" id="timerClose">✖️ Fermer</button>
+        </div>
+      </div>
+    </div>
+
     <!-- TOAST -->
     <div id="toast" role="status" aria-live="polite" class="toast" hidden>OK</div>
 
@@ -1033,7 +1131,7 @@ Maquette V1"></textarea></label>
   <footer class="footer" role="contentinfo">
     <!-- Mise à jour du numéro de version affiché en pied de page -->
         <!-- Mettre à jour la version affichée dans le pied de page en cohérence avec APP_VERSION. -->
-        <span>Offline • IndexedDB • v3.4.26</span>
+        <span>Offline • IndexedDB • v3.5.0</span>
   </footer>
 
   <!-- Append version as query parameter to force browsers and service workers to fetch the updated script -->
