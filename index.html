@@ -1,0 +1,1088 @@
+<!doctype html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Mise à jour version : passage à v3.4.25 -->
+  <!-- Update the page title to reflect the new application version -->
+  <title>Klaro — Planificateur v3.4.25</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip" href="#app">Aller au contenu</a>
+  <header class="topbar" role="banner">
+    <!-- Affichage de la version dans l'entête -->
+    <!-- Update version number displayed in the header when bumping application version. -->
+    <div class="brand" aria-label="Nom de l'application">📈 Klaro — v3.4.25 (offline)</div>
+    <nav class="nav" aria-label="Navigation principale">
+      <button data-nav="dashboard" class="nav-btn active" aria-pressed="true">Dashboard</button>
+      <!-- Regroupement des objectifs dans un onglet principal "Objet". Les anciennes sections
+           (globaux, systèmes, projets, actions, routines) deviennent des sous‑onglets accessibles via
+           un sous-menu. -->
+      <button data-nav="objects" class="nav-btn">Objet</button>
+      <!-- Les boutons classiques restent dans le DOM mais sont masqués via CSS. Ils sont
+           nécessaires pour le routage interne mais ne doivent plus être affichés directement
+           dans la barre de navigation principale. -->
+      <button data-nav="globals" class="nav-btn hidden">Obj. Globaux</button>
+      <button data-nav="systems" class="nav-btn hidden">Obj. Système</button>
+      <button data-nav="projects" class="nav-btn hidden">Projets</button>
+      <button data-nav="actions" class="nav-btn hidden">Actions</button>
+      <button data-nav="routines" class="nav-btn hidden">Routines</button>
+      <button data-nav="views" class="nav-btn">Vues</button>
+      <!-- Nouvel onglet Review regroupant Red‑Team et J.E.U. -->
+      <button data-nav="review" class="nav-btn">Review</button>
+      <!-- Boutons internes masqués nécessaires pour le routage des sous‑menus -->
+      <button data-nav="archives" class="nav-btn hidden">Archivés</button>
+      <button data-nav="params" class="nav-btn hidden">Paramètres</button>
+      <button data-nav="redteam" class="nav-btn hidden">Red‑Team</button>
+      <button data-nav="jeu" class="nav-btn hidden">🧭 J.E.U.</button>
+    </nav>
+
+    <!-- Sous-menu pour l’onglet "Objet". Masqué par défaut et affiché uniquement lorsque
+         l’onglet principal "Objet" est sélectionné. Chaque bouton déclenche l’affichage
+         de la vue correspondante (globaux, système, projets, actions, routines). -->
+    <div id="objectSubnav" class="subnav hidden" aria-label="Sous-menu Objet">
+      <button data-subview="globals" class="subnav-btn" aria-pressed="false">Globaux</button>
+      <button data-subview="systems" class="subnav-btn" aria-pressed="false">Systèmes</button>
+      <button data-subview="projects" class="subnav-btn" aria-pressed="false">Projets</button>
+      <button data-subview="actions" class="subnav-btn" aria-pressed="false">Actions</button>
+      <button data-subview="routines" class="subnav-btn" aria-pressed="false">Routines</button>
+      <button data-subview="archives" class="subnav-btn" aria-pressed="false">Archivés</button>
+    </div>
+
+    <!-- Sous-menu pour l’onglet "Review" regroupant Red-Team et J.E.U. -->
+    <div id="reviewSubnav" class="subnav hidden" aria-label="Sous-menu Review">
+      <button data-review="redteam" class="subnav-btn" aria-pressed="false">Red‑Team</button>
+      <button data-review="jeu" class="subnav-btn" aria-pressed="false">J.E.U.</button>
+    </div>
+    <div class="toolbar">
+      <button id="btnTheme" title="Basculer thème">🌓</button>
+      <button id="btnPrivacy" title="Mode confidentialité (masquer noms/€)">🙈</button>
+      <!-- Bouton Paramètres transformé en icône d'engrenage -->
+      <button id="btnSettings" title="Paramètres">⚙️</button>
+    </div>
+  </header>
+
+  <main id="app" role="main">
+
+    <!-- DASHBOARD -->
+    <section id="view-dashboard" class="view show" aria-labelledby="h-dashboard">
+      <h1 id="h-dashboard">Dashboard</h1>
+      <!-- Barre de filtres globales pour le dashboard (période, projet, responsable) -->
+      <div id="dashFilters" class="dash-filters">
+        <label>Période
+          <select id="filterTime" aria-label="Filtrer par période">
+            <option value="today">Aujourd’hui</option>
+            <option value="7d">7 jours</option>
+            <option value="30d">30 jours</option>
+            <option value="all" selected>Tout</option>
+          </select>
+        </label>
+        <label>Projet
+          <select id="filterProject" aria-label="Filtrer par projet"><option value="all">Tous</option></select>
+        </label>
+        <label>Responsable
+          <select id="filterOwner" aria-label="Filtrer par responsable"><option value="all">Tous</option></select>
+        </label>
+        <button id="btnApplyFilters" class="secondary" title="Appliquer les filtres">Appliquer</button>
+        <button id="btnResetFilters" class="secondary" title="Réinitialiser les filtres">Réinitialiser</button>
+        <!-- Bouton pour télécharger un rapport complet de l’application (PDF) -->
+        <button id="btnDownloadReport" class="secondary" title="Télécharger le rapport complet">Télécharger rapport</button>
+      </div>
+      <div class="cards">
+        <div class="card"><div class="kpi-label">Objectifs globaux</div><div class="kpi-value" id="kpiGlobalCount">—</div></div>
+        <div class="card"><div class="kpi-label">Avancement — Globaux</div><div class="kpi-value" id="kpiGlobalAvg">—</div></div>
+        <div class="card"><div class="kpi-label">Obj. Système</div><div class="kpi-value" id="kpiSysCount">—</div></div>
+        <div class="card"><div class="kpi-label">Avancement — Système</div><div class="kpi-value" id="kpiSysAvg">—</div></div>
+        <div class="card"><div class="kpi-label">Projets</div><div class="kpi-value" id="kpiProjCount">—</div></div>
+        <div class="card"><div class="kpi-label">Avancement — Projets</div><div class="kpi-value" id="kpiProjAvg">—</div></div>
+        <div class="card warn"><div class="kpi-label">Projets en retard</div><div class="kpi-value" id="kpiLateCount">—</div></div>
+        <!-- Nouveaux indicateurs pour les actions -->
+        <div class="card"><div class="kpi-label">Actions ouvertes</div><div class="kpi-value" id="kpiActionOpen">—</div></div>
+        <div class="card warn"><div class="kpi-label">Actions en retard</div><div class="kpi-value" id="kpiActionLate">—</div></div>
+        <!-- Indicateurs pour les routines -->
+        <div class="card"><div class="kpi-label">Routines actives</div><div class="kpi-value" id="kpiRoutineCount">—</div></div>
+        <div class="card"><div class="kpi-label">Tâches routines aujourd’hui</div><div class="kpi-value" id="kpiRoutineTasksToday">—</div></div>
+        <!-- Carte d’alertes pour les tâches en retard/red‑team en attente -->
+        <div class="card warn"><div class="kpi-label">Alertes</div><div class="kpi-value" id="kpiAlerts">—</div></div>
+        <!-- Carte pour les entrées Red‑Team à traiter ou commits JEU en attente -->
+        <div class="card"><div class="kpi-label">Red‑Team en attente</div><div class="kpi-value" id="kpiRedTeamPending">—</div></div>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="panel">
+        <h2>Répartition Statuts (Projets) <button class="collapse-btn" aria-label="Réduire ou étendre">▾</button></h2>
+          <div id="statusDist" class="grid grid-2"></div>
+          <canvas id="chartStatusDonut" width="320" height="180" aria-label="Statuts projets (graphique)"></canvas>
+        </div>
+        <div class="panel">
+        <h2>Vélocité (points faits) <button class="collapse-btn" aria-label="Réduire ou étendre">▾</button></h2>
+          <div class="grid grid-2">
+            <div><div class="kpi-label">7 derniers jours</div><div class="kpi-value" id="kpiVelo7">—</div></div>
+            <div><div class="kpi-label">28 derniers jours</div><div class="kpi-value" id="kpiVelo28">—</div></div>
+          </div>
+          <canvas id="chartVelo" width="320" height="120" aria-label="Vélocité (sparkline)"></canvas>
+        </div>
+      </div>
+
+      <!-- Panel for upcoming actions (due soon) -->
+      <div class="panel">
+        <h2>Actions à venir (7 jours) <button class="collapse-btn" aria-label="Réduire ou étendre">▾</button></h2>
+        <table class="table compact" id="tblDashboardDueSoon">
+          <thead>
+            <tr><th>Projet</th><th>Tâche</th><th>Échéance</th><th>Resp.</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- Répartition des statuts pour les actions -->
+      <div class="panel">
+        <h2>Répartition Statuts (Actions) <button class="collapse-btn" aria-label="Réduire ou étendre">▾</button></h2>
+        <div id="actionsStatusDist" class="grid grid-2"></div>
+        <canvas id="chartActionStatusDonut" width="320" height="180" aria-label="Statuts actions (graphique)"></canvas>
+      </div>
+
+      <!-- Actions ouvertes par collaborateur -->
+      <div class="panel">
+        <h2>Actions par collaborateur <button class="collapse-btn" aria-label="Réduire ou étendre">▾</button></h2>
+        <canvas id="chartActionsOwnerBars" width="480" height="180" aria-label="Actions par collaborateur"></canvas>
+        <table class="table compact" id="tblActionsOwner">
+          <thead><tr><th>Collaborateur</th><th>Actions ouvertes</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h2>Charge vs Capacité — 7 prochains jours <button class="collapse-btn" aria-label="Réduire ou étendre">▾</button></h2>
+        <canvas id="chartCapacityBars" width="480" height="180" aria-label="Charge vs capacité"></canvas>
+        <table class="table compact" id="tblCapacity">
+          <thead><tr><th>Collaborateur</th><th>Charge (pts)</th><th>Capacité (pts)</th><th>Écart</th><th>Surcharge ?</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- Répartition des routines par fréquence -->
+      <div class="panel">
+        <h2>Répartition Fréquence (Routines) <button class="collapse-btn" aria-label="Réduire ou étendre">▾</button></h2>
+        <div id="routineFreqDist" class="grid grid-2"></div>
+        <canvas id="chartRoutineFreqDonut" width="320" height="180" aria-label="Fréquence routines (graphique)"></canvas>
+      </div>
+
+      <div class="panel">
+        <h2>Gantt (8 semaines) <button class="collapse-btn" aria-label="Réduire ou étendre">▾</button></h2>
+        <div id="dashGantt" class="gantt"></div>
+      </div>
+    </section>
+
+    <!-- JEU (Journal d'Évolution Universel) -->
+    <section id="view-jeu" class="view" aria-labelledby="h-jeu">
+      <div class="list-header">
+        <h1 id="h-jeu">J.E.U. – Journal d’Évolution Universel</h1>
+        <div class="right">
+          <button id="btnJEUNew">➕ Nouveau commit</button>
+          <button id="btnJEUReport">📘 Générer bibliothèque</button>
+        </div>
+      </div>
+      <!-- Timeline des commits JEU (affichage des entrées sous forme de cartes) -->
+      <div id="jeuTimeline" class="timeline"></div>
+      <!-- Formulaire / modale pour ajouter un nouveau commit JEU -->
+      <form id="formJEU" class="form collapsed" aria-label="Formulaire JEU">
+        <h3 id="titleJEUForm">Nouveau commit J.E.U.</h3>
+        <div class="grid grid-2">
+          <label>Date<input type="date" name="date" required /></label>
+          <label>Projet<select name="projet"></select></label>
+          <label>Décision<textarea name="decision" rows="2" required></textarea></label>
+          <label>Cause<textarea name="cause" rows="2" required></textarea></label>
+          <label>Impact<textarea name="impact" rows="2" required></textarea></label>
+          <label>Correctif<textarea name="correctif" rows="2" required></textarea></label>
+          <label>Leçon<textarea name="lecon" rows="2" required></textarea></label>
+          <label>Énergie (1–10)<input type="number" name="energie" min="1" max="10" step="1" value="10" required /></label>
+          <label>Lien commit<input type="text" name="lien_commit" /></label>
+        </div>
+        <div class="form-actions">
+          <button type="submit">💾 Enregistrer</button>
+          <button type="button" class="secondary" id="cancelJEU">Annuler</button>
+        </div>
+      </form>
+    </section>
+
+
+    <!-- ROUTINES (périodiques) -->
+    <section id="view-routines" class="view" aria-labelledby="h-routines">
+      <div class="list-header">
+        <h1 id="h-routines">Routines</h1>
+        <div class="right">
+          <input id="searchRoutines" class="searchbox" type="search" placeholder="Rechercher…" aria-label="Rechercher routines">
+          <button id="btnAddRoutine">➕ Ajouter</button>
+        </div>
+      </div>
+
+      <div class="filterbar" id="fb-routines" hidden>
+        <!-- reserved for future filters -->
+      </div>
+
+      <form id="formRoutine" class="form collapsed" aria-label="Formulaire Routine">
+        <h3 id="titleRoutineForm">Nouvelle routine</h3>
+        <div class="grid grid-3">
+          <label>Nom<input name="name" required /></label>
+          <label>Système<select name="idSystem"></select></label>
+          <label>Fréquence<select name="frequency">
+            <option value="daily">Quotidien</option>
+            <option value="weekly">Hebdomadaire</option>
+            <option value="monthly">Mensuel</option>
+          </select></label>
+          <label class="routine-weekly">Jours (hebdo)
+            <div class="chips days-select">
+              <label><input type="checkbox" name="dow" value="0">Dim</label>
+              <label><input type="checkbox" name="dow" value="1">Lun</label>
+              <label><input type="checkbox" name="dow" value="2">Mar</label>
+              <label><input type="checkbox" name="dow" value="3">Mer</label>
+              <label><input type="checkbox" name="dow" value="4">Jeu</label>
+              <label><input type="checkbox" name="dow" value="5">Ven</label>
+              <label><input type="checkbox" name="dow" value="6">Sam</label>
+            </div>
+          </label>
+          <label class="routine-monthly">Jour du mois<input type="number" name="dom" min="1" max="31" /></label>
+          <label><input type="checkbox" name="autoCreate" /> Créer automatiquement pour aujourd’hui</label>
+        </div>
+        <h4>Tâches de la routine</h4>
+        <div class="table-wrapper">
+          <!-- La table des tâches permet désormais de spécifier un mode (court, normal, long) par tâche -->
+          <table class="table compact" id="tblRoutineTasks">
+            <thead>
+              <tr>
+                <th>Titre</th>
+                <th>Durée (min)</th>
+                <th>Mode</th>
+                <th>Moment</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="btnAddRoutineTask">➕ Ajouter tâche</button>
+          <button type="submit">💾 Enregistrer</button>
+          <button type="button" class="secondary" id="cancelRoutine">Annuler</button>
+        </div>
+      </form>
+
+      <table class="table" id="tblRoutines">
+        <thead>
+          <tr>
+            <!-- Colonne ID masquée via classe col-id -->
+            <th data-sort="id" data-type="text" class="col-id">ID</th>
+            <th data-sort="idSystem" data-type="text">Système</th>
+            <th data-sort="name" data-type="text">Nom</th>
+            <th data-sort="frequency" data-type="text">Fréquence</th>
+            <th data-sort="active" data-type="text">Actif</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- GLOBALS -->
+    <section id="view-globals" class="view" aria-labelledby="h-globals">
+      <div class="list-header">
+        <h1 id="h-globals">Objectifs globaux</h1>
+        <div class="right">
+          <input id="searchGlobals" class="searchbox" type="search" placeholder="Rechercher…" aria-label="Rechercher objectifs globaux">
+          <button id="btnAddGlobal">➕ Ajouter</button>
+        </div>
+      </div>
+
+      <div class="filterbar" id="fb-globals">
+        <div class="chips" id="chips-globals" aria-live="polite"></div>
+        <div class="filters-row">
+          <label>Champ <select id="f-field-globals"></select></label>
+          <label>Opérateur <select id="f-op-globals"></select></label>
+          <label>Valeur <input id="f-value-globals" /></label>
+          <button id="f-add-globals">Ajouter filtre</button>
+          <button class="secondary" id="f-clear-globals">Effacer</button>
+        </div>
+        <div class="sort-row">
+          <label>Trier par <select id="sort-globals"></select></label>
+        </div>
+      </div>
+
+      <form id="formGlobal" class="form collapsed" aria-label="Formulaire Objectif global">
+        <h3 id="titleGlobalForm">Nouvel objectif global</h3>
+        <!-- Bouton pour afficher/masquer les options avancées -->
+        <button type="button" class="toggle-advanced secondary" aria-expanded="false" aria-controls="advGlobalFields">+ Options avancées</button>
+        <!-- Champs essentiels pour un objectif global -->
+        <div class="grid grid-3">
+          <label>Intitulé<input name="title" required /></label>
+          <label>Domaine<select name="domain"></select></label>
+          <label>Horizon (ans)<input type="number" step="1" name="horizonYears" value="1" /></label>
+        </div>
+        <!-- Options avancées masquées par défaut -->
+        <div id="advGlobalFields" class="grid grid-3 advanced-options" hidden>
+          <label>KPI principal<input name="kpi" /></label>
+          <label>Baseline<input type="number" step="any" name="baseline" value="0" /></label>
+          <label>Cible<input type="number" step="any" name="target" value="100" /></label>
+          <label>Unité<select name="unit"></select></label>
+          <label>Valeur actuelle<input type="number" step="any" name="currentValue" value="0" /></label>
+          <label>Responsable<select name="owner"></select></label>
+          <label>Statut<select name="status"></select></label>
+          <label>Priorité<select name="priority"></select></label>
+          <label>Risque (1–5)<input type="number" step="1" min="1" max="5" name="risk" value="3" /></label>
+          <label>Clarté (1–5)<input type="number" step="1" min="1" max="5" name="clarity" value="3" /></label>
+          <label>Impact (1–5)<input type="number" step="1" min="1" max="5" name="impact" value="3" /></label>
+          <label>Urgence (1–5)<input type="number" step="1" min="1" max="5" name="urgency" value="3" /></label>
+          <label>Date début<input type="date" name="startDate" /></label>
+          <label>Date fin cible<input type="date" name="targetDate" /><span class="no-date-wrapper"><input type="checkbox" class="no-end-date" data-target="targetDate" /> Sans date de fin</span></label>
+          <label>Description<textarea name="description" rows="2"></textarea></label>
+        </div>
+        <div class="form-actions">
+          <button type="submit">💾 Enregistrer</button>
+          <button type="button" class="secondary" id="cancelGlobal">Annuler</button>
+        </div>
+      </form>
+
+      <table class="table" id="tblGlobals">
+        <thead>
+          <tr>
+            <th data-sort="id" data-type="text" class="col-id">ID</th>
+            <th data-sort="title" data-type="text">Intitulé</th>
+            <th data-sort="domain" data-type="text">Domaine</th>
+            <th data-sort="progressValue" data-type="percent">% Avancement</th>
+            <th data-sort="avgSystems" data-type="percent">Avancement (systèmes)</th>
+            <th data-sort="avgProjects" data-type="percent">Avancement (projets)</th>
+            <th data-sort="owner" data-type="text">Propriétaire</th>
+            <th data-sort="priority" data-type="text">Priorité</th>
+            <th data-sort="status" data-type="text">Statut</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- SYSTEMS -->
+    <section id="view-systems" class="view" aria-labelledby="h-systems">
+      <div class="list-header">
+        <h1 id="h-systems">Objectifs système</h1>
+        <div class="right">
+          <input id="searchSystems" class="searchbox" type="search" placeholder="Rechercher…" aria-label="Rechercher objectifs système">
+          <button id="btnAddSystem">➕ Ajouter</button>
+        </div>
+      </div>
+
+      <div class="filterbar" id="fb-systems">
+        <div class="chips" id="chips-systems" aria-live="polite"></div>
+        <div class="filters-row">
+          <label>Champ <select id="f-field-systems"></select></label>
+          <label>Opérateur <select id="f-op-systems"></select></label>
+          <label>Valeur <input id="f-value-systems" /></label>
+          <button id="f-add-systems">Ajouter filtre</button>
+          <button class="secondary" id="f-clear-systems">Effacer</button>
+        </div>
+        <div class="sort-row">
+          <label>Trier par <select id="sort-systems"></select></label>
+        </div>
+      </div>
+
+      <form id="formSystem" class="form collapsed" aria-label="Formulaire Objectif système">
+        <h3 id="titleSystemForm">Nouvel objectif système</h3>
+        <!-- Bouton Options avancées -->
+        <button type="button" class="toggle-advanced secondary" aria-expanded="false" aria-controls="advSystemFields">+ Options avancées</button>
+        <!-- Champs essentiels -->
+        <div class="grid grid-3">
+          <label>Objectif global<select name="idGlobal"></select></label>
+          <label>Intitulé<input name="title" required /></label>
+        </div>
+        <!-- Champs avancés -->
+        <div id="advSystemFields" class="grid grid-3 advanced-options" hidden>
+          <label>KPI principal<input name="kpi" /></label>
+          <label>Baseline<input type="number" step="any" name="baseline" value="0" /></label>
+          <label>Cible<input type="number" step="any" name="target" value="100" /></label>
+          <label>Unité<select name="unit"></select></label>
+          <label>Actuel<input type="number" step="any" name="current" value="0" /></label>
+          <label>Responsable<select name="owner"></select></label>
+          <label>Statut<select name="status"></select></label>
+          <label>Priorité<select name="priority"></select></label>
+          <label>Date début<input type="date" name="startDate" /></label>
+          <label>Date fin cible<input type="date" name="targetDate" /><span class="no-date-wrapper"><input type="checkbox" class="no-end-date" data-target="targetDate" /> Sans date de fin</span></label>
+          <label>Description<textarea name="description" rows="2"></textarea></label>
+        </div>
+        <div class="form-actions">
+          <button type="submit">💾 Enregistrer</button>
+          <button type="button" class="secondary" id="cancelSystem">Annuler</button>
+        </div>
+      </form>
+
+      <table class="table" id="tblSystems">
+        <thead>
+          <tr>
+            <th data-sort="id" data-type="text" class="col-id">ID</th>
+            <th data-sort="idGlobal" data-type="text">Global</th>
+            <th data-sort="title" data-type="text">Intitulé</th>
+            <th data-sort="progress" data-type="percent">% Avancement</th>
+            <th data-sort="owner" data-type="text">Responsable</th>
+            <th data-sort="priority" data-type="text">Priorité</th>
+            <th data-sort="status" data-type="text">Statut</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- PROJECTS -->
+    <section id="view-projects" class="view" aria-labelledby="h-projects">
+      <div class="list-header">
+        <h1 id="h-projects">Projets</h1>
+        <div class="right">
+          <input id="searchProjects" class="searchbox" type="search" placeholder="Rechercher…" aria-label="Rechercher projets">
+          <button id="btnAddProject">➕ Ajouter</button>
+        </div>
+      </div>
+
+      <div class="filterbar" id="fb-projects">
+        <div class="chips" id="chips-projects" aria-live="polite"></div>
+        <div class="filters-row">
+          <label>Champ <select id="f-field-projects"></select></label>
+          <label>Opérateur <select id="f-op-projects"></select></label>
+          <label>Valeur <input id="f-value-projects" /></label>
+          <button id="f-add-projects">Ajouter filtre</button>
+          <button class="secondary" id="f-clear-projects">Effacer</button>
+        </div>
+        <div class="sort-row">
+          <label>Trier par <select id="sort-projects"></select></label>
+        </div>
+      </div>
+
+      <div class="bulkbar" id="bulkProjects" hidden>
+        <div>Éléments sélectionnés : <span id="bulkProjCount">0</span></div>
+        <div class="actions">
+          <button data-bulk="status:Planifié">Planifié</button>
+          <button data-bulk="status:En cours">En cours</button>
+          <button data-bulk="status:Bloqué">Bloqué</button>
+          <button data-bulk="status:Terminé">Terminé</button>
+          <button data-bulk="delete" class="danger">🗑️ Supprimer</button>
+          <button data-bulk="export">⬇️ Exporter CSV</button>
+        </div>
+      </div>
+
+      <form id="formProject" class="form collapsed" aria-label="Formulaire Projet">
+        <h3 id="titleProjectForm">Nouveau projet</h3>
+        <!-- Bouton Options avancées -->
+        <button type="button" class="toggle-advanced secondary" aria-expanded="false" aria-controls="advProjectFields">+ Options avancées</button>
+        <!-- Champs essentiels -->
+        <div class="grid grid-3">
+          <label>Objectif global<select name="idGlobal"></select></label>
+          <label>Objectif système<select name="idSystem"></select></label>
+          <label>Projet / livrable<input name="title" required /></label>
+          <label>Mode de suivi<select name="mode"><option value="value">Valeur</option><option value="tasks">Tâches</option></select></label>
+          <label>Responsable<select name="owner"></select></label>
+          <label>Statut<select name="status"></select></label>
+          <label>Priorité<select name="priority"></select></label>
+          <label>Date fin planifiée<input type="date" name="plannedEnd" /><span class="no-date-wrapper"><input type="checkbox" class="no-end-date" data-target="plannedEnd" /> Sans date de fin</span></label>
+        </div>
+        <!-- Champs avancés -->
+        <div id="advProjectFields" class="grid grid-3 advanced-options" hidden>
+          <label>Hypothèse testée<input name="hypothesis" /></label>
+          <label>Indicateur principal<input name="indicator" /></label>
+          <label>Cible<input type="number" step="any" name="target" value="100" /></label>
+          <label>Unité<select name="unit"></select></label>
+          <label>Valeur actuelle<input type="number" step="any" name="current" value="0" /></label>
+          <label>Budget (€)<input type="number" step="any" name="budget" value="0" /></label>
+          <label>Coût réel (€)<input type="number" step="any" name="actualCost" value="0" /></label>
+          <label>Revenus (€)<input type="number" step="any" name="revenue" value="0" /></label>
+          <label>Impact (1–5)<input type="number" step="1" min="1" max="5" name="impact" value="3" /></label>
+          <label>Confiance (0–1)<input type="number" step="0.1" min="0" max="1" name="confidence" value="0.7" /></label>
+          <label>Effort (jours)<input type="number" step="1" min="0" name="effort" value="5" /></label>
+          <label>Risque (1–5)<input type="number" step="1" min="1" max="5" name="risk" value="3" /></label>
+          <label>Énergie (1–10)<input type="number" step="1" min="1" max="10" name="energy" value="10" /></label>
+          <label>Contribution au but maître (0–100%)<input type="number" step="1" min="0" max="100" name="contribution" value="80" /></label>
+          <label>État d’énergie<select name="energyState"><option value="vivant">Vivant</option><option value="stagnant">Stagnant</option></select></label>
+          <label>Risque dilution<select name="dilutionRisk">
+            <option value="">—</option>
+            <option value="temps">Temps</option>
+            <option value="contexte">Contexte</option>
+            <option value="attention">Attention</option>
+          </select></label>
+          <!-- Niveau actuel du projet : En cours ou Autonome -->
+          <label>Niveau actuel<select name="currentLevel">
+            <option value="">—</option>
+            <option value="running">En cours</option>
+            <option value="automatic">Automatique</option>
+          </select></label>
+          <!-- Masse critique : pourcentage à partir duquel le projet est considéré accompli -->
+          <label>Masse critique (%)<input type="number" step="1" min="1" max="100" name="criticalMass" value="80" /></label>
+          <label>Date début<input type="date" name="startDate" /></label>
+          <label>Date fin réelle<input type="date" name="actualEnd" /><span class="no-date-wrapper"><input type="checkbox" class="no-end-date" data-target="actualEnd" /> Sans date de fin</span></label>
+          <label>Commentaires<textarea name="comments" rows="2"></textarea></label>
+          <label>Étapes d’escalade<textarea name="escalation" rows="2" placeholder="Listez les étapes (une par ligne)"></textarea></label>
+        </div>
+        <div class="form-actions">
+          <button type="submit">💾 Enregistrer</button>
+          <button type="button" class="secondary" id="cancelProject">Annuler</button>
+        </div>
+      </form>
+
+      <table class="table" id="tblProjects">
+        <thead>
+          <tr>
+            <th class="selectcol"><input type="checkbox" id="selAllProjects" aria-label="Tout sélectionner"></th>
+            <th data-sort="id" data-type="text" class="col-id">ID</th>
+            <th data-sort="title" data-type="text">Projet</th>
+            <th data-sort="progressOverall" data-type="percent">% Global</th>
+            <th data-sort="ICE" data-type="number">ICE</th>
+            <th data-sort="SPI" data-type="number">SPI</th>
+            <th data-sort="RAG" data-type="text">RAG</th>
+            <!-- Colonne énergie du projet -->
+            <th data-sort="energy" data-type="number">Énergie</th>
+            <!-- Indicateurs Kairos : contribution, état d'énergie, risque de dilution -->
+            <th data-sort="contribution" data-type="number">Contrib.</th>
+            <th data-sort="energyState" data-type="text">État</th>
+            <th data-sort="dilutionRisk" data-type="text">Dilution</th>
+            <th data-sort="status" data-type="text">Statut</th>
+            <th data-sort="plannedEnd" data-type="date">Fin planifiée</th>
+            <th data-sort="owner" data-type="text">Resp.</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- ACTIONS -->
+    <section id="view-actions" class="view" aria-labelledby="h-actions">
+      <div class="list-header">
+        <h1 id="h-actions">Actions</h1>
+        <div class="right">
+          <input id="searchActions" class="searchbox" type="search" placeholder="Rechercher…" aria-label="Rechercher actions">
+          <button id="btnAddAction">➕ Ajouter</button>
+        </div>
+      </div>
+
+      <div class="filterbar" id="fb-actions">
+        <div class="chips" id="chips-actions" aria-live="polite"></div>
+        <div class="filters-row">
+          <label>Champ <select id="f-field-actions"></select></label>
+          <label>Opérateur <select id="f-op-actions"></select></label>
+          <label>Valeur <input id="f-value-actions" /></label>
+          <button id="f-add-actions">Ajouter filtre</button>
+          <button class="secondary" id="f-clear-actions">Effacer</button>
+        </div>
+        <div class="sort-row">
+          <label>Trier par <select id="sort-actions"></select></label>
+        </div>
+      </div>
+
+      <div class="bulkbar" id="bulkActions" hidden>
+        <div>Éléments sélectionnés : <span id="bulkActCount">0</span></div>
+        <div class="actions">
+          <button data-bulk-act="status:À faire">À faire</button>
+          <button data-bulk-act="status:En cours">En cours</button>
+          <button data-bulk-act="status:Bloqué">Bloqué</button>
+          <button data-bulk-act="status:Fait">Fait</button>
+          <button data-bulk-act="delete" class="danger">🗑️ Supprimer</button>
+          <button data-bulk-act="export">⬇️ Exporter CSV</button>
+        </div>
+      </div>
+
+      <!-- Barre d’auto‑priorisation : permet de saisir le niveau d’énergie de l’utilisateur
+           et de déclencher le calcul automatique des priorités pour les actions. -->
+      <div class="auto-prio-bar" style="margin: 0.5rem 0; display:flex; flex-wrap:wrap; gap:1rem; align-items:center;">
+        <label style="display:flex; align-items:center; gap:0.25rem;">
+          Énergie actuelle
+          <input id="userEnergyNow" type="number" min="1" max="10" value="8" style="width:4rem;" aria-label="Énergie actuelle (1 à 10)">
+        </label>
+        <button id="btnAutoPrioritize" type="button" title="Calcule un ordre d’exécution optimal des tâches selon l’impact, l’urgence, l’effort et l’alignement énergétique">⚡ Auto‑Prioriser maintenant</button>
+        <small style="flex:1 1 100%; font-size:0.8rem;">Score = 40% impact + 25% urgence + 20% (1 - effort) + 15% alignement énergie</small>
+      </div>
+
+      <form id="formAction" class="form collapsed" aria-label="Formulaire Action">
+        <h3 id="titleActionForm">Nouvelle action</h3>
+        <!-- Bouton Options avancées -->
+        <button type="button" class="toggle-advanced secondary" aria-expanded="false" aria-controls="advActionFields">+ Options avancées</button>
+        <!-- Champs essentiels -->
+        <div class="grid grid-3">
+          <label>Projet<select name="idProject"></select></label>
+          <label>Tâche<input name="task" required /></label>
+          <label>Responsable<select name="owner"></select></label>
+          <label>Date fin prévue<input type="date" name="dueDate" /><span class="no-date-wrapper"><input type="checkbox" class="no-end-date" data-target="dueDate" /> Sans date de fin</span></label>
+          <label>Points<input type="number" step="1" min="0" name="points" value="1" /></label>
+          <label>Statut<select name="statusTask"></select></label>
+          <!-- Moment de la journée : permet de planifier l’action (Matin, Aprem, Soir) -->
+          <label>Moment<select name="timeOfDay">
+            <option value="">—</option>
+            <option value="morning">Matin</option>
+            <option value="afternoon">Aprem</option>
+            <option value="evening">Soir</option>
+          </select></label>
+        </div>
+        <!-- Champs avancés -->
+        <div id="advActionFields" class="grid grid-3 advanced-options" hidden>
+          <label>Date début<input type="date" name="startDate" /></label>
+          <label>Date fin réelle<input type="date" name="doneDate" /><span class="no-date-wrapper"><input type="checkbox" class="no-end-date" data-target="doneDate" /> Sans date de fin</span></label>
+          <label>Durée estimée (h)<input type="number" step="1" min="0" name="estHours" value="1" /></label>
+          <label>Durée réelle (h)<input type="number" step="1" min="0" name="realHours" value="0" /></label>
+          <!-- Indicateurs pour l’auto‑priorisation -->
+          <label>Impact (1–10)<input type="number" min="1" max="10" name="impact" value="5" /></label>
+          <label>Urgence (1–10)<input type="number" min="1" max="10" name="urgency" value="5" /></label>
+          <label>Effort estimé (1–10)<input type="number" min="1" max="10" name="effort_estimate" value="5" /></label>
+          <label>Énergie requise (1–10)<input type="number" min="1" max="10" name="energy_required" value="5" /></label>
+          <label>Tag<input name="tag" /></label>
+          <label>Commentaires<textarea name="comments" rows="2"></textarea></label>
+          <!-- Sous-objectifs SMART : un par ligne, doit contenir lettres et chiffres -->
+          <label>Sous-objectifs SMART<textarea name="subgoals" rows="2" placeholder="Un sous‑objectif par ligne (lettres et chiffres)"></textarea></label>
+        </div>
+        <div class="form-actions">
+          <button type="submit">💾 Enregistrer</button>
+          <button type="button" class="secondary" id="cancelAction">Annuler</button>
+        </div>
+      </form>
+
+      <table class="table" id="tblActions">
+        <thead>
+          <tr>
+            <th class="selectcol"><input type="checkbox" id="selAllActions" aria-label="Tout sélectionner"></th>
+            <th data-sort="id" data-type="text" class="col-id">ID</th>
+            <th data-sort="idProject" data-type="text">Projet</th>
+            <th data-sort="task" data-type="text">Tâche</th>
+            <th data-sort="dueDate" data-type="date">Due</th>
+            <th data-sort="points" data-type="number">Points</th>
+            <th data-sort="statusTask" data-type="text">Statut</th>
+            <th data-sort="owner" data-type="text">Resp.</th>
+            <th data-sort="score" data-type="number">Score</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- VIEWS -->
+    <section id="view-views" class="view" aria-labelledby="h-views">
+      <h1 id="h-views">Vues</h1>
+      <div class="view-mode-select">
+        <span>Sélection mode routine:</span>
+        <label><input type="radio" name="viewMode" value="short" checked /> Court</label>
+        <label><input type="radio" name="viewMode" value="normal" /> Normal</label>
+        <label><input type="radio" name="viewMode" value="long" /> Long</label>
+      </div>
+              <!-- ACTION-FIRST — Diagnostic & Pack -->
+        <div class="panel" id="afPanel">
+          <h3>🎯 Action-First (diagnostic & pack)</h3>
+
+          <!-- Gating (G0→G3) -->
+          <form id="afGating" class="form" aria-label="Gating Action-First">
+            <!-- Étapes de gating disposées verticalement sans cases à cocher, selon l’exemple fourni -->
+            <div class="gating-step">
+              <span class="step">2.</span>
+              <span>2–3 testeurs/sources ?</span>
+            </div>
+            <div class="gating-step">
+              <span class="step">3.</span>
+              <span>Question binaire + métriques ?</span>
+            </div>
+            <div class="gating-step">
+              <span class="step">4.</span>
+              <span>Contrainte prouvée ? (gardien / ressource / date)</span>
+              <input name="g3_proof" placeholder="Ex : Admin WhatsApp / accès groupe / 2025-11-07">
+            </div>
+            <div class="gating-step">
+              <span class="step">5.</span>
+              <span>Projet cible (optionnel)</span>
+              <select id="afProject"></select>
+            </div>
+            <div class="form-actions">
+              <button type="button" id="afRunGating">Étape suivante</button>
+            </div>
+          </form>
+
+          <!-- Matrice Oui/Non -->
+          <details id="afMatrixBox" open>
+            <summary>🧮 Matrice Oui/Non</summary>
+            <div class="grid grid-3" id="afMatrix"></div>
+            <div class="form-actions">
+              <button type="button" id="afDetect">Détecter le type</button>
+              <span id="afTypeBadge" class="chip" aria-live="polite"></span>
+            </div>
+          </details>
+
+          <!-- Pack d'hypothèses H1→Hn rendu ici -->
+          <div id="afPack"></div>
+        </div>
+<div class="grid grid-2">
+        <div class="panel">
+          <h3>⭐ Ma sélection de projets</h3>
+          <div class="watchlist">
+            <label>Ajouter un projet
+              <input list="dl-projects" id="wl-add-project" placeholder="Rechercher par titre ou ID">
+              <datalist id="dl-projects"></datalist>
+            </label>
+            <button id="wl-add-btn">Ajouter</button>
+          </div>
+          <ul id="watchlistProjects" class="list chips"></ul>
+        </div>
+        <div class="panel">
+          <h3>📁 Vues enregistrées (filtres + tri)</h3>
+          <div class="form-actions">
+            <label>Nom de la vue <input id="savedViewName" placeholder="Ex: Projets bloqués de Marie"></label>
+            <select id="savedViewTarget">
+              <option value="projects">Projets</option>
+              <option value="actions">Actions</option>
+              <option value="globals">Globaux</option>
+              <option value="systems">Systèmes</option>
+            </select>
+            <button id="btnSaveCurrentView">💾 Enregistrer la vue courante</button>
+          </div>
+          <table class="table compact" id="tblSavedViews">
+            <thead><tr><th>Nom</th><th>Vue</th><th>Critères</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="grid grid-2">
+        <div class="panel">
+          <h3>⏱️ Projets en retard</h3>
+          <table class="table" id="tblViewLate">
+            <thead><tr><th>ID</th><th>Projet</th><th>Début</th><th>Fin planifiée</th><th>Écart</th><th>ICE</th><th>Priorité</th><th>Resp.</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <h3>🧱 Projets bloqués</h3>
+          <table class="table" id="tblViewBlocked">
+            <thead><tr><th>ID</th><th>Projet</th><th>Avancement</th><th>ICE</th><th>Priorité</th><th>Resp.</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>⏰ Actions bientôt dues</h3>
+        <table class="table" id="tblViewDueSoon">
+          <thead><tr><th>ID</th><th>Projet</th><th>Tâche</th><th>Due</th><th>Jours restants</th><th>Resp.</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- Routine & Actions du jour -->
+      <div class="grid grid-2">
+        <div class="panel">
+          <h3>🔁 Routines – aujourd'hui</h3>
+          <table class="table" id="tblViewRoutineToday">
+            <thead><tr><th>ID</th><th>Routine</th><th>Tâche</th><th>Durée</th><th>Mode</th><th>Resp.</th><th>Statut</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <h3>✔️ Actions – aujourd'hui / en cours</h3>
+          <table class="table" id="tblViewActionToday">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Projet</th>
+                <th>Tâche</th>
+                <th>Due</th>
+                <th>Statut</th>
+                <th>Resp.</th>
+                <th>Finir</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Liste des tâches faites aujourd'hui -->
+      <div class="panel">
+        <h3>✅ Actions effectuées aujourd'hui</h3>
+        <table class="table" id="tblViewActionDone">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Projet</th>
+              <th>Tâche</th>
+              <th>Due</th>
+              <th>Statut</th>
+              <th>Resp.</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ARCHIVES -->
+    <section id="view-archives" class="view" aria-labelledby="h-archives">
+      <h1 id="h-archives">Archivés</h1>
+      <div class="grid grid-2">
+        <div class="panel">
+          <h3>📦 Actions archivées</h3>
+          <table class="table" id="tblArchivedActions">
+            <thead>
+              <tr>
+                <th class="col-id">ID</th>
+                <th>Projet</th>
+                <th>Tâche</th>
+                <th>Échéance</th>
+                <th>Points</th>
+                <th>Statut</th>
+                <th>Resp.</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="panel">
+          <h3>📦 Routines archivées</h3>
+          <table class="table" id="tblArchivedRoutines">
+            <thead>
+              <tr>
+                <th class="col-id">ID</th>
+                <th>Système</th>
+                <th>Nom</th>
+                <th>Fréquence</th>
+                <th>Actif</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PARAMS (inclut Données) -->
+    <section id="view-params" class="view" aria-labelledby="h-params">
+      <div class="tabs" id="paramsTabs" role="tablist">
+        <button class="tab active" data-tab="p-general" aria-selected="true">Général</button>
+        <button class="tab" data-tab="p-data" aria-selected="false">Données</button>
+      </div>
+
+  <!-- Overlay de chargement pour feedback de performance -->
+  <!-- supprimé de cette position pour être rendu global -->
+
+      <div id="p-general" class="tabpanel show" role="tabpanel">
+        <h1 id="h-params">Paramètres</h1>
+        <div class="grid grid-2">
+          <form id="formThresholds" class="form" aria-label="Seuils">
+            <h3>Seuils</h3>
+            <div class="grid grid-3">
+              <label>Variance rouge (≤) <input name="varRed" type="number" step="0.01" value="-0.10" /></label>
+              <label>Variance ambre (≤) <input name="varAmber" type="number" step="0.01" value="-0.03" /></label>
+              <label>“Due soon” (jours) <input name="dueSoonDays" type="number" step="1" value="7" /></label>
+              <label>SPI rouge (≤) <input name="spiRed" type="number" step="0.01" value="0.90" /></label>
+              <label>SPI ambre (≤) <input name="spiAmber" type="number" step="0.01" value="0.98" /></label>
+            </div>
+            <div class="form-actions"><button type="submit">💾 Enregistrer seuils</button></div>
+          </form>
+
+          <form id="formEnums" class="form" aria-label="Listes">
+            <h3>Listes</h3>
+            <label>Domaines <textarea name="domains" rows="3"></textarea></label>
+            <label>Statuts (projets) <textarea name="statuses" rows="3"></textarea></label>
+            <label>Priorités <textarea name="priorities" rows="3"></textarea></label>
+            <label>Unités <textarea name="units" rows="3"></textarea></label>
+            <label>Statuts tâches <textarea name="taskStatuses" rows="3"></textarea></label>
+            <label>Collaborateurs <textarea name="collaborators" rows="3"></textarea></label>
+            <div class="form-actions"><button type="submit">💾 Enregistrer listes</button></div>
+          </form>
+
+        </div>
+
+        <!-- Panneau de personnalisation pour permettre la modification de la couleur d'accent -->
+        <div class="panel">
+          <h3>Personnalisation</h3>
+          <form id="formAccent" class="form" aria-label="Personnalisation">
+            <label>Couleur principale
+              <input type="color" id="accentColorPicker" name="accentColor" />
+            </label>
+            <div class="form-actions"><button type="button" id="btnSaveAccent">🎨 Appliquer couleur</button></div>
+          </form>
+        </div>
+
+        <div class="panel">
+          <h3>Capacités (points / semaine)</h3>
+          <table class="table compact" id="tblCaps">
+            <thead><tr><th>Collaborateur</th><th>Capacité</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div class="form-actions">
+            <button id="btnAddCap">➕ Ajouter Collaborateur</button>
+            <button id="btnSaveCaps">💾 Enregistrer capacités</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Templates (actions par défaut)</h3>
+          <div class="grid grid-2">
+            <form id="formTemplate" class="form" aria-label="Créer template">
+              <label>Nom du template <input name="tplName" required /></label>
+              <label>Actions (une par ligne) <textarea name="tplActions" rows="5" placeholder="Ex: Découverte client
+Rédiger plan
+Maquette V1"></textarea></label>
+              <div class="form-actions"><button type="submit">💾 Enregistrer template</button></div>
+            </form>
+            <div class="form">
+              <label>Appliquer à un projet (ID) <input id="tplProjectId" /></label>
+              <label>Template<select id="tplSelect"></select></label>
+              <div class="form-actions"><button id="btnApplyTpl">✨ Appliquer</button></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div id="p-data" class="tabpanel" role="tabpanel">
+        <h1 id="h-data">Données</h1>
+        <div class="grid grid-2">
+          <div class="panel">
+            <h3>Exporter</h3>
+            <p>Exporte toutes les données (JSON) pour sauvegarde ou migration.</p>
+            <button id="btnExport">⬇️ Exporter JSON</button>
+            <button id="btnExportProjectsCSV">⬇️ Exporter Projets (CSV)</button>
+            <button id="btnExportActionsCSV">⬇️ Exporter Actions (CSV)</button>
+          </div>
+          <div class="panel">
+            <h3>Importer</h3>
+            <p>JSON complet ou CSV ciblé.</p>
+            <input type="file" id="fileImport" accept=".json,application/json,.csv,text/csv" multiple />
+            <div class="form-actions">
+              <button id="btnImportJSON">⬆️ Importer JSON</button>
+              <button id="btnImportProjectsCSV">⬆️ Importer Projets (CSV)</button>
+              <button id="btnImportActionsCSV">⬆️ Importer Actions (CSV)</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="panel">
+            <h3>Intégrité des données & QA</h3>
+            <button id="btnScanIntegrity">🔎 Scanner</button>
+            <div id="integrityResults" class="muted" style="margin-top:8px;"></div>
+          </div>
+          <div class="panel">
+            <h3>Snapshots (versions locales)</h3>
+            <div class="form-actions">
+              <button id="btnSnapshot">💾 Créer un snapshot</button>
+            </div>
+            <table class="table compact" id="tblSnapshots">
+              <thead><tr><th>ID</th><th>Date</th><th>Taille</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="panel">
+            <h3>Pièces jointes</h3>
+            <input type="file" id="fileAttach" multiple />
+            <label>Associer au projet (ID) <input id="attachProjectId" /></label>
+            <div class="form-actions">
+              <button id="btnUpload">⬆️ Ajouter</button>
+            </div>
+            <table class="table compact" id="tblFiles">
+              <thead><tr><th>ID</th><th>Nom</th><th>Type</th><th>Taille</th><th>Projet</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="panel">
+            <h3>Corbeille</h3>
+            <table class="table compact" id="tblTrash">
+              <thead><tr><th>Store</th><th>ID</th><th>Date</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="panel">
+            <h3>Journal (audit)</h3>
+            <table class="table compact" id="tblAudit">
+              <thead><tr><th>Date</th><th>Op</th><th>Store</th><th>ID</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <p class="muted">Données locales, aucune connexion serveur. **Aucun chiffrement** dans cette version.</p>
+      </div>
+    </section>
+
+    <!-- RED-TEAM -->
+    <section id="view-redteam" class="view" aria-labelledby="h-redteam">
+      <h1 id="h-redteam">Red‑Team</h1>
+      <p class="muted">Flux des tâches nécessitant un retour d’expérience. Les tâches terminées sont listées ici tant que la Red‑Team n’est pas validée.</p>
+      <table class="table" id="tblRedTeam">
+        <thead>
+          <tr><th>Tâche</th><th>Date ajout</th><th>Statut</th><th></th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <!-- Formulaire/boîte modale pour traiter une entrée Red‑Team -->
+      <form id="formRedTeam" class="form collapsed" aria-label="Formulaire Red‑Team">
+        <h3 id="titleRedTeamForm">Traitement Red‑Team</h3>
+        <div class="grid grid-2">
+          <label>Titre<input name="title" readonly /></label>
+          <label>Durée réelle estimée (min)<input type="text" name="duration" value="5–15" /></label>
+          <label>Qu'est-ce qui a pris le plus de temps ?<textarea name="time" rows="2"></textarea></label>
+          <label>Qu'est-ce qui a bien fonctionné ?<textarea name="success" rows="2"></textarea></label>
+          <label>Qu'est-ce qui a drainé l'énergie ?<textarea name="drain" rows="2"></textarea></label>
+          <label>Décision corrective proposée<textarea name="decision" rows="2" required></textarea></label>
+          <label>Cause structurelle identifiée<textarea name="cause" rows="2" required></textarea></label>
+          <label>Impact observé<textarea name="impact" rows="2" required></textarea></label>
+          <label>Correctif immédiat<textarea name="correctif" rows="2" required></textarea></label>
+          <label>Leçon structurelle<textarea name="lesson" rows="2" required></textarea></label>
+          <label>Énergie (1–10)<input type="number" name="energy" min="1" max="10" required /></label>
+          <label>Lien commit<input type="text" name="lien_commit" placeholder="URL ou identifiant commit" /></label>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="btnRedTeamStart" class="secondary">⏱️ Démarrer timer</button>
+          <button type="button" id="btnRedTeamSave" class="secondary">💾 Sauvegarder brouillon</button>
+          <button type="submit" id="btnRedTeamCommit">✅ Commit</button>
+          <button type="button" id="btnRedTeamDismiss" class="secondary">⛔ Ignorer</button>
+          <button type="button" id="btnRedTeamCancel" class="secondary">Annuler</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- TOAST -->
+    <div id="toast" role="status" aria-live="polite" class="toast" hidden>OK</div>
+
+  <!-- Global loading overlay displayed during lengthy operations -->
+  <div id="loadingOverlay" class="loading-overlay" hidden aria-hidden="true">
+    <div class="spinner" role="status" aria-label="Chargement…"></div>
+  </div>
+  </main>
+
+  <footer class="footer" role="contentinfo">
+    <!-- Mise à jour du numéro de version affiché en pied de page -->
+        <!-- Mettre à jour la version affichée dans le pied de page en cohérence avec APP_VERSION. -->
+        <span>Offline • IndexedDB • v3.4.25</span>
+  </footer>
+
+  <!-- Append version as query parameter to force browsers and service workers to fetch the updated script -->
+  <!-- The version query parameter forces browsers and the service worker
+       to fetch the latest app.js after an upgrade. Ensure this value
+       matches APP_VERSION in app.js. -->
+  <!-- Librairie jsPDF pour générer des rapports PDF. Chargée depuis un CDN. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="app.js?v=3.4.25"></script>
+  <!-- Module J.E.U. pour le Journal d'Évolution Universel. Utilise le même
+       paramètre de version pour invalider le cache lorsque ce script évolue. -->
+  <script src="jeu.js?v=3.4.25"></script>
+  <!-- Moteur d’auto‑priorisation pour calculer et appliquer des scores aux actions -->
+  <script src="prioritizer.js?v=3.4.25"></script>
+  <script>
+  // PWA (optionnel): actif uniquement via http(s)
+  if (location.protocol.startsWith('http') && 'serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  }
+  </script>
+
+  <!-- Impression PDF par élément -->
+  <section id="reportView" class=""></section>
+</body>
+</html>

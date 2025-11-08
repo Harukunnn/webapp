@@ -1,0 +1,396 @@
+/* Klaro v3.3r — styles épurés, avec filterbar, chips, gantt et tabs */
+:root{
+  --bg:#0b1020; --card:#111a33; --muted:#9db1d1; --text:#e8f1ff; --accent:#7fb4ff;
+  --warn:#ffc107; --bad:#ff6b6b; --ok:#4cd4a8; --grid:#24314d; --grey:#f2f4f7;
+  --line:#1f2b45; --btn:#17305e; --btn2:#172034;
+  --gantt-day:20px; --radius:8px; --shadow:0 1px 2px rgba(0,0,0,.15);
+}
+:root[data-theme="light"]{
+  --bg:#f6f8fc; --card:#ffffff; --muted:#4a5a70; --text:#0e1a2c; --accent:#0a58ff;
+  --warn:#b08900; --bad:#d32f2f; --ok:#2e7d32; --grid:#dce5f3; --grey:#f2f4f7;
+  --line:#d8dee9; --btn:#f0f4ff; --btn2:#f4f6fa;
+}
+*{ box-sizing: border-box; }
+html,body{ height:100%; }
+body{ margin:0; font:14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:var(--bg); color:var(--text); }
+a{ color:var(--accent); text-decoration:none; }
+.skip{ position:absolute; left:-9999px; }
+.skip:focus{ left:12px; background:#fff; color:#000; padding:8px; z-index:999; }
+
+.topbar{ position:sticky; top:0; z-index:10; display:flex; gap:16px; align-items:center; justify-content:space-between; padding:12px 16px; background:rgba(11,19,40,.9); border-bottom:1px solid var(--line); backdrop-filter: blur(6px); }
+.brand{ font-weight:700; letter-spacing:.2px; }
+.nav{ display:flex; flex-wrap:wrap; gap:6px; }
+.nav-btn{ background:#162240; color:#cfe0ff; border:1px solid #22335d; padding:8px 10px; border-radius:8px; cursor:pointer; }
+:root[data-theme="light"] .nav-btn{ background:#f2f6ff; color:#1f355d; border-color:#c9d6ee; }
+.nav-btn.active{ background:#20407a; color:#fff; }
+:root[data-theme="light"] .nav-btn.active{ background:#0a58ff; color:#fff; }
+.nav-btn:hover{ filter: brightness(1.08); }
+.toolbar{ display:flex; align-items:center; gap:8px; }
+
+.footer{ padding:10px 16px; border-top:1px solid var(--line); color:var(--muted); text-align:center; background:rgba(11,19,40,.9); }
+main{ padding:16px; max-width:1200px; margin:0 auto; }
+.view{ display:none; }
+.view.show{ display:block; animation: fade .15s ease-out; }
+@keyframes fade{ from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none} }
+
+.cards{
+  display:grid;
+  /* Utiliser auto-fit pour s’adapter au nombre de cartes et à la largeur disponible */
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap:12px;
+  margin:12px 0 20px;
+}
+.card{ background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.02); }
+.card.warn{ box-shadow: inset 0 0 0 1px rgba(255,193,7,.18); }
+
+/* Cartes du dashboard cliquables */
+.card.clickable{ cursor:pointer; transition: filter .15s ease-in-out; }
+.card.clickable:hover{ filter: brightness(1.08); }
+.kpi-label{ color:#9bb2da; font-size:12px; margin-bottom:6px; }
+:root[data-theme="light"] .kpi-label{ color:#406089; }
+.kpi-value{ font-size:26px; font-weight:700; }
+
+/* Tableau de filtres du dashboard */
+.dash-filters{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  align-items:center;
+  margin:8px 0 16px;
+}
+.dash-filters label{ display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--muted); }
+.dash-filters select{ background:var(--card); color:var(--text); border:1px solid var(--line); border-radius:6px; padding:6px 8px; }
+.dash-filters button{ padding:6px 10px; border-radius:6px; background:var(--btn2); color:var(--text); border:1px solid var(--line); }
+.dash-filters button:hover{ filter:brightness(1.1); }
+
+/* Bouton pour réduire/étendre les panneaux du dashboard */
+.collapse-btn{
+  background:transparent;
+  border:none;
+  color:var(--muted);
+  cursor:pointer;
+  font-size:1rem;
+  margin-left:4px;
+  transform: rotate(0deg);
+  transition: transform 0.2s ease;
+}
+.panel.collapsed .collapse-btn{
+  transform: rotate(-90deg);
+}
+/* Lorsque le panneau est replié, masquer tout sauf le titre */
+.panel.collapsed > *:not(h2){
+  display:none;
+}
+
+.panel{ background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px; margin:12px 0; }
+.grid{ display:grid; gap:12px; }
+.grid-2{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+.grid-3{ grid-template-columns: repeat(3, minmax(0,1fr)); }
+@media (max-width:1100px){ .cards{ grid-template-columns: repeat(3, minmax(0,1fr)); } .grid-3{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (max-width:720px){ .grid-2, .grid-3{ grid-template-columns: 1fr; } }
+
+.list-header{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; }
+.list-header .right{ display:flex; align-items:center; gap:8px; }
+.searchbox{ width:260px; padding:8px 10px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--text); }
+
+button{ cursor:pointer; border-radius:8px; border:1px solid var(--line); background:var(--btn); color:inherit; padding:8px 10px; }
+button.secondary{ background:var(--btn2); color:var(--muted); }
+button.danger{ background:#3a1010; border-color:#5b1a1a; color:#ffaaaa; }
+:root[data-theme="light"] button.danger{ background:#ffecec; border-color:#f5bcbc; color:#b00020; }
+button:hover{ filter: brightness(1.06); }
+
+.form{ background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px; margin-bottom:12px; }
+.form.collapsed{ display:none; }
+.form label{ display:flex; flex-direction:column; gap:6px; font-size:12px; color:#9bb2da; }
+:root[data-theme="light"] .form label{ color:#295078; }
+.form input, .form select, .form textarea{ width:100%; background:transparent; border:1px solid var(--line); border-radius:8px; padding:8px; color:inherit; }
+
+.table{ width:100%; border-collapse: collapse; background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+.table thead th{ background:#0c1a38; color:#a8c0ec; font-weight:600; text-align:left; font-size:12px; padding:10px; border-bottom:1px solid var(--line); }
+:root[data-theme="light"] .table thead th{ background:#eaf0ff; color:#1f355d; }
+.table thead th[data-sort]{ cursor:pointer; }
+.table thead th[data-sort].asc::after{ content:" ↑"; font-weight:700; }
+.table thead th[data-sort].desc::after{ content:" ↓"; font-weight:700; }
+.table tbody td{ padding:10px; border-bottom:1px solid var(--line); }
+.table tbody tr:hover{ background:#11204a; }
+:root[data-theme="light"] .table tbody tr:hover{ background:#f4f8ff; }
+.table .ro{ color:#9db1d1; background:#0a1630; }
+.selectcol{ width:38px; text-align:center; }
+
+.bulkbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--card); border:1px dashed var(--line); border-radius:10px; padding:8px 10px; margin:8px 0; }
+
+.bad{ color: var(--bad); }
+.ok{ color: var(--ok); }
+.muted{ color: var(--muted); }
+
+/* Hide ID columns globally */
+.col-id{
+  display:none;
+}
+.table thead th.col-id{
+  display:none;
+}
+
+/* Wrapper for no-end-date checkbox */
+.no-date-wrapper{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  margin-top:4px;
+  color:var(--muted);
+}
+.no-date-wrapper input[type=checkbox]{
+  margin:0 4px 0 0;
+}
+
+/* Filter bar */
+.filterbar{ padding:8px 0 2px 0; }
+.filterbar .filters-row, .filterbar .sort-row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:.25rem 0 .5rem 0;}
+.filterbar .chips{ display:flex; gap:6px; flex-wrap:wrap; min-height:20px; margin-bottom:4px;}
+.chip{ background:var(--btn); color:var(--text); border-radius:999px; padding:2px 8px; display:inline-flex; gap:6px; align-items:center; }
+.chip button{ background:none; border:none; color:inherit; cursor:pointer; }
+
+/* Tabs in Params */
+.tabs{ display:flex; gap:8px; margin:12px 0; border-bottom:1px solid var(--line); }
+.tab{ border:none; background:var(--btn2); color:var(--text); padding:6px 10px; border-top-left-radius:6px; border-top-right-radius:6px; cursor:pointer; }
+.tab.active{ background:var(--btn); }
+.tabpanel{ display:none; }
+.tabpanel.show{ display:block; }
+
+/* Gantt */
+.gantt{ border:1px solid var(--line); border-radius:8px; background:var(--card); overflow:auto; }
+.gantt .header{ display:flex; gap:2px; position:sticky; top:0; background:var(--card); padding:6px; border-bottom:1px solid var(--line); z-index:1; }
+.gantt .header .day{ width: var(--gantt-day); height:14px; border:1px solid #0d1a33; background:#0b152d; }
+:root[data-theme="light"] .gantt .header .day{ width: var(--gantt-day); border-color:#d4ddf0; background:#f5f8ff; }
+.gantt .row{ display:flex; align-items:center; gap:4px; padding:4px 6px; border-bottom:1px solid var(--line); position:relative; }
+.gantt .name{ width:240px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.gantt .timeline{ position:relative; height:18px; min-width:1150px; }
+.gantt .bar{ position:absolute; height:14px; border-radius:6px; background:var(--accent); opacity:.9; }
+
+/* Colour coding for Gantt bars based on project status. These classes are applied
+   dynamically in app.js using the status of each project. Feel free to adjust
+   the colours to match your theme. */
+.gantt .bar.status-idea{ background:#9c27b0; }
+.gantt .bar.status-planned{ background:#2196f3; }
+.gantt .bar.status-progress{ background:#4caf50; }
+.gantt .bar.status-blocked{ background:#ff9800; }
+.gantt .bar.status-done{ background:#9e9e9e; }
+.gantt .bar.status-cancelled{ background:#795548; }
+
+/* Mise en évidence des projets à faible énergie. Si la colonne
+   d'énergie d'un projet contient une classe "low-energy", on change
+   la couleur du texte pour attirer l'attention et on applique un fond
+   légèrement accentué afin de signaler qu'une pause structurée est
+   recommandée. */
+.energy-cell.low-energy{
+  color:#ff6b6b;
+  font-weight:bold;
+  background:rgba(255,107,107,0.15);
+}
+
+/* Icône de tendance pour les KPI (flèches de variation) */
+.trend-icon{
+  margin-left:4px;
+  font-size:16px;
+  vertical-align:middle;
+}
+.trend-icon.ok{ color: var(--ok); }
+.trend-icon.bad{ color: var(--bad); }
+.trend-icon.muted{ color: var(--muted); }
+
+/* Mise en évidence des projets en hibernation (faible contribution, énergie faible ou état stagnant).
+   On applique une teinte rose clair sur toute la ligne pour signaler la mise en pause structurée. */
+tr.hibernation{
+  background-color: rgba(255, 186, 186, 0.12);
+}
+.gantt .today{ position:absolute; width:2px; height:100%; background:#ffcf5a; top:0; }
+.gantt .weekend{ position:absolute; top:0; bottom:0; background:linear-gradient(90deg, rgba(255,255,255,.05), rgba(255,255,255,.05)); }
+
+/* Report view */
+#reportView{ display:none; background:white; color:black; padding:16px; }
+#reportView.show{ display:block; }
+
+.toast{ position:fixed; bottom:16px; right:16px; background:rgba(0,0,0,.8); color:white; padding:10px 12px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,.25); }
+:root[data-theme="light"] .toast{ background:rgba(30,30,30,.95); }
+
+/* Cellule de statut cliquable pour les actions (toggle À faire/Fait) */
+.status-toggle{
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Badge pour afficher le score de priorité des actions. Utilisé dans la
+   colonne "Score" des actions pour refléter le résultat du moteur
+   d’auto‑priorisation. */
+.score-badge{
+  display:inline-block;
+  min-width:2rem;
+  padding:0.2rem 0.4rem;
+  border-radius:0.5rem;
+  background:var(--btn);
+  color:var(--text);
+  font-weight:bold;
+  text-align:center;
+  font-size:0.8rem;
+  line-height:1;
+}
+
+/* Loading overlay and spinner for perceived performance */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.loading-overlay[hidden] {
+  display: none;
+}
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 5px solid var(--accent);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive design enhancements */
+@media (max-width: 600px) {
+  .nav { flex-direction: column; }
+  .nav-btn { width: 100%; text-align: left; }
+  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* Transform tables into block layout on small screens */
+  .table thead { display: none; }
+  .table, .table tbody, .table tr, .table td { display: block; width: 100%; }
+  .table tr { margin-bottom: 10px; border-bottom: 1px solid var(--line); }
+  .table td { display: flex; justify-content: space-between; padding: 8px; }
+}
+
+@media print{
+  header, .nav, .footer, .list-header, .form, #view-dashboard, #view-globals, #view-systems, #view-projects, #view-actions, #view-views, #view-params { display:none !important; }
+  #reportView{ display:block !important; }
+  body{ background:white; color:black; }
+  .report{ background:white; border:none; }
+  .table{ background:white; color:black; }
+}
+
+/* Timeline pour le module J.E.U. */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+.timeline .card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--card);
+}
+.timeline .card h4 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  color: var(--accent);
+}
+.timeline .card .meta {
+  font-size: 0.85rem;
+  color: var(--text2);
+  margin-bottom: 6px;
+}
+.timeline .card .field {
+  margin-bottom: 4px;
+}
+.timeline .card .field strong {
+  color: var(--text);
+}
+
+/* ===================================================== */
+/* Options avancées pour formulaires
+   Les sections avancées sont masquées par défaut via l'attribut hidden.
+   Les boutons .toggle-advanced permettent de les afficher/replier. */
+.advanced-options[hidden] {
+  display: none !important;
+}
+.toggle-advanced {
+  margin: 0.5em 0;
+  padding: 0.25em 0.6em;
+  font-size: 0.88rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.toggle-advanced.secondary {
+  background: var(--btn-bg, #1f2937);
+  color: var(--btn-text, #a5b4fc);
+  border: 1px solid var(--btn-border, #374151);
+}
+
+/* Elements with the hidden class are not displayed. Used to hide nav buttons when
+   grouping under the Objet menu. */
+.hidden {
+  display: none !important;
+}
+
+/* Boutons de sélection de mode pour les routines (vue quotidienne).
+   On force l’affichage en ligne pour éviter qu’ils ne se superposent verticalement,
+   et on ajuste la taille et les marges pour qu’ils tiennent dans une seule cellule. */
+#tblViewRoutineToday button.mode-btn {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  padding: 4px;
+  margin-right: 4px;
+  text-align: center;
+}
+#tblViewRoutineToday button.mode-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Mise en forme des étapes de gating dans la section Action‑First. Chaque étape
+   est affichée verticalement avec un numéro gras à gauche et le libellé
+   aligné sur la même ligne. */
+.gating-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.gating-step .step {
+  font-weight: bold;
+  margin-right: 4px;
+}
+
+/* Styling for the sub-navigation displayed when the Objet tab is active. This
+   horizontal menu appears below the main navigation bar and lets the user
+   switch between globaux, systèmes, projets, actions et routines. */
+.subnav {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+}
+.subnav-btn {
+  background: none;
+  border: none;
+  color: var(--text);
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+}
+.subnav-btn[aria-pressed="true"] {
+  font-weight: bold;
+  border-bottom: 2px solid var(--accent);
+}
+.subnav.hidden {
+  display: none;
+}

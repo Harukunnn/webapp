@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Journal d’Évolution Universel</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">📘 J.E.U.</div>
+    <nav class="nav">
+      <a class="nav-btn" href="index.html">← Retour au tableau de bord</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Journal d’Évolution Universel</h1>
+    <div class="list-header">
+      <div class="right">
+        <button id="btnJEUNewStandalone">➕ Nouveau commit</button>
+        <button id="btnJEUReportStandalone">📘 Générer bibliothèque</button>
+      </div>
+    </div>
+    <div id="jeuTimeline" class="timeline"></div>
+    <form id="formJEUStandalone" class="form collapsed" aria-label="Formulaire JEU">
+      <h3 id="titleJEUForm2">Nouveau commit J.E.U.</h3>
+      <div class="grid grid-2">
+        <label>Date<input type="date" name="date" required /></label>
+        <label>Projet<input name="projet" /></label>
+        <label>Décision<textarea name="decision" rows="2" required></textarea></label>
+        <label>Cause<textarea name="cause" rows="2" required></textarea></label>
+        <label>Impact<textarea name="impact" rows="2" required></textarea></label>
+        <label>Correctif<textarea name="correctif" rows="2" required></textarea></label>
+        <label>Leçon<textarea name="lecon" rows="2" required></textarea></label>
+        <label>Énergie (1–10)<input type="number" name="energie" min="1" max="10" step="1" value="10" required /></label>
+        <label>Lien commit<input type="text" name="lien_commit" /></label>
+      </div>
+      <div class="form-actions">
+        <button type="submit">💾 Enregistrer</button>
+        <button type="button" class="secondary" id="cancelJEUStandalone">Annuler</button>
+      </div>
+    </form>
+  </main>
+  <script src="jeu.js?v=3.4.17"></script>
+  <script>
+    // Quelques binding spécifiques pour la page standalone
+    document.addEventListener('DOMContentLoaded', () => {
+      const btnNew = document.getElementById('btnJEUNewStandalone');
+      const btnReport = document.getElementById('btnJEUReportStandalone');
+      const form = document.getElementById('formJEUStandalone');
+      const cancel = document.getElementById('cancelJEUStandalone');
+      btnNew?.addEventListener('click', () => {
+        form.classList.remove('collapsed');
+      });
+      btnReport?.addEventListener('click', () => {
+        if (window.generateMetaReport) window.generateMetaReport();
+      });
+      cancel?.addEventListener('click', () => {
+        form.reset();
+        form.classList.add('collapsed');
+      });
+      form?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const fd = new FormData(form);
+        const entry = {
+          date: fd.get('date'),
+          projet: fd.get('projet'),
+          decision: fd.get('decision'),
+          cause: fd.get('cause'),
+          impact: fd.get('impact'),
+          correctif: fd.get('correctif'),
+          lecon: fd.get('lecon'),
+          energie: Number(fd.get('energie')),
+          lien_commit: fd.get('lien_commit')
+        };
+        window.addCommitJEU && window.addCommitJEU(entry);
+        form.reset();
+        form.classList.add('collapsed');
+      });
+      // Initialiser timeline
+      window.renderJEUView && window.renderJEUView();
+    });
+  </script>
+</body>
+</html>
