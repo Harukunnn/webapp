@@ -78,7 +78,7 @@ const APP_VERSION = '3.5.0';
   //  - time: 'today' | '7d' | '30d' | 'all'
   //  - project: id du projet ou 'all'
   //  - owner: nom du collaborateur ou 'all'
-  const dashboardFilters = { time:'all', project:'all', owner:'all' };
+  const dashboardFilters = { preset:'all', start:'', end:'', project:'all', owner:'all' };
 
   // ---------- IndexedDB ----------
   function openDB(){
@@ -460,8 +460,20 @@ const APP_VERSION = '3.5.0';
   }
 
   // ---------- State ----------
-  let theme = (localStorage.getItem('theme') || 'dark');
-  document.documentElement.setAttribute('data-theme', theme);
+  const THEME_MODES = ['auto','dark','light','contrast'];
+  let themeMode = localStorage.getItem('themeMode') || 'auto';
+  function applyTheme(mode){
+    if (!THEME_MODES.includes(mode)) mode = 'auto';
+    themeMode = mode;
+    document.documentElement.setAttribute('data-theme', mode);
+    if (mode === 'auto'){
+      const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+      document.documentElement.setAttribute('data-theme-actual', prefersLight ? 'light' : 'dark');
+    } else {
+      document.documentElement.setAttribute('data-theme-actual', mode);
+    }
+  }
+  applyTheme(themeMode);
   let timerInterval = null;
   let timerDeadline = 0;
   let timerRemainingMs = 0;
@@ -481,9 +493,9 @@ const APP_VERSION = '3.5.0';
     await seedIfEmpty();
     await autoSnapshotDaily();
     bindNav();
-    // Attacher les gestionnaires des sous-menus après avoir relié la navigation principale
-    bindObjectSubnav();
-    bindReviewSubnav();
+    enhanceNavDrawer();
+    initStatusBadge();
+    bindNotifications();
     bindTheme();
     bindPrivacy();
     bindForms();
@@ -495,6 +507,8 @@ const APP_VERSION = '3.5.0';
     bindAccentForm();
     // Attacher les liens interactifs pour les KPI du dashboard
     bindDashboardLinks();
+    enhanceDashboardPanels();
+    enhanceForms();
 
     // Initialiser les filtres du dashboard (projets, responsables) une fois que la base est ouverte
     await populateDashboardFilters();
@@ -509,18 +523,14 @@ const APP_VERSION = '3.5.0';
     if (btnRep){
       btnRep.addEventListener('click', () => { downloadFullReport(); });
     }
-    // Appliquer les filtres sauvegardés aux listes déroulantes
-    const selTime = document.getElementById('filterTime');
-    const selProj = document.getElementById('filterProject');
-    const selOwner = document.getElementById('filterOwner');
-    if (selTime && dashboardFilters.time) selTime.value = dashboardFilters.time;
-    if (selProj && dashboardFilters.project) selProj.value = dashboardFilters.project;
-    if (selOwner && dashboardFilters.owner) selOwner.value = dashboardFilters.owner;
-    // Attacher les boutons d’application/réinitialisation des filtres
+    syncDashboardFilterUi();
+    initFilterPresets();
     const btnApply = document.getElementById('btnApplyFilters');
     const btnReset = document.getElementById('btnResetFilters');
+    const btnSaveView = document.getElementById('btnSaveDashboardView');
     if (btnApply) btnApply.addEventListener('click', applyDashboardFilters);
     if (btnReset) btnReset.addEventListener('click', resetDashboardFilters);
+    if (btnSaveView) btnSaveView.addEventListener('click', saveDashboardView);
 
     // Activer les boutons de réduction des panneaux du dashboard
     document.querySelectorAll('#view-dashboard .panel .collapse-btn').forEach(btn => {
@@ -543,11 +553,10 @@ const APP_VERSION = '3.5.0';
     // Mettre à jour dynamiquement la version affichée dans l'entête pour qu'elle corresponde
     // à APP_VERSION. Cela évite de devoir modifier manuellement index.html à chaque
     // changement de version. Si l'élément .brand existe, on remplace son texte.
-    const brandEl = document.querySelector('.brand');
-    if (brandEl) {
-      const offline = brandEl.textContent.includes('(offline)');
-      brandEl.textContent = `📈 Klaro — v${APP_VERSION} ${offline ? '(offline)' : ''}`;
-    }
+    const brandTitle = document.querySelector('.brand-title');
+    const brandVersion = document.querySelector('.brand-version');
+    if (brandTitle) brandTitle.textContent = APP_NAME;
+    if (brandVersion) brandVersion.textContent = `Planificateur v${APP_VERSION}`;
 
     // Mettre à jour le titre du document avec la version actuelle. Lors du changement de vue,
     // showView() ajoutera le nom de la vue après le tiret.
@@ -603,124 +612,200 @@ const APP_VERSION = '3.5.0';
   }
 
   // ---------- Navigation & Theme & Privacy ----------
-  function bindNav(){ $$('.nav-btn').forEach(b => b.addEventListener('click', () => showView(b.dataset.nav))); }
+  const OBJECT_VIEWS = ['globals','systems','projects','actions','routines','archives'];
+  const REVIEW_VIEWS = ['redteam'];
+  const NAV_VISIT_KEY = 'klaro:navVisited';
+  const PANEL_STATE_KEY = 'klaro:panelState';
+  const navVisited = loadVisitedNav();
+  const panelState = loadPanelState();
 
-  // Sous-menu objet : gérer les clics sur les sous-onglets (globaux, systèmes, projets,
-  // actions, routines). Cette fonction affiche la vue correspondante tout en laissant
-  // actif le bouton principal "Objet" et en mettant à jour l'état du sous-menu.
-  function bindObjectSubnav(){
-    const subnav = document.getElementById('objectSubnav');
-    if (!subnav) return;
-    subnav.querySelectorAll('.subnav-btn').forEach(btn => {
+  function bindNav(){
+    document.querySelectorAll('.nav-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const target = btn.dataset.subview;
-        // Afficher la vue correspondante via showView
-        showView(target);
-        // Laisser l'onglet principal "Objet" actif
-        const navObjs = document.querySelectorAll('.nav-btn');
-        navObjs.forEach(nb => {
-          if (nb.dataset.nav === 'objects'){
-            nb.classList.add('active');
-            nb.setAttribute('aria-pressed','true');
-          } else if (nb.dataset.nav === target){
-            // Ne pas marquer l'onglet spécifique comme actif dans le menu principal
-            nb.classList.remove('active');
-            nb.setAttribute('aria-pressed','false');
-          }
-        });
-        // Mettre à jour l'état des boutons du sous-menu
-        subnav.querySelectorAll('.subnav-btn').forEach(b => {
-          const on = b === btn;
-          b.setAttribute('aria-pressed', String(on));
-        });
-        // Veiller à ce que le sous-menu reste visible
-        subnav.classList.remove('hidden');
+        if (!btn.dataset.nav) return;
+        showView(btn.dataset.nav);
       });
+      btn.addEventListener('animationend', () => btn.classList.remove('pulse'));
     });
+    applyVisitedState();
   }
 
-  // Sous-menu review : gérer les clics sur le sous-onglet Red-Team.
-  function bindReviewSubnav(){
-    const subnav = document.getElementById('reviewSubnav');
-    if (!subnav) return;
-    subnav.querySelectorAll('.subnav-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const target = btn.dataset.review;
-        // Afficher la vue correspondante
-        showView(target);
-        // Laisser l'onglet principal "Review" actif
-        document.querySelectorAll('.nav-btn').forEach(nb => {
-          if (nb.dataset.nav === 'review'){
-            nb.classList.add('active');
-            nb.setAttribute('aria-pressed','true');
-          } else if (nb.dataset.nav === target){
-            nb.classList.remove('active');
-            nb.setAttribute('aria-pressed','false');
-          }
-        });
-        // Mettre à jour l'état des boutons du sous-menu
-        subnav.querySelectorAll('.subnav-btn').forEach(b => {
-          const on = b === btn;
-          b.setAttribute('aria-pressed', String(on));
-        });
-        subnav.classList.remove('hidden');
+  function enhanceNavDrawer(){
+    bindDrawerButtons();
+    document.body.classList.add('sidebar-expanded');
+    const toggle = document.getElementById('btnSettings');
+    if (toggle){
+      toggle.addEventListener('dblclick', () => {
+        document.body.classList.toggle('sidebar-collapsed');
       });
-    });
-  }
-  function showView(name){
-    // Gérer l'affichage des vues et le menu principal. Si l'onglet "Objet" est
-    // sélectionné, nous affichons la sous‑navigation et basculons par défaut
-    // sur la vue des objectifs globaux. Sinon, nous masquons la sous‑navigation.
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('show'));
-    const subnavObj = document.getElementById('objectSubnav');
-    const subnavRev = document.getElementById('reviewSubnav');
-    if (name === 'objects'){
-      // Par défaut, afficher la vue Globaux lorsque l'on clique sur Objet
-      const def = document.getElementById('view-globals');
-      if (def) def.classList.add('show');
-      if (subnavObj) subnavObj.classList.remove('hidden');
-      if (subnavRev) subnavRev.classList.add('hidden');
-      // Activer le premier bouton du sous-menu Objet
-      if (subnavObj) subnavObj.querySelectorAll('.subnav-btn').forEach((b,i) => {
-        const active = (i===0);
-        b.setAttribute('aria-pressed', String(active));
-      });
-    } else if (name === 'review'){
-      // Afficher par défaut la vue RedTeam
-      const def = document.getElementById('view-redteam');
-      if (def) def.classList.add('show');
-      if (subnavRev) subnavRev.classList.remove('hidden');
-      if (subnavObj) subnavObj.classList.add('hidden');
-      // Activer le premier bouton du sous-menu Review
-      if (subnavRev) subnavRev.querySelectorAll('.subnav-btn').forEach((b,i) => {
-        const active = (i===0);
-        b.setAttribute('aria-pressed', String(active));
-      });
-    } else {
-      // Afficher la vue correspondante et masquer les sous-menus
-      const view = document.getElementById('view-'+name);
-      if (view) view.classList.add('show');
-      if (subnavObj) subnavObj.classList.add('hidden');
-      if (subnavRev) subnavRev.classList.add('hidden');
     }
-    // Mettre à jour l'état des boutons de navigation principaux
-    document.querySelectorAll('.nav-btn').forEach(b => {
-      const on = (b.dataset.nav===name);
-      b.classList.toggle('active', on);
-      b.setAttribute('aria-pressed', String(on));
+  }
+
+  function bindDrawerButtons(){
+    document.querySelectorAll('#objectDrawer .subnav-btn').forEach(btn => {
+      btn.addEventListener('click', () => showView(btn.dataset.subview));
     });
-    // Mettre à jour le titre de la page
+    document.querySelectorAll('#reviewDrawer .subnav-btn').forEach(btn => {
+      btn.addEventListener('click', () => showView(btn.dataset.review));
+    });
+  }
+
+  function toggleDrawer(source){
+    const drawer = document.getElementById('navDrawer');
+    if (!drawer) return;
+    drawer.querySelectorAll('.drawer-panel').forEach(panel => {
+      const isSource = panel.dataset.source === source;
+      panel.classList.toggle('visible', isSource);
+    });
+    drawer.classList.toggle('open', Boolean(source));
+  }
+
+  function highlightDrawerButtons(panelId, target){
+    const panel = document.getElementById(panelId);
+    if (!panel) return;
+    panel.querySelectorAll('.subnav-btn').forEach(btn => {
+      const key = btn.dataset.subview || btn.dataset.review;
+      const active = key === target;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', String(active));
+    });
+  }
+
+  function loadVisitedNav(){
+    try {
+      const raw = JSON.parse(localStorage.getItem(NAV_VISIT_KEY) || '[]');
+      if (Array.isArray(raw)) return new Set(raw);
+    } catch(e){}
+    return new Set();
+  }
+
+  function persistVisitedNav(){
+    try{ localStorage.setItem(NAV_VISIT_KEY, JSON.stringify(Array.from(navVisited))); }catch(e){}
+  }
+
+  function loadPanelState(){
+    try{
+      const raw = JSON.parse(localStorage.getItem(PANEL_STATE_KEY) || '{}');
+      if (raw && typeof raw === 'object') return raw;
+    }catch(e){}
+    return {};
+  }
+
+  function persistPanelState(){
+    try{ localStorage.setItem(PANEL_STATE_KEY, JSON.stringify(panelState)); }catch(e){}
+  }
+
+  function markNavVisited(view){
+    if (!view) return;
+    navVisited.add(view);
+    persistVisitedNav();
+  }
+
+  function applyVisitedState(){
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      const nav = btn.dataset.nav;
+      const visited = navVisited.has(nav) || (nav === 'objects' && OBJECT_VIEWS.some(v => navVisited.has(v)));
+      btn.dataset.visited = visited ? 'true' : 'false';
+    });
+  }
+
+  function updateNavProgress(activeView){
+    markNavVisited(activeView);
+    const total = document.querySelectorAll('.nav-btn:not(.hidden)').length || 1;
+    const ratio = Math.min(1, navVisited.size / total);
+    document.documentElement.style.setProperty('--nav-progress-ratio', ratio.toFixed(2));
+    applyVisitedState();
+    const activeBtn = Array.from(document.querySelectorAll('.nav-btn')).find(btn => btn.classList.contains('active'));
+    if (activeBtn){
+      activeBtn.classList.add('pulse');
+      activeBtn.style.setProperty('--nav-progress', '100%');
+    }
+  }
+
+  function updateDocumentTitle(requested, actual){
     try{
       const baseTitle = (document.title.split(' — ')[0] || 'Klaro');
-      if (name === 'objects'){
-        document.title = baseTitle + ' — Objet';
-      } else {
-        document.title = baseTitle + ' — ' + name.charAt(0).toUpperCase()+name.slice(1);
-      }
+      let label = actual;
+      if (requested === 'objects') label = 'Objet';
+      else if (requested === 'review') label = 'Review';
+      else label = actual.charAt(0).toUpperCase()+actual.slice(1);
+      document.title = `${baseTitle} — ${label}`;
     }catch(e){}
-    if (typeof refreshView==='function') refreshView(name);
   }
-  function bindTheme(){ $('#btnTheme').addEventListener('click', () => { theme = (theme==='dark'?'light':'dark'); document.documentElement.setAttribute('data-theme', theme); localStorage.setItem('theme', theme); }); }
+
+  function showView(name){
+    const isObject = name === 'objects' || OBJECT_VIEWS.includes(name);
+    const isReview = name === 'review' || REVIEW_VIEWS.includes(name);
+    let actual = name;
+    if (isObject && name === 'objects') actual = 'globals';
+    if (isReview && name === 'review') actual = 'redteam';
+    if (isObject && OBJECT_VIEWS.includes(name)) actual = name;
+    if (isReview && REVIEW_VIEWS.includes(name)) actual = name;
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('show'));
+    const view = document.getElementById('view-' + actual);
+    if (view) view.classList.add('show');
+    toggleDrawer(isObject ? 'objects' : isReview ? 'review' : '');
+    highlightDrawerButtons('objectDrawer', isObject ? (OBJECT_VIEWS.includes(name) ? name : 'globals') : '');
+    highlightDrawerButtons('reviewDrawer', isReview ? actual : '');
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      const nav = btn.dataset.nav;
+      const active = isObject ? nav === 'objects' : isReview ? nav === 'review' : nav === name;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', String(active));
+    });
+    updateNavProgress(actual);
+    updateDocumentTitle(name, actual);
+    if (typeof refreshView==='function') refreshView(actual);
+  }
+
+  function initStatusBadge(){
+    const badge = document.getElementById('statusBadge');
+    if (!badge) return;
+    const text = badge.querySelector('.status-text');
+    const dot = badge.querySelector('.dot');
+    const applyState = () => {
+      const online = navigator.onLine;
+      badge.classList.toggle('online', online);
+      badge.classList.toggle('offline', !online);
+      if (dot) dot.classList.toggle('pulse', online);
+      if (text) text.textContent = online ? 'En ligne' : 'Hors ligne';
+      badge.setAttribute('data-state', online ? 'online' : 'offline');
+    };
+    applyState();
+    window.addEventListener('online', applyState);
+    window.addEventListener('offline', applyState);
+  }
+
+  function bindNotifications(){
+    const btn = document.getElementById('btnNotifications');
+    if (!btn) return;
+    btn.addEventListener('click', () => {
+      showToast('Centre de notifications bientôt disponible');
+      btn.classList.remove('has-alert');
+      const badge = btn.querySelector('.badge');
+      if (badge) badge.textContent = '0';
+    });
+  }
+  function bindTheme(){
+    const btn = document.getElementById('btnTheme');
+    if (!btn) return;
+    const updateLabel = () => {
+      const labels = { auto:'Auto', dark:'Nuit', light:'Jour', contrast:'Contraste' };
+      btn.dataset.mode = themeMode;
+      btn.setAttribute('aria-label', `Thème : ${labels[themeMode] || themeMode}`);
+      btn.title = `Thème : ${labels[themeMode] || themeMode}`;
+    };
+    updateLabel();
+    btn.addEventListener('click', () => {
+      const idx = THEME_MODES.indexOf(themeMode);
+      const next = THEME_MODES[(idx + 1) % THEME_MODES.length];
+      applyTheme(next);
+      updateLabel();
+      localStorage.setItem('themeMode', themeMode);
+    });
+    const mq = window.matchMedia('(prefers-color-scheme: light)');
+    mq.addEventListener('change', () => { if (themeMode === 'auto') applyTheme('auto'); });
+  }
   function bindPrivacy(){ $('#btnPrivacy').addEventListener('click', async ()=> { await setPrivacyState(privacy==='on'?'off':'on'); showToast(privacy==='on'?'Confidentialité ON':'Confidentialité OFF'); refreshAll(); }); }
 
   // ---------- Forms & Tables ----------
@@ -1388,42 +1473,505 @@ const APP_VERSION = '3.5.0';
     });
   }
 
-  /**
-   * Applique les filtres sélectionnés dans la barre de filtres et rafraîchit
-   * le tableau de bord. Les valeurs sont conservées dans l'objet
-   * dashboardFilters pour être utilisées par refreshDashboard().
-   */
-  function applyDashboardFilters(){
-    const selTime = document.getElementById('filterTime');
-    const selProj = document.getElementById('filterProject');
-    const selOwner = document.getElementById('filterOwner');
-    if (selTime) dashboardFilters.time = selTime.value || 'all';
-    if (selProj) dashboardFilters.project = selProj.value || 'all';
-    if (selOwner) dashboardFilters.owner = selOwner.value || 'all';
-    // Sauvegarder dans localStorage pour mémoire persistante
+  function persistDashboardFilters(){
     try{
       localStorage.setItem('klaro:dashboardFilters', JSON.stringify(dashboardFilters));
     }catch(e){}
+  }
+
+  function formatDateLabel(value){
+    if (!value) return '';
+    try{
+      return new Date(value).toLocaleDateString();
+    }catch(e){
+      return value;
+    }
+  }
+
+  function updatePresetButtons(){
+    document.querySelectorAll('#dashFilters .preset').forEach(btn => {
+      const active = btn.dataset.preset === dashboardFilters.preset;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', String(active));
+    });
+  }
+
+  function renderFilterChips(){
+    const wrap = document.getElementById('filterChips');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    const chips = [];
+    const presetLabels = { today:"Aujourd'hui", '7d':'7 jours', '30d':'30 jours', all:'Toutes périodes', custom:'Personnalisé' };
+    if (dashboardFilters.preset && dashboardFilters.preset !== 'all'){
+      chips.push({ key:'preset', label:`Période : ${presetLabels[dashboardFilters.preset] || dashboardFilters.preset}` });
+    }
+    if (dashboardFilters.preset === 'custom'){
+      if (dashboardFilters.start) chips.push({ key:'start', label:`Du ${formatDateLabel(dashboardFilters.start)}` });
+      if (dashboardFilters.end) chips.push({ key:'end', label:`Au ${formatDateLabel(dashboardFilters.end)}` });
+    }
+    if (dashboardFilters.project && dashboardFilters.project !== 'all'){
+      const projSel = document.getElementById('filterProject');
+      const label = projSel ? projSel.options[projSel.selectedIndex]?.textContent || dashboardFilters.project : dashboardFilters.project;
+      chips.push({ key:'project', label:`Projet : ${label}` });
+    }
+    if (dashboardFilters.owner && dashboardFilters.owner !== 'all'){
+      const ownerSel = document.getElementById('filterOwner');
+      const label = ownerSel ? ownerSel.options[ownerSel.selectedIndex]?.textContent || dashboardFilters.owner : dashboardFilters.owner;
+      chips.push({ key:'owner', label:`Resp. : ${label}` });
+    }
+    if (!chips.length){
+      const span = document.createElement('span');
+      span.className = 'chip ghost';
+      span.textContent = 'Aucun filtre actif';
+      wrap.appendChild(span);
+      return;
+    }
+    chips.forEach(({key,label}) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chip';
+      btn.dataset.chip = key;
+      btn.innerHTML = `<span>${label}</span><span aria-hidden="true">×</span>`;
+      wrap.appendChild(btn);
+    });
+  }
+
+  function initFilterChipActions(){
+    const wrap = document.getElementById('filterChips');
+    if (!wrap || wrap.dataset.bound) return;
+    wrap.dataset.bound = '1';
+    wrap.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-chip]');
+      if (!btn) return;
+      const key = btn.dataset.chip;
+      if (key === 'preset'){
+        setDashboardPreset('all');
+      } else if (key === 'start'){
+        dashboardFilters.start = '';
+        dashboardFilters.preset = 'custom';
+      } else if (key === 'end'){
+        dashboardFilters.end = '';
+        dashboardFilters.preset = 'custom';
+      } else if (key === 'project'){
+        dashboardFilters.project = 'all';
+      } else if (key === 'owner'){
+        dashboardFilters.owner = 'all';
+      }
+      syncDashboardFilterUi();
+      persistDashboardFilters();
+      refreshDashboard();
+    });
+  }
+
+  function syncDashboardFilterUi(){
+    const startInput = document.getElementById('filterStart');
+    const endInput = document.getElementById('filterEnd');
+    const selProj = document.getElementById('filterProject');
+    const selOwner = document.getElementById('filterOwner');
+    if (startInput && startInput.value !== (dashboardFilters.start || '')) startInput.value = dashboardFilters.start || '';
+    if (endInput && endInput.value !== (dashboardFilters.end || '')) endInput.value = dashboardFilters.end || '';
+    if (selProj && selProj.value !== (dashboardFilters.project || 'all')) selProj.value = dashboardFilters.project || 'all';
+    if (selOwner && selOwner.value !== (dashboardFilters.owner || 'all')) selOwner.value = dashboardFilters.owner || 'all';
+    updatePresetButtons();
+    initFilterChipActions();
+    renderFilterChips();
+    const dashFiltersEl = document.getElementById('dashFilters');
+    if (dashFiltersEl) initFloatingLabels(dashFiltersEl);
+  }
+
+  function setDashboardPreset(preset){
+    dashboardFilters.preset = preset;
+    if (preset !== 'custom'){
+      const base = today();
+      if (preset === 'today'){
+        dashboardFilters.start = fmtDate(base);
+        dashboardFilters.end = fmtDate(base);
+      } else if (preset === '7d'){
+        dashboardFilters.start = fmtDate(base);
+        dashboardFilters.end = fmtDate(dateAddDays(base, 7));
+      } else if (preset === '30d'){
+        dashboardFilters.start = fmtDate(base);
+        dashboardFilters.end = fmtDate(dateAddDays(base, 30));
+      } else if (preset === 'all'){
+        dashboardFilters.start = '';
+        dashboardFilters.end = '';
+      }
+    }
+    syncDashboardFilterUi();
+  }
+
+  function initFilterPresets(){
+    document.querySelectorAll('#dashFilters .preset').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const preset = btn.dataset.preset;
+        if (!preset) return;
+        setDashboardPreset(preset);
+        persistDashboardFilters();
+        refreshDashboard();
+      });
+    });
+    const startInput = document.getElementById('filterStart');
+    const endInput = document.getElementById('filterEnd');
+    [startInput, endInput].forEach(inp => {
+      if (!inp) return;
+      inp.addEventListener('change', () => {
+        dashboardFilters.preset = 'custom';
+        applyDashboardFilters();
+      });
+    });
+    initFilterChipActions();
+  }
+
+  function applyDashboardFilters(){
+    const startInput = document.getElementById('filterStart');
+    const endInput = document.getElementById('filterEnd');
+    const selProj = document.getElementById('filterProject');
+    const selOwner = document.getElementById('filterOwner');
+    if (startInput) dashboardFilters.start = startInput.value || '';
+    if (endInput) dashboardFilters.end = endInput.value || '';
+    if (selProj) dashboardFilters.project = selProj.value || 'all';
+    if (selOwner) dashboardFilters.owner = selOwner.value || 'all';
+    if (dashboardFilters.start || dashboardFilters.end) dashboardFilters.preset = 'custom';
+    persistDashboardFilters();
+    syncDashboardFilterUi();
     refreshDashboard();
   }
 
-  /**
-   * Réinitialise les filtres de dashboard et déclenche un rafraîchissement.
-   */
   function resetDashboardFilters(){
-    dashboardFilters.time = 'all';
+    setDashboardPreset('all');
     dashboardFilters.project = 'all';
     dashboardFilters.owner = 'all';
-    const selTime = document.getElementById('filterTime');
-    const selProj = document.getElementById('filterProject');
-    const selOwner = document.getElementById('filterOwner');
-    if (selTime) selTime.value = 'all';
-    if (selProj) selProj.value = 'all';
-    if (selOwner) selOwner.value = 'all';
-    try{
-      localStorage.setItem('klaro:dashboardFilters', JSON.stringify(dashboardFilters));
-    }catch(e){}
+    syncDashboardFilterUi();
+    persistDashboardFilters();
     refreshDashboard();
+  }
+
+  function saveDashboardView(){
+    const name = prompt('Nom de la vue à enregistrer ?');
+    if (!name) return;
+    const key = 'klaro:dashboardViews';
+    let views = {};
+    try{
+      const raw = JSON.parse(localStorage.getItem(key) || '{}');
+      if (raw && typeof raw === 'object') views = raw;
+    }catch(e){}
+    views[name] = Object.assign({}, dashboardFilters);
+    try{ localStorage.setItem(key, JSON.stringify(views)); }catch(e){}
+    showToast('Vue enregistrée');
+  }
+
+  function updatePanelSummary(id, text){
+    const el = document.getElementById(`summary-${id}`);
+    if (el) el.textContent = text;
+  }
+
+  function updatePanelInsights(id, items){
+    const list = document.getElementById(`insights-${id}`);
+    if (!list) return;
+    list.innerHTML = '';
+    if (!items || !items.length){
+      const li = document.createElement('li');
+      li.className = 'muted';
+      li.textContent = 'Aucun insight disponible.';
+      list.appendChild(li);
+      return;
+    }
+    items.forEach(text => {
+      const li = document.createElement('li');
+      li.textContent = text;
+      list.appendChild(li);
+    });
+  }
+
+  function enhanceDashboardPanels(){
+    const panels = document.querySelectorAll('#view-dashboard .panel');
+    panels.forEach(panel => {
+      if (panel.dataset.enhanced) return;
+      const heading = panel.querySelector('h2');
+      if (!heading) return;
+      panel.dataset.enhanced = '1';
+      const titleText = (heading.childNodes[0]?.textContent || heading.textContent || '').trim();
+      const slug = panel.dataset.panelId || titleText.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+      panel.dataset.panelId = slug || `panel-${Math.random().toString(36).slice(2,8)}`;
+      const nodes = Array.from(panel.children).filter(el => el !== heading);
+      panel.textContent = '';
+
+      const head = document.createElement('header');
+      head.className = 'panel-head';
+      const textWrap = document.createElement('div');
+      textWrap.className = 'panel-heading-text';
+      const titleEl = document.createElement('h2');
+      titleEl.textContent = titleText;
+      const summary = document.createElement('p');
+      summary.className = 'panel-summary';
+      summary.id = `summary-${panel.dataset.panelId}`;
+      summary.textContent = 'Synthèse en cours…';
+      textWrap.appendChild(titleEl);
+      textWrap.appendChild(summary);
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'panel-toggle';
+      toggle.setAttribute('aria-label', 'Replier le panneau');
+      toggle.innerHTML = '<span class="chevron" aria-hidden="true"></span>';
+      head.appendChild(textWrap);
+      head.appendChild(toggle);
+      panel.appendChild(head);
+
+      const chartNodes = [];
+      const tableNodes = [];
+      const miscNodes = [];
+      nodes.forEach(node => {
+        if (node.matches('table, .table, .table-wrapper')) tableNodes.push(node);
+        else if (node.matches('canvas, .grid, .gantt, .chart-shell, .legend-floating')) chartNodes.push(node);
+        else miscNodes.push(node);
+      });
+      if (miscNodes.length){ chartNodes.push(...miscNodes); }
+
+      const tabs = document.createElement('div');
+      tabs.className = 'panel-tabs';
+      tabs.setAttribute('role','tablist');
+      const body = document.createElement('div');
+      body.className = 'panel-body';
+
+      const panes = new Map();
+      const createPane = (key,label,nodesList,placeholder) => {
+        const pane = document.createElement('section');
+        pane.className = 'panel-pane';
+        pane.dataset.tab = key;
+        pane.setAttribute('role','tabpanel');
+        if (nodesList.length){
+          nodesList.forEach(n => pane.appendChild(n));
+        } else if (placeholder){
+          const msg = document.createElement('p');
+          msg.className = 'muted';
+          msg.textContent = placeholder;
+          pane.appendChild(msg);
+        }
+        panes.set(key, pane);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'panel-tab';
+        btn.dataset.tab = key;
+        btn.textContent = label;
+        btn.setAttribute('role','tab');
+        tabs.appendChild(btn);
+        return pane;
+      };
+
+      const chartPane = createPane('chart', 'Graphique', chartNodes, 'Aucune donnée graphique.');
+      const tablePane = createPane('table', 'Tableau', tableNodes, 'Aucun tableau disponible.');
+      const insightsPane = createPane('insights', 'Insights', [], 'Les insights seront générés automatiquement.');
+      const insightList = document.createElement('ul');
+      insightList.className = 'insight-list';
+      insightList.id = `insights-${panel.dataset.panelId}`;
+      const insightPlaceholder = document.createElement('li');
+      insightPlaceholder.className = 'muted';
+      insightPlaceholder.textContent = 'Synchronisez le dashboard pour générer des insights.';
+      insightList.appendChild(insightPlaceholder);
+      insightsPane.appendChild(insightList);
+
+      panes.forEach(pane => body.appendChild(pane));
+      panel.appendChild(tabs);
+      panel.appendChild(body);
+
+      const state = panelState[panel.dataset.panelId] || {};
+      panelState[panel.dataset.panelId] = state;
+      if (state.collapsed) panel.classList.add('collapsed');
+      const applyExpanded = () => {
+        toggle.setAttribute('aria-expanded', String(!panel.classList.contains('collapsed')));
+      };
+      applyExpanded();
+      toggle.addEventListener('click', () => {
+        panel.classList.toggle('collapsed');
+        state.collapsed = panel.classList.contains('collapsed');
+        applyExpanded();
+        persistPanelState();
+      });
+
+      const tabButtons = Array.from(tabs.querySelectorAll('.panel-tab'));
+      const activateTab = (key) => {
+        tabButtons.forEach(btn => {
+          const on = btn.dataset.tab === key;
+          btn.classList.toggle('active', on);
+          btn.setAttribute('aria-selected', String(on));
+          const pane = panes.get(btn.dataset.tab);
+          if (pane){
+            pane.classList.toggle('show', on);
+            pane.hidden = !on;
+          }
+        });
+        state.tab = key;
+        persistPanelState();
+      };
+      tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => activateTab(btn.dataset.tab));
+      });
+      const initialTab = state.tab && panes.has(state.tab) ? state.tab : 'chart';
+      activateTab(initialTab);
+      if (tabButtons.length <= 1){
+        tabs.classList.add('single');
+        tabs.setAttribute('aria-hidden','true');
+      }
+    });
+  }
+
+  function applyFieldError(field, message){
+    const container = field.closest('label, .field');
+    if (!container) return;
+    container.classList.add('has-error');
+    let msg = container.querySelector('.field-msg');
+    if (!msg){
+      msg = document.createElement('span');
+      msg.className = 'field-msg';
+      container.appendChild(msg);
+    }
+    msg.textContent = message || '';
+  }
+
+  function clearFieldError(field){
+    const container = field.closest('label, .field');
+    if (!container) return;
+    container.classList.remove('has-error');
+    const msg = container.querySelector('.field-msg');
+    if (msg) msg.textContent = '';
+  }
+
+  function updateFormProgress(form){
+    const required = Array.from(form.querySelectorAll('[required]')).filter(el => el.type !== 'hidden');
+    if (!required.length) return;
+    const completed = required.filter(el => !!el.value).length;
+    let meter = form.querySelector('.form-progress');
+    if (!meter){
+      meter = document.createElement('div');
+      meter.className = 'form-progress';
+      meter.innerHTML = '<div class="form-progress-bar"></div><span class="form-progress-label"></span>';
+      form.insertBefore(meter, form.firstChild);
+    }
+    const ratio = Math.round((completed / required.length) * 100);
+    const bar = meter.querySelector('.form-progress-bar');
+    if (bar){
+      bar.style.width = ratio + '%';
+      bar.style.setProperty('--form-progress', ratio + '%');
+    }
+    const label = meter.querySelector('.form-progress-label');
+    if (label) label.textContent = `${completed}/${required.length} champs requis`;
+  }
+
+  function segmentFormSections(form){
+    const headings = Array.from(form.children).filter(el => ['H3','H4'].includes(el.tagName));
+    headings.forEach(heading => {
+      if (heading.dataset.segmented) return;
+      const details = document.createElement('details');
+      details.className = 'form-section';
+      details.open = heading.tagName === 'H3';
+      const summary = document.createElement('summary');
+      summary.textContent = heading.textContent;
+      details.appendChild(summary);
+      let sibling = heading.nextSibling;
+      while (sibling && !(sibling.nodeType === 1 && ['H3','H4'].includes(sibling.tagName))){
+        const next = sibling.nextSibling;
+        details.appendChild(sibling);
+        sibling = next;
+      }
+      heading.replaceWith(details);
+      details.dataset.segmented = '1';
+    });
+  }
+
+  function setupFloatingLabel(label){
+    if (!(label instanceof HTMLElement)) return;
+    if (label.dataset.floatingBound === '1') return;
+    const controls = Array.from(label.querySelectorAll('input, textarea, select')).filter(ctrl => {
+      return !(ctrl instanceof HTMLInputElement && ctrl.type === 'hidden');
+    });
+    if (!controls.length){
+      label.dataset.floatingBound = '1';
+      return;
+    }
+    const floatable = controls.some(ctrl => {
+      return !(ctrl instanceof HTMLInputElement && ['checkbox','radio'].includes(ctrl.type));
+    });
+    label.dataset.floatingBound = '1';
+    if (!floatable) return;
+    label.classList.add('floating');
+    label.dataset.enhanced = '1';
+    let labelText = label.dataset.label || label.getAttribute('aria-label') || '';
+    if (!labelText){
+      const textParts = [];
+      Array.from(label.childNodes).forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()){
+          textParts.push(node.textContent.trim());
+        }
+      });
+      labelText = textParts.join(' ');
+    }
+    Array.from(label.childNodes).forEach(node => {
+      if (node.nodeType === Node.TEXT_NODE) label.removeChild(node);
+    });
+    if (labelText && !label.querySelector('.label-text')){
+      const span = document.createElement('span');
+      span.className = 'label-text';
+      span.textContent = labelText;
+      label.insertBefore(span, label.firstChild);
+    }
+    const update = () => {
+      const filled = controls.some(ctrl => {
+        if (ctrl instanceof HTMLInputElement){
+          if (['checkbox','radio'].includes(ctrl.type)) return ctrl.checked;
+          if (ctrl.type === 'file') return ctrl.files && ctrl.files.length > 0;
+        }
+        if (ctrl instanceof HTMLSelectElement){
+          if (ctrl.multiple) return Array.from(ctrl.selectedOptions).some(opt => opt.value);
+          return (ctrl.value || '').toString().trim() !== '';
+        }
+        const value = ctrl.value ?? '';
+        return value.toString().trim() !== '';
+      });
+      label.classList.toggle('is-filled', filled);
+    };
+    controls.forEach(ctrl => {
+      ctrl.addEventListener('input', update);
+      ctrl.addEventListener('change', update);
+    });
+    update();
+  }
+
+  function initFloatingLabels(scope=document){
+    const labels = new Set([
+      ...scope.querySelectorAll('label.floating'),
+      ...scope.querySelectorAll('.form label')
+    ]);
+    labels.forEach(setupFloatingLabel);
+  }
+
+  function enhanceForms(){
+    initFloatingLabels();
+    document.querySelectorAll('.form').forEach(form => {
+      initFloatingLabels(form);
+      if (!form.dataset.validationBound){
+        form.dataset.validationBound = '1';
+        form.addEventListener('invalid', evt => {
+          const field = evt.target;
+          if (!(field instanceof HTMLElement)) return;
+          evt.preventDefault();
+          applyFieldError(field, field.validationMessage);
+        }, true);
+        form.addEventListener('input', evt => {
+          const field = evt.target;
+          if (!(field instanceof HTMLElement)) return;
+          if (field.checkValidity()) clearFieldError(field);
+          updateFormProgress(form);
+        });
+      }
+      segmentFormSections(form);
+      updateFormProgress(form);
+      if (!form.querySelector('.form-context')){
+        const context = document.createElement('aside');
+        context.className = 'form-context';
+        context.innerHTML = '<strong>Impact</strong><p>Vos modifications actualisent immédiatement le dashboard et les exports.</p>';
+        form.appendChild(context);
+      }
+    });
   }
 
   function openForm(kind, data=null){
@@ -1946,16 +2494,16 @@ const APP_VERSION = '3.5.0';
     if (dashboardFilters.owner && dashboardFilters.owner !== 'all'){
       actionsFiltered = actionsFiltered.filter(a => (a.owner || '') === dashboardFilters.owner);
     }
-    if (dashboardFilters.time && dashboardFilters.time !== 'all'){
-      const nowDateF = today();
-      let endDate;
-      if (dashboardFilters.time === 'today') endDate = nowDateF;
-      else if (dashboardFilters.time === '7d') endDate = dateAddDays(nowDateF, 7);
-      else if (dashboardFilters.time === '30d') endDate = dateAddDays(nowDateF, 30);
+    const rangeStart = dashboardFilters.start ? parseDate(dashboardFilters.start) : null;
+    const rangeEnd = dashboardFilters.end ? parseDate(dashboardFilters.end) : null;
+    if ((rangeStart || rangeEnd)){
       actionsFiltered = actionsFiltered.filter(a => {
         if (!a.dueDate) return false;
         const d = parseDate(a.dueDate);
-        return d && d >= nowDateF && d <= endDate;
+        if (!d) return false;
+        if (rangeStart && d < rangeStart) return false;
+        if (rangeEnd && d > rangeEnd) return false;
+        return true;
       });
     }
     // Calculer les projets à partir de toutes les actions, sans filtrer, pour conserver la vision globale
@@ -2068,6 +2616,10 @@ const APP_VERSION = '3.5.0';
         const parts = freqOrder.map(f => ({ k: freqLabels[f], v: freqCounts[f] || 0 }));
         drawDonut(donutC, parts);
       }
+      const dominant = freqOrder.reduce((best, key) => ((freqCounts[key] || 0) > (freqCounts[best] || 0) ? key : best), freqOrder[0]);
+      updatePanelSummary('repartition-frequence-routines', `${freqLabels[dominant]} dominant`);
+      const freqInsights = freqOrder.map(f => ({ label: freqLabels[f], value: freqCounts[f] || 0 })).filter(item => item.value > 0).map(item => `${item.label} : ${item.value}`);
+      updatePanelInsights('repartition-frequence-routines', freqInsights);
     }catch(e){ console.warn('Erreur calcul KPI routines', e); }
 
     // Nouvelles KPI pour les actions ouvertes et en retard
@@ -2092,6 +2644,13 @@ const APP_VERSION = '3.5.0';
       if (kpiAlertsEl) kpiAlertsEl.textContent = String(alerts);
       const kpiRT = document.getElementById('kpiRedTeamPending');
       if (kpiRT) kpiRT.textContent = String(pendingRTActions + pendingEntries + pendingValidations);
+      const notif = document.getElementById('notifCount');
+      if (notif){
+        const total = alerts;
+        notif.textContent = total > 99 ? '99+' : String(total);
+        const parent = notif.closest('.notifications');
+        if (parent){ parent.classList.toggle('has-alert', total > 0); parent.setAttribute('data-count', String(total)); }
+      }
     }catch(e){ console.warn('Erreur calcul KPI actions', e); }
 
     // Liste des actions à venir (due soon) pour le dashboard
@@ -2110,6 +2669,12 @@ const APP_VERSION = '3.5.0';
       const rows = dueSoon.map(a => [projMapDash.get(a.idProject) || a.idProject || '', a.task || '', a.dueDate || '', maskName(a.owner || '')]);
       const tbDue = document.getElementById('tblDashboardDueSoon');
       if (tbDue){ const tbody = tbDue.querySelector('tbody'); if (tbody){ tbody.innerHTML=''; fillRows(tbody, rows); } }
+      const ownersSoon = new Set(dueSoon.map(a => a.owner).filter(Boolean));
+      const dueSoonInsights = [];
+      if (dueSoon[0]) dueSoonInsights.push(`Prochaine échéance : ${formatDateLabel(dueSoon[0].dueDate || '')}`);
+      dueSoonInsights.push(`Responsables mobilisés : ${ownersSoon.size}`);
+      updatePanelInsights('actions-a-venir-7-jours', dueSoonInsights);
+      updatePanelSummary('actions-a-venir-7-jours', dueSoon.length ? `${dueSoon.length} action(s) à traiter` : 'Aucune action imminente');
     }catch(e){ console.warn('Erreur calcul actions à venir', e); }
 
     // Répartition des statuts des actions + graphique donut
@@ -2133,6 +2698,9 @@ const APP_VERSION = '3.5.0';
         const parts2 = (enums.taskStatuses || []).map(st => ({ k: st, v: taskCounts[st] || 0 }));
         drawDonut(donut2, parts2);
       }
+      updatePanelSummary('repartition-statuts-actions', `En cours : ${taskCounts['En cours'] || 0} · Bloquées : ${taskCounts['Bloqué'] || 0}`);
+      const actionInsights = (enums.taskStatuses || []).map(st => ({ label: st, value: taskCounts[st] || 0 })).filter(item => item.value > 0).sort((a,b) => b.value - a.value).slice(0,3).map(item => `${item.label} : ${item.value}`);
+      updatePanelInsights('repartition-statuts-actions', actionInsights);
     }catch(e){ console.warn('Erreur répartition statuts actions', e); }
 
     // Répartition des actions ouvertes par collaborateur + graphique barre
@@ -2144,18 +2712,43 @@ const APP_VERSION = '3.5.0';
       if (tbOwner){ const tbBody = tbOwner.querySelector('tbody'); if (tbBody){ fillRows(tbBody, rowsOwners); } }
       const barsCanvas = document.getElementById('chartActionsOwnerBars');
       if (barsCanvas){ const series = owners.map(o => ({ name: o, load: ownerCounts[o] || 0, cap: ownerCounts[o] || 0 })); drawSimpleBars(barsCanvas, series); }
+      if (owners.length){
+        const top = owners[0];
+        updatePanelSummary('actions-par-collaborateur', `${maskName(top)} : ${ownerCounts[top] || 0} action(s)`);
+      } else {
+        updatePanelSummary('actions-par-collaborateur', 'Aucune action ouverte');
+      }
+      updatePanelInsights('actions-par-collaborateur', owners.slice(0,3).map(o => `${maskName(o)} : ${ownerCounts[o] || 0}`));
     }catch(e){ console.warn('Erreur actions par collaborateur', e); }
 
     // Statuts distrib + charts
     const statCounts = countBy(projs,'status'); const container = $('#statusDist'); container.innerHTML='';
     (enums.statuses||[]).forEach(st=> { const div=document.createElement('div'); div.className='item'; div.innerHTML=`<div>${escapeHtml(st)}</div><div>${statCounts[st]||0}</div>`; container.appendChild(div); });
     try{ const donut = $('#chartStatusDonut'); if (donut){ const parts=(enums.statuses||[]).map((st)=>({k:st,v:statCounts[st]||0})); drawDonut(donut, parts); } }catch(e){}
+    const blockedProjects = projs.filter(p => (p.status || '').toLowerCase() === 'bloqué').length;
+    const criticalProjects = projs.filter(p => (p.priority || '').toLowerCase() === 'critique').length;
+    updatePanelSummary('repartition-statuts-projets', `Bloqués : ${blockedProjects} · Critiques : ${criticalProjects}`);
+    const statusInsights = (enums.statuses || []).map(st => ({ label: st, value: statCounts[st] || 0 })).filter(item => item.value > 0).sort((a,b) => b.value - a.value).slice(0,3).map(item => `${item.label} : ${item.value}`);
+    updatePanelInsights('repartition-statuts-projets', statusInsights);
 
     // Vélocité KPIs + sparkline factice (somme 7/28j)
     const now=today(), d7 = dateAddDays(now,-7), d28 = dateAddDays(now,-28);
     const sumPts = from => actions.filter(a=> a.statusTask==='Fait' && a.doneDate && parseDate(a.doneDate)>=from).reduce((s,a)=> s+(Number(a.points)||0),0);
-    $('#kpiVelo7').textContent = String(sumPts(d7)); $('#kpiVelo28').textContent = String(sumPts(d28));
-    try{ const sp = $('#chartVelo'); if (sp){ const series=[...Array(12)].map((_,i)=> i<6 ? Math.max(0, sumPts(dateAddDays(now,-i-1))-i) : Math.max(0, sumPts(dateAddDays(now,-i-1))-i-2)); drawSparkline(sp, series.reverse()); } }catch(e){}
+    const velo7 = sumPts(d7);
+    const velo28 = sumPts(d28);
+    $('#kpiVelo7').textContent = String(velo7);
+    $('#kpiVelo28').textContent = String(velo28);
+    updatePanelSummary('velocite-points-faits', `7j : ${velo7} pts · 28j : ${velo28} pts`);
+    const velocitySeries = [...Array(12)].map((_,i)=> i<6 ? Math.max(0, sumPts(dateAddDays(now,-i-1))-i) : Math.max(0, sumPts(dateAddDays(now,-i-1))-i-2));
+    try{ const sp = $('#chartVelo'); if (sp){ drawSparkline(sp, velocitySeries.slice().reverse()); } }catch(e){}
+    const peakVelocity = velocitySeries.length ? Math.max(...velocitySeries) : 0;
+    const latestVelocity = velocitySeries.length ? velocitySeries[velocitySeries.length-1] : 0;
+    const avgVelocity = velocitySeries.length ? Math.round(velocitySeries.reduce((a,b)=>a+b,0)/velocitySeries.length) : 0;
+    updatePanelInsights('velocite-points-faits', [
+      `Sommet 12 périodes : ${peakVelocity} pts`,
+      `Dernière période : ${latestVelocity} pts`,
+      `Moyenne : ${avgVelocity} pts`
+    ]);
 
     // Charge / capacité
     const capRows = Object.keys(capacities||{}).map(name => {
@@ -2164,9 +2757,16 @@ const APP_VERSION = '3.5.0';
     }).sort((a,b)=> b.diff - a.diff);
     fillRows($('#tblCapacity tbody'), capRows.map(r=> [maskName(r.name), r.load, r.cap, (r.diff>0?`+${r.diff}`:r.diff), r.overload?'Oui':'Non']));
     try{ const bars=$('#chartCapacityBars'); if (bars) drawBars(bars, capRows); }catch(e){}
+    const overloadCount = capRows.filter(r => r.overload).length;
+    updatePanelSummary('charge-vs-capacite-7-prochains-jours', overloadCount ? `${overloadCount} collaborateur(s) en surcharge` : 'Charge équilibrée');
+    updatePanelInsights('charge-vs-capacite-7-prochains-jours', capRows.slice(0,3).map(r => `${maskName(r.name)} : ${r.load}/${r.cap} pts`));
 
     // Gantt dans le dashboard
     try{ await renderGantt('dashGantt'); }catch(e){ console.warn('Gantt render error', e); }
+    const ganttUpcoming = actions.filter(a => !a.archived && a.dueDate).sort((a,b) => (a.dueDate || '').localeCompare(b.dueDate || '')).slice(0,3);
+    const ganttInsights = ganttUpcoming.map(a => `${formatDateLabel(a.dueDate || '')} · ${maskName(a.owner || '')}`);
+    updatePanelInsights('gantt-8-semaines', ganttInsights);
+    updatePanelSummary('gantt-8-semaines', `${actionsFiltered.length} action(s) planifiées`);
 
     // Mettre à jour les tendances pour toutes les cartes KPI après avoir calculé les nouvelles valeurs
     try{
@@ -4175,7 +4775,77 @@ function saveDoneRoutineToday(){
   function groupBy(arr,key){ const m={}; for (const x of arr){ const k=x[key]; (m[k]||(m[k]=[])).push(x);} return m; }
   function countBy(arr,key){ const m={}; for (const x of arr){ const k=x[key]??''; m[k]=(m[k]||0)+1; } return m; }
   function avg(arr){ return arr.length? arr.reduce((s,x)=> s+(Number(x)||0),0)/arr.length : 0; }
-  function fillRows(tb, rows){ tb.innerHTML=''; for (const r of rows){ const tr=document.createElement('tr'); tr.innerHTML=r.map(c=>`<td>${escapeHtml(String(c??''))}</td>`).join(''); tb.appendChild(tr); } }
+  const cellParser = document.createElement('textarea');
+  function decodeCell(value){
+    if (typeof value !== 'string') return value;
+    cellParser.innerHTML = value;
+    return cellParser.value;
+  }
+  function renderCellContent(td, cell){
+    if (cell == null){ td.textContent = ''; return; }
+    const decoded = decodeCell(cell);
+    const str = typeof decoded === 'string' ? decoded.trim() : decoded;
+    if (typeof cell === 'number' && cell >= 0 && cell <= 1){
+      renderProgress(td, Math.round(cell * 100), `${Math.round(cell * 100)}%`);
+      return;
+    }
+    if (typeof str === 'string' && /^\d+(?:\.\d+)?\s?%$/.test(str)){
+      const pct = parseFloat(str);
+      if (!Number.isNaN(pct)){
+        renderProgress(td, pct, str);
+        return;
+      }
+    }
+    td.textContent = typeof decoded === 'string' ? decoded : String(decoded);
+  }
+  function renderProgress(td, value, label){
+    td.classList.add('cell-with-progress');
+    const pct = Math.max(0, Math.min(100, value));
+    const bar = document.createElement('div');
+    bar.className = 'cell-progress';
+    bar.style.setProperty('--progress', pct + '%');
+    const span = document.createElement('span');
+    span.className = 'cell-progress-label';
+    span.textContent = label;
+    td.appendChild(bar);
+    td.appendChild(span);
+  }
+  function fillRows(tb, rows){
+    tb.innerHTML='';
+    rows.forEach((row, rowIndex) => {
+      const tr = document.createElement('tr');
+      row.forEach((cell, idx) => {
+        const td = document.createElement('td');
+        if (idx === 0){
+          td.classList.add('cell-primary');
+          const text = decodeCell(cell ?? '');
+          const label = typeof text === 'string' ? text : String(text ?? '');
+          const avatar = document.createElement('span');
+          avatar.className = 'cell-avatar';
+          avatar.textContent = label.trim().split(/\s+/).map(part => part.charAt(0)).join('').slice(0,2).toUpperCase() || '•';
+          const content = document.createElement('span');
+          content.className = 'cell-text';
+          content.textContent = label;
+          const quick = document.createElement('button');
+          quick.type = 'button';
+          quick.className = 'quick-action';
+          quick.textContent = 'Voir';
+          quick.title = 'Afficher la fiche';
+          quick.addEventListener('click', evt => {
+            evt.stopPropagation();
+            showToast('Aperçu disponible dans la prochaine itération.');
+          });
+          td.appendChild(avatar);
+          td.appendChild(content);
+          td.appendChild(quick);
+        } else {
+          renderCellContent(td, cell);
+        }
+        tr.appendChild(td);
+      });
+      tb.appendChild(tr);
+    });
+  }
   function taToList(txt){ return (txt||'').split(/\\r?\\n/).map(s=>s.trim()).filter(Boolean); }
 
   // ---------- Charts ----------

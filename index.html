@@ -10,54 +10,76 @@
 </head>
 <body>
   <a class="skip" href="#app">Aller au contenu</a>
-  <header class="topbar" role="banner">
-    <!-- Affichage de la version dans l'entête -->
-    <!-- Update version number displayed in the header when bumping application version. -->
-    <div class="brand" aria-label="Nom de l'application">📈 Klaro — v3.5.0 (offline)</div>
-    <nav class="nav" aria-label="Navigation principale">
-      <button data-nav="dashboard" class="nav-btn active" aria-pressed="true">Dashboard</button>
-      <!-- Regroupement des objectifs dans un onglet principal "Objet". Les anciennes sections
-           (globaux, systèmes, projets, actions, routines) deviennent des sous‑onglets accessibles via
-           un sous-menu. -->
-      <button data-nav="objects" class="nav-btn">Objet</button>
-      <!-- Les boutons classiques restent dans le DOM mais sont masqués via CSS. Ils sont
-           nécessaires pour le routage interne mais ne doivent plus être affichés directement
-           dans la barre de navigation principale. -->
-      <button data-nav="globals" class="nav-btn hidden">Obj. Globaux</button>
-      <button data-nav="systems" class="nav-btn hidden">Obj. Système</button>
-      <button data-nav="projects" class="nav-btn hidden">Projets</button>
-      <button data-nav="actions" class="nav-btn hidden">Actions</button>
-      <button data-nav="routines" class="nav-btn hidden">Routines</button>
-      <button data-nav="views" class="nav-btn">Vues</button>
-      <!-- Nouvel onglet Review regroupant les activités de Red‑Team. -->
-      <button data-nav="review" class="nav-btn">Review</button>
-      <!-- Boutons internes masqués nécessaires pour le routage des sous‑menus -->
-      <button data-nav="archives" class="nav-btn hidden">Archivés</button>
-      <button data-nav="params" class="nav-btn hidden">Paramètres</button>
-      <button data-nav="redteam" class="nav-btn hidden">Red‑Team</button>
-    </nav>
-
-    <!-- Sous-menu pour l’onglet "Objet". Masqué par défaut et affiché uniquement lorsque
-         l’onglet principal "Objet" est sélectionné. Chaque bouton déclenche l’affichage
-         de la vue correspondante (globaux, système, projets, actions, routines). -->
-    <div id="objectSubnav" class="subnav hidden" aria-label="Sous-menu Objet">
-      <button data-subview="globals" class="subnav-btn" aria-pressed="false">Globaux</button>
-      <button data-subview="systems" class="subnav-btn" aria-pressed="false">Systèmes</button>
-      <button data-subview="projects" class="subnav-btn" aria-pressed="false">Projets</button>
-      <button data-subview="actions" class="subnav-btn" aria-pressed="false">Actions</button>
-      <button data-subview="routines" class="subnav-btn" aria-pressed="false">Routines</button>
-      <button data-subview="archives" class="subnav-btn" aria-pressed="false">Archivés</button>
+  <header class="topbar glass" role="banner">
+    <div class="topbar-left">
+      <div class="logo-wrap" aria-hidden="true">
+        <svg viewBox="0 0 64 64" role="presentation" focusable="false">
+          <defs>
+            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#7fb4ff" />
+              <stop offset="100%" stop-color="#4cd4a8" />
+            </linearGradient>
+          </defs>
+          <rect x="4" y="12" width="12" height="40" rx="6" fill="url(#logoGrad)" opacity="0.8" />
+          <rect x="26" y="20" width="12" height="32" rx="6" fill="url(#logoGrad)" opacity="0.55" />
+          <rect x="48" y="8" width="12" height="44" rx="6" fill="url(#logoGrad)" />
+          <polyline points="8,30 32,18 56,30" fill="none" stroke="#dff4ff" stroke-width="3" stroke-linecap="round" />
+        </svg>
+      </div>
+      <div class="brand-stack" aria-label="Nom de l'application">
+        <span class="brand-title">Klaro</span>
+        <span class="brand-version">Planificateur v3.5.0</span>
+      </div>
+      <span id="statusBadge" class="status-badge offline" role="status" aria-live="polite">
+        <span class="dot" aria-hidden="true"></span>
+        <span class="status-text">Hors ligne</span>
+      </span>
+      <button id="btnNotifications" class="notifications" aria-label="Notifications">
+        <span class="icon" aria-hidden="true">🔔</span>
+        <span class="badge" id="notifCount">0</span>
+      </button>
     </div>
-
-    <!-- Sous-menu pour l’onglet "Review" dédié aux activités Red-Team. -->
-    <div id="reviewSubnav" class="subnav hidden" aria-label="Sous-menu Review">
-      <button data-review="redteam" class="subnav-btn" aria-pressed="false">Red‑Team</button>
-    </div>
-    <div class="toolbar">
-      <button id="btnTheme" title="Basculer thème">🌓</button>
-      <button id="btnPrivacy" title="Mode confidentialité (masquer noms/€)">🙈</button>
-      <!-- Bouton Paramètres transformé en icône d'engrenage -->
-      <button id="btnSettings" title="Paramètres">⚙️</button>
+    <div class="topbar-right">
+      <div class="nav-stack">
+        <nav class="nav primary-nav" aria-label="Navigation principale">
+          <button data-nav="dashboard" class="nav-btn active" aria-pressed="true">Dashboard</button>
+          <button data-nav="objects" class="nav-btn">Objet</button>
+          <button data-nav="globals" class="nav-btn hidden">Obj. Globaux</button>
+          <button data-nav="systems" class="nav-btn hidden">Obj. Système</button>
+          <button data-nav="projects" class="nav-btn hidden">Projets</button>
+          <button data-nav="actions" class="nav-btn hidden">Actions</button>
+          <button data-nav="routines" class="nav-btn hidden">Routines</button>
+          <button data-nav="views" class="nav-btn">Vues</button>
+          <button data-nav="review" class="nav-btn">Review</button>
+          <button data-nav="archives" class="nav-btn hidden">Archivés</button>
+          <button data-nav="params" class="nav-btn hidden">Paramètres</button>
+          <button data-nav="redteam" class="nav-btn hidden">Red‑Team</button>
+        </nav>
+        <div class="nav-drawer" id="navDrawer" aria-live="polite">
+          <div id="objectDrawer" class="drawer-panel" data-source="objects" aria-label="Sous-menu Objet">
+            <div class="drawer-title">Objectifs</div>
+            <div class="drawer-buttons">
+              <button data-subview="globals" class="subnav-btn" aria-pressed="false">Globaux</button>
+              <button data-subview="systems" class="subnav-btn" aria-pressed="false">Systèmes</button>
+              <button data-subview="projects" class="subnav-btn" aria-pressed="false">Projets</button>
+              <button data-subview="actions" class="subnav-btn" aria-pressed="false">Actions</button>
+              <button data-subview="routines" class="subnav-btn" aria-pressed="false">Routines</button>
+              <button data-subview="archives" class="subnav-btn" aria-pressed="false">Archivés</button>
+            </div>
+          </div>
+          <div id="reviewDrawer" class="drawer-panel" data-source="review" aria-label="Sous-menu Review">
+            <div class="drawer-title">Review</div>
+            <div class="drawer-buttons">
+              <button data-review="redteam" class="subnav-btn" aria-pressed="false">Red‑Team</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button id="btnTheme" title="Basculer thème">🌓</button>
+        <button id="btnPrivacy" title="Mode confidentialité (masquer noms/€)">🙈</button>
+        <button id="btnSettings" title="Paramètres">⚙️</button>
+      </div>
     </div>
   </header>
 
@@ -68,44 +90,107 @@
       <h1 id="h-dashboard">Dashboard</h1>
       <!-- Barre de filtres globales pour le dashboard (période, projet, responsable) -->
       <div id="dashFilters" class="dash-filters">
-        <label>Période
-          <select id="filterTime" aria-label="Filtrer par période">
-            <option value="today">Aujourd’hui</option>
-            <option value="7d">7 jours</option>
-            <option value="30d">30 jours</option>
-            <option value="all" selected>Tout</option>
-          </select>
-        </label>
-        <label>Projet
-          <select id="filterProject" aria-label="Filtrer par projet"><option value="all">Tous</option></select>
-        </label>
-        <label>Responsable
-          <select id="filterOwner" aria-label="Filtrer par responsable"><option value="all">Tous</option></select>
-        </label>
-        <button id="btnApplyFilters" class="secondary" title="Appliquer les filtres">Appliquer</button>
-        <button id="btnResetFilters" class="secondary" title="Réinitialiser les filtres">Réinitialiser</button>
-        <!-- Bouton pour télécharger un rapport complet de l’application (PDF) -->
-        <button id="btnDownloadReport" class="secondary" title="Télécharger le rapport complet">Télécharger rapport</button>
+        <div class="filter-grid">
+          <div class="filter-field range">
+            <div class="field-title">Période</div>
+            <div class="range-picker">
+              <label class="floating" data-label="Début">
+                <input type="date" id="filterStart" aria-label="Date de début" />
+              </label>
+              <span class="range-sep" aria-hidden="true">→</span>
+              <label class="floating" data-label="Fin">
+                <input type="date" id="filterEnd" aria-label="Date de fin" />
+              </label>
+            </div>
+            <div class="preset-row" role="list">
+              <button class="preset" data-preset="today" role="listitem">Aujourd’hui</button>
+              <button class="preset" data-preset="7d" role="listitem">7 jours</button>
+              <button class="preset" data-preset="30d" role="listitem">30 jours</button>
+              <button class="preset" data-preset="all" role="listitem">Tout</button>
+            </div>
+          </div>
+          <label class="filter-field floating" data-label="Projet">
+            <select id="filterProject" aria-label="Filtrer par projet"><option value="all">Tous</option></select>
+          </label>
+          <label class="filter-field floating" data-label="Responsable">
+            <select id="filterOwner" aria-label="Filtrer par responsable"><option value="all">Tous</option></select>
+          </label>
+        </div>
+        <div class="filter-meta">
+          <div id="filterChips" class="filter-chips" aria-live="polite"></div>
+          <div class="filter-actions">
+            <button id="btnApplyFilters" class="primary" title="Appliquer les filtres">Appliquer</button>
+            <button id="btnResetFilters" class="ghost" title="Réinitialiser les filtres">Réinitialiser</button>
+            <button id="btnSaveDashboardView" class="ghost" title="Enregistrer la vue">Enregistrer la vue</button>
+            <button id="btnDownloadReport" class="ghost" title="Télécharger le rapport complet">Télécharger rapport</button>
+          </div>
+        </div>
       </div>
-      <div class="cards">
-        <div class="card"><div class="kpi-label">Objectifs globaux</div><div class="kpi-value" id="kpiGlobalCount">—</div></div>
-        <div class="card"><div class="kpi-label">Avancement — Globaux</div><div class="kpi-value" id="kpiGlobalAvg">—</div></div>
-        <div class="card"><div class="kpi-label">Obj. Système</div><div class="kpi-value" id="kpiSysCount">—</div></div>
-        <div class="card"><div class="kpi-label">Avancement — Système</div><div class="kpi-value" id="kpiSysAvg">—</div></div>
-        <div class="card"><div class="kpi-label">Projets</div><div class="kpi-value" id="kpiProjCount">—</div></div>
-        <div class="card"><div class="kpi-label">Avancement — Projets</div><div class="kpi-value" id="kpiProjAvg">—</div></div>
-        <div class="card warn"><div class="kpi-label">Projets en retard</div><div class="kpi-value" id="kpiLateCount">—</div></div>
-        <!-- Nouveaux indicateurs pour les actions -->
-        <div class="card"><div class="kpi-label">Actions ouvertes</div><div class="kpi-value" id="kpiActionOpen">—</div></div>
-        <div class="card warn"><div class="kpi-label">Actions en retard</div><div class="kpi-value" id="kpiActionLate">—</div></div>
-        <!-- Indicateurs pour les routines -->
-        <div class="card"><div class="kpi-label">Routines actives</div><div class="kpi-value" id="kpiRoutineCount">—</div></div>
-        <div class="card"><div class="kpi-label">Tâches routines aujourd’hui</div><div class="kpi-value" id="kpiRoutineTasksToday">—</div></div>
-        <!-- Carte d’alertes pour les tâches en retard/red‑team en attente -->
-        <div class="card warn"><div class="kpi-label">Alertes</div><div class="kpi-value" id="kpiAlerts">—</div></div>
-        <!-- Carte pour les entrées Red‑Team à traiter -->
-        <div class="card"><div class="kpi-label">Red‑Team en attente</div><div class="kpi-value" id="kpiRedTeamPending">—</div></div>
-      </div>
+      <section class="kpi-area" aria-label="Indicateurs clés">
+        <div class="kpi-hero">
+          <article class="card hero" data-kpi="global-count">
+            <header>
+              <span class="kpi-label">Objectifs globaux</span>
+              <button class="info" data-tooltip="Nombre total d’objectifs stratégiques actifs.">i</button>
+            </header>
+            <div class="kpi-value" id="kpiGlobalCount">—</div>
+            <footer id="kpiGlobalTrend" class="kpi-trend" aria-live="polite"></footer>
+          </article>
+          <article class="card hero" data-kpi="projects-progress">
+            <header>
+              <span class="kpi-label">Avancement projets</span>
+              <button class="info" data-tooltip="Progression moyenne pondérée sur tous les projets actifs.">i</button>
+            </header>
+            <div class="kpi-value" id="kpiProjAvg">—</div>
+            <footer id="kpiProjTrend" class="kpi-trend" aria-live="polite"></footer>
+          </article>
+        </div>
+        <div class="kpi-secondary">
+          <article class="card secondary">
+            <header><span class="kpi-label">Obj. Système</span><button class="info" data-tooltip="Nombre d’objectifs systèmes associés aux objectifs globaux.">i</button></header>
+            <div class="kpi-value" id="kpiSysCount">—</div>
+          </article>
+          <article class="card secondary">
+            <header><span class="kpi-label">Avancement — Système</span><button class="info" data-tooltip="Progression moyenne des objectifs systèmes.">i</button></header>
+            <div class="kpi-value" id="kpiSysAvg">—</div>
+          </article>
+          <article class="card secondary">
+            <header><span class="kpi-label">Projets</span><button class="info" data-tooltip="Nombre de projets ouverts.">i</button></header>
+            <div class="kpi-value" id="kpiProjCount">—</div>
+          </article>
+          <article class="card secondary">
+            <header><span class="kpi-label">Avancement — Globaux</span><button class="info" data-tooltip="Progression moyenne des objectifs globaux.">i</button></header>
+            <div class="kpi-value" id="kpiGlobalAvg">—</div>
+          </article>
+          <article class="card secondary">
+            <header><span class="kpi-label">Actions ouvertes</span><button class="info" data-tooltip="Total des actions actives non terminées.">i</button></header>
+            <div class="kpi-value" id="kpiActionOpen">—</div>
+          </article>
+          <article class="card secondary">
+            <header><span class="kpi-label">Actions en retard</span><button class="info" data-tooltip="Actions dépassant la date d’échéance.">i</button></header>
+            <div class="kpi-value" id="kpiActionLate">—</div>
+          </article>
+          <article class="card secondary">
+            <header><span class="kpi-label">Routines actives</span><button class="info" data-tooltip="Nombre de routines actives programmées.">i</button></header>
+            <div class="kpi-value" id="kpiRoutineCount">—</div>
+          </article>
+          <article class="card secondary">
+            <header><span class="kpi-label">Tâches routines aujourd’hui</span><button class="info" data-tooltip="Volume de tâches planifiées pour aujourd’hui dans les routines.">i</button></header>
+            <div class="kpi-value" id="kpiRoutineTasksToday">—</div>
+          </article>
+          <article class="card secondary">
+            <header><span class="kpi-label">Red‑Team en attente</span><button class="info" data-tooltip="Éléments Red‑Team à instruire.">i</button></header>
+            <div class="kpi-value" id="kpiRedTeamPending">—</div>
+          </article>
+        </div>
+        <aside class="card alert" aria-live="polite">
+          <header>
+            <span class="kpi-label">Alertes</span>
+            <button class="info" data-tooltip="Projets et actions critiques nécessitant une attention immédiate.">i</button>
+          </header>
+          <div class="kpi-value" id="kpiAlerts">—</div>
+        </aside>
+      </section>
 
       <div class="grid grid-2">
         <div class="panel">
