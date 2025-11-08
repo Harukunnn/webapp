@@ -986,6 +986,14 @@ Maquette V1"></textarea></label>
         </thead>
         <tbody></tbody>
       </table>
+      <h2>Validations différées (7 jours)</h2>
+      <p class="muted">Les nouveaux objectifs et routines sont surveillés pendant une semaine. Confirmez-les ou supprimez-les définitivement une fois l’utilité vérifiée.</p>
+      <table class="table" id="tblValidationQueue">
+        <thead>
+          <tr><th>ID</th><th>Type</th><th>Nom</th><th>Créé le</th><th>Échéance</th><th></th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
       <!-- Formulaire/boîte modale pour traiter une entrée Red‑Team -->
       <form id="formRedTeam" class="form collapsed" aria-label="Formulaire Red‑Team">
         <h3 id="titleRedTeamForm">Traitement Red‑Team</h3>
@@ -1025,7 +1033,7 @@ Maquette V1"></textarea></label>
   <footer class="footer" role="contentinfo">
     <!-- Mise à jour du numéro de version affiché en pied de page -->
         <!-- Mettre à jour la version affichée dans le pied de page en cohérence avec APP_VERSION. -->
-        <span>Offline • IndexedDB • v3.4.25</span>
+        <span>Offline • IndexedDB • v3.4.26</span>
   </footer>
 
   <!-- Append version as query parameter to force browsers and service workers to fetch the updated script -->
@@ -1034,9 +1042,9 @@ Maquette V1"></textarea></label>
        matches APP_VERSION in app.js. -->
   <!-- Librairie jsPDF pour générer des rapports PDF. Chargée depuis un CDN. -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="app.js?v=3.4.25"></script>
+  <script src="app.js?v=3.4.26"></script>
   <!-- Moteur d’auto‑priorisation pour calculer et appliquer des scores aux actions -->
-  <script src="prioritizer.js?v=3.4.25"></script>
+  <script src="prioritizer.js?v=3.4.26"></script>
   <script>
   // PWA (optionnel): actif uniquement via http(s)
   if (location.protocol.startsWith('http') && 'serviceWorker' in navigator) {
