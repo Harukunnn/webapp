@@ -1022,7 +1022,7 @@ const APP_VERSION = '3.5.0';
         addObjectiveRow(targetId, {});
       });
     });
-    ['systemObjectives','actionObjectives','routineObjectives'].forEach(id => ensureObjectiveBaseline(id));
+    ['systemObjectives','projectObjectives','actionObjectives','routineObjectives'].forEach(id => ensureObjectiveBaseline(id));
   }
 
   function resetAdvancedSections(form){
@@ -1455,6 +1455,7 @@ const APP_VERSION = '3.5.0';
       $('#titleProjectForm').textContent = data?`Modifier ${data.id}`:'Nouveau projet';
       formSet(form, data||{});
       form.dataset.editing = data?data.id:'';
+      resetObjectives('projectObjectives', data?.objectives || []);
       updateNoEndDateState(form);
     }else if(kind==='action'){
       fillActionSelects();
@@ -1539,6 +1540,8 @@ const APP_VERSION = '3.5.0';
     const existing = editingId ? await idb.get(db,'projects', editingId) : null;
     const id = editingId || await nextId('P','projects');
     const obj = existing ? { ...existing } : {};
+    const objectives = collectObjectives('projectObjectives');
+    if (!validateObjectives(objectives)) return alert('Ajoutez au minimum trois objectifs (temps, résultat, méthode) pour ce projet.');
     Object.assign(obj, { id,
       idGlobal:p.idGlobal||'', idSystem:p.idSystem||'', title:p.title||'', hypothesis:p.hypothesis||'', indicator:p.indicator||'',
       target:Number(p.target)||0, unit:p.unit||'', current:Number(p.current)||0, mode:(p.mode==='tasks'?'tasks':'value'),
@@ -1557,8 +1560,9 @@ const APP_VERSION = '3.5.0';
     });
     const parentRaw = Array.isArray(p.parentProjects) ? p.parentProjects : (p.parentProjects ? [p.parentProjects] : []);
     obj.parentProjects = Array.from(new Set(parentRaw.map(String).map(x => x.trim()).filter(x => x && x !== id)));
+    obj.objectives = objectives;
     ensureValidationMetadata('projects', existing, obj);
-    await idb.put(db,'projects', obj); await audit(editingId?'update':'create','projects', id); f.classList.add('collapsed'); f.reset(); showToast('Projet enregistré'); refreshProjects();
+    await idb.put(db,'projects', obj); await audit(editingId?'update':'create','projects', id); f.classList.add('collapsed'); f.reset(); resetObjectives('projectObjectives', []); showToast('Projet enregistré'); refreshProjects();
   }
   async function handleActionSubmit(e){
     e.preventDefault(); const f=e.currentTarget, a=formGet(f);
