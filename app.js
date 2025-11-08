@@ -21,7 +21,7 @@
 // automatique de l'hibernation pour les projets à faible énergie.
 // Mise à jour de la version : inclut l’auto‑priorisation des actions
 // et le flux Red‑Team automatisé avec intégration des entrées Red‑Team
-const APP_VERSION = '3.4.25';
+const APP_VERSION = '3.4.26';
 
   // Exposer la version de l’application sur l’objet global afin d’y accéder
   // facilement depuis la console ou d’autres scripts. Permet aussi aux
@@ -168,6 +168,84 @@ const APP_VERSION = '3.4.25';
   const fmtDate = d => d ? new Date(d).toISOString().slice(0,10) : '';
   const escapeHtml = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function showToast(msg){ const t = $('#toast'); if (!t) return; t.textContent = msg; t.hidden=false; setTimeout(()=>t.hidden=true, 1600); }
+
+  // --------- Validation différée pour les nouveaux éléments (hors actions) ---------
+  const VALIDATION_DELAY_DAYS = 7;
+  const VALIDATION_TARGETS = {
+    globals:{ label:'Objectif global', title:item => item?.title || item?.id || '' },
+    systems:{ label:'Système', title:item => item?.title || item?.id || '' },
+    projects:{ label:'Projet', title:item => item?.title || item?.id || '' },
+    routines:{ label:'Routine', title:item => item?.name || item?.title || item?.id || '' }
+  };
+
+  function createValidationMetadata(){
+    const base = today();
+    const created = fmtDate(base);
+    const due = fmtDate(dateAddDays(base, VALIDATION_DELAY_DAYS));
+    return { status:'pending', createdAt: created, dueDate: due };
+  }
+
+  function ensureValidationMetadata(kind, existing, obj){
+    if (kind === 'actions') return obj;
+    if (existing && existing.validation){
+      obj.validation = existing.validation;
+      return obj;
+    }
+    if (!existing){
+      obj.validation = createValidationMetadata();
+    }
+    return obj;
+  }
+
+  function computeValidationDue(meta){
+    if (!meta) return null;
+    if (meta.dueDate){
+      return parseDate(meta.dueDate);
+    }
+    if (meta.createdAt){
+      const created = parseDate(meta.createdAt);
+      if (created) return dateAddDays(created, VALIDATION_DELAY_DAYS);
+    }
+    return null;
+  }
+
+  function gatherValidationQueue(data){
+    const queue = [];
+    const now = today();
+    Object.entries(VALIDATION_TARGETS).forEach(([store, cfg]) => {
+      const list = data[store] || [];
+      list.forEach(item => {
+        if (!item) return;
+        const meta = item.validation;
+        if (!meta || meta.status !== 'pending') return;
+        const due = computeValidationDue(meta);
+        if (!due || due > now) return;
+        queue.push({
+          store,
+          id: item.id,
+          type: cfg.label,
+          title: cfg.title(item),
+          createdAt: meta.createdAt || '',
+          dueDate: meta.dueDate || fmtDate(due),
+          due
+        });
+      });
+    });
+    queue.sort((a,b) => {
+      const ad = a.due ? a.due.getTime() : 0;
+      const bd = b.due ? b.due.getTime() : 0;
+      if (ad !== bd) return ad - bd;
+      return (a.title || '').localeCompare(b.title || '', 'fr', {numeric:true, sensitivity:'base'});
+    });
+    return queue;
+  }
+
+  function refreshStoreAfterValidation(store){
+    if (store === 'globals') return refreshGlobals();
+    if (store === 'systems') return refreshSystems();
+    if (store === 'projects') return refreshProjects();
+    if (store === 'routines' && window.refreshRoutines) return window.refreshRoutines();
+  }
 
   // --------- Loading overlay helpers ---------
   function showLoading(){ const o=document.getElementById('loadingOverlay'); if (o) o.removeAttribute('hidden'); }
@@ -930,21 +1008,32 @@ const APP_VERSION = '3.4.25';
   async function handleGlobalSubmit(e){
     e.preventDefault(); const f=e.currentTarget, g=formGet(f);
     if (Number(g.target)<Number(g.baseline)) return alert('Cible doit être > Baseline');
-    const id = f.dataset.editing || await nextId('G','globals');
-    const obj = { id, title:g.title||'', description:g.description||'', domain:g.domain||'', horizonYears:Number(g.horizonYears)||0, kpi:g.kpi||'', baseline:Number(g.baseline)||0, target:Number(g.target)||0, unit:g.unit||'', currentValue:Number(g.currentValue)||0, owner:g.owner||'', status:g.status||'', priority:g.priority||'', risk:Number(g.risk)||0, clarity:Number(g.clarity)||0, impact:Number(g.impact)||0, urgency:Number(g.urgency)||0, startDate:g.startDate||'', targetDate:g.targetDate||'' };
-    await idb.put(db,'globals', obj); await audit(f.dataset.editing?'update':'create','globals', id); f.classList.add('collapsed'); f.reset(); showToast('Objectif global enregistré'); refreshGlobals();
+    const editingId = f.dataset.editing || '';
+    const existing = editingId ? await idb.get(db,'globals', editingId) : null;
+    const id = editingId || await nextId('G','globals');
+    const obj = existing ? { ...existing } : {};
+    Object.assign(obj, { id, title:g.title||'', description:g.description||'', domain:g.domain||'', horizonYears:Number(g.horizonYears)||0, kpi:g.kpi||'', baseline:Number(g.baseline)||0, target:Number(g.target)||0, unit:g.unit||'', currentValue:Number(g.currentValue)||0, owner:g.owner||'', status:g.status||'', priority:g.priority||'', risk:Number(g.risk)||0, clarity:Number(g.clarity)||0, impact:Number(g.impact)||0, urgency:Number(g.urgency)||0, startDate:g.startDate||'', targetDate:g.targetDate||'' });
+    ensureValidationMetadata('globals', existing, obj);
+    await idb.put(db,'globals', obj); await audit(editingId?'update':'create','globals', id); f.classList.add('collapsed'); f.reset(); showToast('Objectif global enregistré'); refreshGlobals();
   }
   async function handleSystemSubmit(e){
     e.preventDefault(); const f=e.currentTarget, s=formGet(f);
     if (Number(s.target)<Number(s.baseline)) return alert('Cible doit être > Baseline');
-    const id = f.dataset.editing || await nextId('S','systems');
-    const obj = { id, idGlobal:s.idGlobal||'', title:s.title||'', description:s.description||'', kpi:s.kpi||'', baseline:Number(s.baseline)||0, target:Number(s.target)||0, unit:s.unit||'', current:Number(s.current)||0, owner:s.owner||'', status:s.status||'', priority:s.priority||'', startDate:s.startDate||'', targetDate:s.targetDate||'' };
-    await idb.put(db,'systems', obj); await audit(f.dataset.editing?'update':'create','systems', id); f.classList.add('collapsed'); f.reset(); showToast('Objectif système enregistré'); refreshSystems();
+    const editingId = f.dataset.editing || '';
+    const existing = editingId ? await idb.get(db,'systems', editingId) : null;
+    const id = editingId || await nextId('S','systems');
+    const obj = existing ? { ...existing } : {};
+    Object.assign(obj, { id, idGlobal:s.idGlobal||'', title:s.title||'', description:s.description||'', kpi:s.kpi||'', baseline:Number(s.baseline)||0, target:Number(s.target)||0, unit:s.unit||'', current:Number(s.current)||0, owner:s.owner||'', status:s.status||'', priority:s.priority||'', startDate:s.startDate||'', targetDate:s.targetDate||'' });
+    ensureValidationMetadata('systems', existing, obj);
+    await idb.put(db,'systems', obj); await audit(editingId?'update':'create','systems', id); f.classList.add('collapsed'); f.reset(); showToast('Objectif système enregistré'); refreshSystems();
   }
   async function handleProjectSubmit(e){
     e.preventDefault(); const f=e.currentTarget, p=formGet(f);
-    const id = f.dataset.editing || await nextId('P','projects');
-    const obj = { id,
+    const editingId = f.dataset.editing || '';
+    const existing = editingId ? await idb.get(db,'projects', editingId) : null;
+    const id = editingId || await nextId('P','projects');
+    const obj = existing ? { ...existing } : {};
+    Object.assign(obj, { id,
       idGlobal:p.idGlobal||'', idSystem:p.idSystem||'', title:p.title||'', hypothesis:p.hypothesis||'', indicator:p.indicator||'',
       target:Number(p.target)||0, unit:p.unit||'', current:Number(p.current)||0, mode:(p.mode==='tasks'?'tasks':'value'),
       budget:Number(p.budget)||0, actualCost:Number(p.actualCost)||0, revenue:Number(p.revenue)||0,
@@ -959,8 +1048,9 @@ const APP_VERSION = '3.4.25';
       escalation:p.escalation||'',
       currentLevel:p.currentLevel||'',
       criticalMass:Number(p.criticalMass)||0
-    };
-    await idb.put(db,'projects', obj); await audit(f.dataset.editing?'update':'create','projects', id); f.classList.add('collapsed'); f.reset(); showToast('Projet enregistré'); refreshProjects();
+    });
+    ensureValidationMetadata('projects', existing, obj);
+    await idb.put(db,'projects', obj); await audit(editingId?'update':'create','projects', id); f.classList.add('collapsed'); f.reset(); showToast('Projet enregistré'); refreshProjects();
   }
   async function handleActionSubmit(e){
     e.preventDefault(); const f=e.currentTarget, a=formGet(f);
@@ -1461,11 +1551,12 @@ const APP_VERSION = '3.4.25';
       // Charger les entrées Red‑Team pour connaître celles en attente
       loadRedTeam();
       const pendingEntries = redTeamEntries.filter(rt => rt.status === 'to_process').length;
-      const alerts = overdueCount + pendingRTActions + pendingEntries;
+      const pendingValidations = gatherValidationQueue({ globals, systems, projects, routines }).length;
+      const alerts = overdueCount + pendingRTActions + pendingEntries + pendingValidations;
       const kpiAlertsEl = document.getElementById('kpiAlerts');
       if (kpiAlertsEl) kpiAlertsEl.textContent = String(alerts);
       const kpiRT = document.getElementById('kpiRedTeamPending');
-      if (kpiRT) kpiRT.textContent = String(pendingRTActions + pendingEntries);
+      if (kpiRT) kpiRT.textContent = String(pendingRTActions + pendingEntries + pendingValidations);
     }catch(e){ console.warn('Erreur calcul KPI actions', e); }
 
     // Liste des actions à venir (due soon) pour le dashboard
@@ -2554,89 +2645,183 @@ function createRedTeamEntry(action){
 async function refreshRedTeam(){
   loadRedTeam();
   const tbody = document.querySelector('#tblRedTeam tbody');
-  if (!tbody) return;
-  tbody.innerHTML = '';
-  const actions = await idb.getAll(db,'actions');
-  // Inclure des pseudo‑entrées pour les actions marquées Fait mais non archivées et sans redteam entry committée
-  const pseudo = [];
-  (actions||[]).forEach(a => {
-    if (a.archived) return;
-    // N'inclure en pseudo-entrée que les actions terminées (Fait) qui n'ont pas
-    // déjà une entrée Red-Team et qui n'ont pas été validées manuellement
-    if (a.statusTask === 'Fait'){
-      const hasEntry = redTeamEntries.some(rt => rt.taskId === a.id && rt.status !== 'dismissed');
-      if (!hasEntry && !a.redTeamCommitted){
-        pseudo.push({ id:'PA'+a.id, taskId:a.id, title:a.task||a.id, dateAdded: a.doneDate||'', status:'Fait', pseudo:true });
+  const validationBody = document.querySelector('#tblValidationQueue tbody');
+  if (!tbody && !validationBody) return;
+  if (tbody) tbody.innerHTML = '';
+  if (validationBody) validationBody.innerHTML = '';
+  const [actions, globals, systems, projects, routines] = await Promise.all([
+    idb.getAll(db,'actions'),
+    idb.getAll(db,'globals'),
+    idb.getAll(db,'systems'),
+    idb.getAll(db,'projects'),
+    idb.getAll(db,'routines')
+  ]);
+  if (tbody){
+    // Inclure des pseudo‑entrées pour les actions marquées Fait mais non archivées et sans redteam entry committée
+    const pseudo = [];
+    (actions||[]).forEach(a => {
+      if (a.archived) return;
+      // N'inclure en pseudo-entrée que les actions terminées (Fait) qui n'ont pas
+      // déjà une entrée Red-Team et qui n'ont pas été validées manuellement
+      if (a.statusTask === 'Fait'){
+        const hasEntry = redTeamEntries.some(rt => rt.taskId === a.id && rt.status !== 'dismissed');
+        if (!hasEntry && !a.redTeamCommitted){
+          pseudo.push({ id:'PA'+a.id, taskId:a.id, title:a.task||a.id, dateAdded: a.doneDate||'', status:'Fait', pseudo:true });
+        }
+      }
+    });
+    // Filtrer uniquement les entrées non dismissées
+    const list = redTeamEntries.filter(rt => rt.status !== 'dismissed');
+    list.sort((a,b) => (b.dateAdded || '').localeCompare(a.dateAdded || ''));
+    // Concaténer pseudo entrées en haut
+    const finalList = pseudo.concat(list);
+    for (const rt of finalList){
+      const tr = document.createElement('tr');
+      let statusLabel;
+      if (rt.pseudo){ statusLabel = 'Fait'; }
+      else {
+        statusLabel = rt.status === 'to_process' ? 'À traiter' : (rt.status === 'in_progress' ? 'En cours' : (rt.status === 'committed' ? 'Validé' : 'Ignoré'));
+      }
+      tr.innerHTML = `
+        <td>${escapeHtml(rt.title)}</td>
+        <td>${escapeHtml(rt.dateAdded)}</td>
+        <td>${escapeHtml(statusLabel)}</td>
+        <td>
+          ${rt.pseudo
+            ? `<button data-commit-pseudo="${escapeHtml(rt.taskId)}" aria-label="Valider">✅</button>`
+            : `<button data-rt="${escapeHtml(rt.id)}" aria-label="Traiter">📝</button>${rt.status !== 'committed' ? ` <button data-commit-rt="${escapeHtml(rt.id)}" aria-label="Valider">✅</button>` : ''}`}
+        </td>`;
+      tbody.appendChild(tr);
+    }
+    // Attacher événements de traitement aux vraies entrées
+    tbody.querySelectorAll('button[data-rt]').forEach(btn => btn.addEventListener('click', (e) => {
+      const id = e.currentTarget.dataset.rt;
+      openRedTeamForm(id);
+    }));
+
+    // Bouton de validation rapide pour les entrées Red-Team existantes
+    tbody.querySelectorAll('button[data-commit-rt]').forEach(btn => btn.addEventListener('click', async (e) => {
+      const rtId = e.currentTarget.dataset.commitRt;
+      // Recharger les données
+      loadRedTeam();
+      const entry = redTeamEntries.find(rt => rt.id === rtId);
+      if (!entry) return;
+      if (entry.status === 'committed') return;
+      entry.status = 'committed';
+      entry.dateCommitted = fmtDate(new Date());
+      saveRedTeam();
+      // Mettre à jour la tâche associée
+      const action = await idb.get(db,'actions', entry.taskId);
+      if (action){
+        action.statusTask = 'Fait';
+        action.redTeamCommitted = true;
+        await idb.put(db,'actions', action);
+        await audit('update','actions', action.id);
+      }
+      showToast('Entrée Red‑Team validée');
+      refreshRedTeam();
+      refreshActions();
+    }));
+
+    // Bouton de validation rapide pour les tâches pseudo (Fait mais sans Red-Team)
+    tbody.querySelectorAll('button[data-commit-pseudo]').forEach(btn => btn.addEventListener('click', async (e) => {
+      const taskId = e.currentTarget.dataset.commitPseudo;
+      // Mettre à jour l’action pour indiquer que la Red-Team a été effectuée
+      const a = await idb.get(db, 'actions', taskId);
+      if (a){
+        a.redTeamCommitted = true;
+        await idb.put(db, 'actions', a);
+        await audit('update','actions', a.id);
+      }
+      showToast('Tâche validée — vous pouvez l’archiver');
+      refreshRedTeam();
+      refreshActions();
+    }));
+  }
+
+  if (validationBody){
+    const queue = gatherValidationQueue({ globals, systems, projects, routines });
+    if (!queue.length){
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td colspan="5" class="muted">Aucun élément en attente de validation.</td>';
+      validationBody.appendChild(tr);
+    } else {
+      for (const item of queue){
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="col-id">${escapeHtml(item.id || '')}</td>
+          <td>${escapeHtml(item.type)}</td>
+          <td>${escapeHtml(item.title || '')}</td>
+          <td>${escapeHtml(item.createdAt || '')}</td>
+          <td>${escapeHtml(item.dueDate || '')}</td>
+          <td>
+            <button data-confirm-validation="${escapeHtml(item.id || '')}" data-store="${escapeHtml(item.store)}" aria-label="Confirmer">✅</button>
+            <button class="secondary" data-reject-validation="${escapeHtml(item.id || '')}" data-store="${escapeHtml(item.store)}" aria-label="Supprimer">🗑️</button>
+          </td>`;
+        validationBody.appendChild(tr);
       }
     }
-  });
-  // Filtrer uniquement les entrées non dismissées
-  const list = redTeamEntries.filter(rt => rt.status !== 'dismissed');
-  list.sort((a,b) => (b.dateAdded || '').localeCompare(a.dateAdded || ''));
-  // Concaténer pseudo entrées en haut
-  const finalList = pseudo.concat(list);
-  for (const rt of finalList){
-    const tr = document.createElement('tr');
-    let statusLabel;
-    if (rt.pseudo){ statusLabel = 'Fait'; }
-    else {
-      statusLabel = rt.status === 'to_process' ? 'À traiter' : (rt.status === 'in_progress' ? 'En cours' : (rt.status === 'committed' ? 'Validé' : 'Ignoré'));
-    }
-    tr.innerHTML = `
-      <td>${escapeHtml(rt.title)}</td>
-      <td>${escapeHtml(rt.dateAdded)}</td>
-      <td>${escapeHtml(statusLabel)}</td>
-      <td>
-        ${rt.pseudo
-          ? `<button data-commit-pseudo="${escapeHtml(rt.taskId)}" aria-label="Valider">✅</button>`
-          : `<button data-rt="${escapeHtml(rt.id)}" aria-label="Traiter">📝</button>${rt.status !== 'committed' ? ` <button data-commit-rt="${escapeHtml(rt.id)}" aria-label="Valider">✅</button>` : ''}`}
-      </td>`;
-    tbody.appendChild(tr);
+    validationBody.querySelectorAll('button[data-confirm-validation]').forEach(btn => btn.addEventListener('click', (e) => {
+      const store = e.currentTarget.dataset.store;
+      const id = e.currentTarget.dataset.confirmValidation;
+      confirmValidationItem(store, id);
+    }));
+    validationBody.querySelectorAll('button[data-reject-validation]').forEach(btn => btn.addEventListener('click', (e) => {
+      const store = e.currentTarget.dataset.store;
+      const id = e.currentTarget.dataset.rejectValidation;
+      rejectValidationItem(store, id);
+    }));
   }
-  // Attacher événements de traitement aux vraies entrées
-  tbody.querySelectorAll('button[data-rt]').forEach(btn => btn.addEventListener('click', (e) => {
-    const id = e.currentTarget.dataset.rt;
-    openRedTeamForm(id);
-  }));
+}
 
-  // Bouton de validation rapide pour les entrées Red-Team existantes
-  tbody.querySelectorAll('button[data-commit-rt]').forEach(btn => btn.addEventListener('click', async (e) => {
-    const rtId = e.currentTarget.dataset.commitRt;
-    // Recharger les données
-    loadRedTeam();
-    const entry = redTeamEntries.find(rt => rt.id === rtId);
-    if (!entry) return;
-    if (entry.status === 'committed') return;
-    entry.status = 'committed';
-    entry.dateCommitted = fmtDate(new Date());
-    saveRedTeam();
-    // Mettre à jour la tâche associée
-    const action = await idb.get(db,'actions', entry.taskId);
-    if (action){
-      action.statusTask = 'Fait';
-      action.redTeamCommitted = true;
-      await idb.put(db,'actions', action);
-      await audit('update','actions', action.id);
+async function confirmValidationItem(store, id){
+  if (!store || !id) return;
+  try{
+    const item = await idb.get(db, store, id);
+    if (!item) return;
+    const meta = (item.validation && typeof item.validation === 'object') ? { ...item.validation } : {};
+    meta.status = 'confirmed';
+    meta.confirmedAt = fmtDate(today());
+    if (!meta.createdAt) meta.createdAt = fmtDate(today());
+    if (!meta.dueDate){
+      const due = computeValidationDue(meta) || today();
+      meta.dueDate = fmtDate(due);
     }
-    showToast('Entrée Red‑Team validée');
-    refreshRedTeam();
-    refreshActions();
-  }));
+    item.validation = meta;
+    await idb.put(db, store, item);
+    await audit('validate', store, id);
+    showToast('Élément confirmé');
+  }catch(err){
+    console.warn('Erreur lors de la confirmation de validation différée', err);
+    showToast('Erreur lors de la confirmation');
+  }
+  refreshStoreAfterValidation(store);
+  refreshRedTeam();
+  refreshDashboard();
+}
 
-  // Bouton de validation rapide pour les tâches pseudo (Fait mais sans Red-Team)
-  tbody.querySelectorAll('button[data-commit-pseudo]').forEach(btn => btn.addEventListener('click', async (e) => {
-    const taskId = e.currentTarget.dataset.commitPseudo;
-    // Mettre à jour l’action pour indiquer que la Red-Team a été effectuée
-    const a = await idb.get(db, 'actions', taskId);
-    if (a){
-      a.redTeamCommitted = true;
-      await idb.put(db, 'actions', a);
-      await audit('update','actions', a.id);
+async function rejectValidationItem(store, id){
+  if (!store || !id) return;
+  const label = VALIDATION_TARGETS[store]?.label || 'cet élément';
+  if (!confirm(`Supprimer définitivement ${label.toLowerCase()} ?`)) return;
+  try{
+    if (store === 'routines'){
+      const tasks = await idb.indexGetAll(db,'routineTasks','byRoutine', id);
+      for (const t of tasks || []){
+        await idb.del(db,'routineTasks', t.id);
+        await audit('delete','routineTasks', t.id);
+      }
     }
-    showToast('Tâche validée — vous pouvez l’archiver');
-    refreshRedTeam();
-    refreshActions();
-  }));
+    await idb.del(db, store, id);
+    await audit('delete', store, id);
+    showToast(`${label} supprimé`);
+  }catch(err){
+    console.warn('Erreur lors de la suppression de validation différée', err);
+    showToast('Erreur lors de la suppression');
+  }
+  refreshStoreAfterValidation(store);
+  refreshRedTeam();
+  refreshDashboard();
 }
 
 function openRedTeamForm(entryId){
@@ -2955,10 +3140,19 @@ function saveDoneRoutineToday(){
       else {
         rid = await nextId('R','routines');
       }
+      const existing = isUpdate ? await idb.get(db,'routines', rid) : null;
       // Build routine object
-      const routine = { id: rid, idSystem, name, frequency, autoCreate: autoCreate?true:false, active:true, archived:false };
+      const routine = existing ? { ...existing } : { id: rid, active:true, archived:false };
+      routine.idSystem = idSystem;
+      routine.name = name;
+      routine.frequency = frequency;
+      routine.autoCreate = autoCreate ? true : false;
+      if (!existing) routine.archived = false;
+      delete routine.dow;
+      delete routine.dom;
       if (frequency==='weekly') routine.dow = dow;
       if (frequency==='monthly') routine.dom = dom;
+      ensureValidationMetadata('routines', existing, routine);
       // Save routine
       await idb.put(db,'routines', routine);
       await audit(isUpdate?'update':'create','routines', rid);
@@ -3063,7 +3257,9 @@ function saveDoneRoutineToday(){
         newRoutine.name = (r.name || '') + ' (copie)';
         // Activer la routine et s'assurer qu'elle n'est pas archivée
         newRoutine.active = true;
-        delete newRoutine.archived;
+        newRoutine.archived = false;
+        delete newRoutine.validation;
+        ensureValidationMetadata('routines', null, newRoutine);
         await idb.put(db,'routines', newRoutine);
         await audit('create','routines', newId);
         // Dupliquer chaque tâche de routine
