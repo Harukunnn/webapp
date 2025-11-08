@@ -507,6 +507,12 @@
           <label>Étapes d’escalade<textarea name="escalation" rows="2" placeholder="Listez les étapes (une par ligne)"></textarea></label>
           <label>Projets parents<select name="parentProjects" multiple size="4"></select><span class="field-hint">Sélectionnez les projets englobants pour créer des systèmes multi-niveaux.</span></label>
         </div>
+        <fieldset class="objective-editor" data-target="projectObjectives">
+          <legend>🎯 Objectifs du projet</legend>
+          <p id="projectObjectivesHint" class="muted">Ajoutez au minimum trois objectifs couvrant le temps, le résultat et la méthode pour cadrer le projet.</p>
+          <div id="projectObjectives" class="objective-items" role="list"></div>
+          <button type="button" class="secondary" data-add-objective="projectObjectives">➕ Ajouter un objectif</button>
+        </fieldset>
         <div class="form-actions">
           <button type="submit">💾 Enregistrer</button>
           <button type="button" class="secondary" id="cancelProject">Annuler</button>
