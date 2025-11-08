@@ -284,36 +284,6 @@ tr.hibernation{
   .table{ background:white; color:black; }
 }
 
-/* Timeline pour le module J.E.U. */
-.timeline {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 12px;
-}
-.timeline .card {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 12px;
-  background: var(--card);
-}
-.timeline .card h4 {
-  margin: 0 0 4px;
-  font-size: 1rem;
-  color: var(--accent);
-}
-.timeline .card .meta {
-  font-size: 0.85rem;
-  color: var(--text2);
-  margin-bottom: 6px;
-}
-.timeline .card .field {
-  margin-bottom: 4px;
-}
-.timeline .card .field strong {
-  color: var(--text);
-}
-
 /* ===================================================== */
 /* Options avancées pour formulaires
    Les sections avancées sont masquées par défaut via l'attribut hidden.

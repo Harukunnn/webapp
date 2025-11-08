@@ -29,13 +29,12 @@
       <button data-nav="actions" class="nav-btn hidden">Actions</button>
       <button data-nav="routines" class="nav-btn hidden">Routines</button>
       <button data-nav="views" class="nav-btn">Vues</button>
-      <!-- Nouvel onglet Review regroupant Red‑Team et J.E.U. -->
+      <!-- Nouvel onglet Review regroupant les activités de Red‑Team. -->
       <button data-nav="review" class="nav-btn">Review</button>
       <!-- Boutons internes masqués nécessaires pour le routage des sous‑menus -->
       <button data-nav="archives" class="nav-btn hidden">Archivés</button>
       <button data-nav="params" class="nav-btn hidden">Paramètres</button>
       <button data-nav="redteam" class="nav-btn hidden">Red‑Team</button>
-      <button data-nav="jeu" class="nav-btn hidden">🧭 J.E.U.</button>
     </nav>
 
     <!-- Sous-menu pour l’onglet "Objet". Masqué par défaut et affiché uniquement lorsque
@@ -50,10 +49,9 @@
       <button data-subview="archives" class="subnav-btn" aria-pressed="false">Archivés</button>
     </div>
 
-    <!-- Sous-menu pour l’onglet "Review" regroupant Red-Team et J.E.U. -->
+    <!-- Sous-menu pour l’onglet "Review" dédié aux activités Red-Team. -->
     <div id="reviewSubnav" class="subnav hidden" aria-label="Sous-menu Review">
       <button data-review="redteam" class="subnav-btn" aria-pressed="false">Red‑Team</button>
-      <button data-review="jeu" class="subnav-btn" aria-pressed="false">J.E.U.</button>
     </div>
     <div class="toolbar">
       <button id="btnTheme" title="Basculer thème">🌓</button>
@@ -105,7 +103,7 @@
         <div class="card"><div class="kpi-label">Tâches routines aujourd’hui</div><div class="kpi-value" id="kpiRoutineTasksToday">—</div></div>
         <!-- Carte d’alertes pour les tâches en retard/red‑team en attente -->
         <div class="card warn"><div class="kpi-label">Alertes</div><div class="kpi-value" id="kpiAlerts">—</div></div>
-        <!-- Carte pour les entrées Red‑Team à traiter ou commits JEU en attente -->
+        <!-- Carte pour les entrées Red‑Team à traiter -->
         <div class="card"><div class="kpi-label">Red‑Team en attente</div><div class="kpi-value" id="kpiRedTeamPending">—</div></div>
       </div>
 
@@ -174,39 +172,6 @@
         <div id="dashGantt" class="gantt"></div>
       </div>
     </section>
-
-    <!-- JEU (Journal d'Évolution Universel) -->
-    <section id="view-jeu" class="view" aria-labelledby="h-jeu">
-      <div class="list-header">
-        <h1 id="h-jeu">J.E.U. – Journal d’Évolution Universel</h1>
-        <div class="right">
-          <button id="btnJEUNew">➕ Nouveau commit</button>
-          <button id="btnJEUReport">📘 Générer bibliothèque</button>
-        </div>
-      </div>
-      <!-- Timeline des commits JEU (affichage des entrées sous forme de cartes) -->
-      <div id="jeuTimeline" class="timeline"></div>
-      <!-- Formulaire / modale pour ajouter un nouveau commit JEU -->
-      <form id="formJEU" class="form collapsed" aria-label="Formulaire JEU">
-        <h3 id="titleJEUForm">Nouveau commit J.E.U.</h3>
-        <div class="grid grid-2">
-          <label>Date<input type="date" name="date" required /></label>
-          <label>Projet<select name="projet"></select></label>
-          <label>Décision<textarea name="decision" rows="2" required></textarea></label>
-          <label>Cause<textarea name="cause" rows="2" required></textarea></label>
-          <label>Impact<textarea name="impact" rows="2" required></textarea></label>
-          <label>Correctif<textarea name="correctif" rows="2" required></textarea></label>
-          <label>Leçon<textarea name="lecon" rows="2" required></textarea></label>
-          <label>Énergie (1–10)<input type="number" name="energie" min="1" max="10" step="1" value="10" required /></label>
-          <label>Lien commit<input type="text" name="lien_commit" /></label>
-        </div>
-        <div class="form-actions">
-          <button type="submit">💾 Enregistrer</button>
-          <button type="button" class="secondary" id="cancelJEU">Annuler</button>
-        </div>
-      </form>
-    </section>
-
 
     <!-- ROUTINES (périodiques) -->
     <section id="view-routines" class="view" aria-labelledby="h-routines">
@@ -1070,9 +1035,6 @@ Maquette V1"></textarea></label>
   <!-- Librairie jsPDF pour générer des rapports PDF. Chargée depuis un CDN. -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="app.js?v=3.4.25"></script>
-  <!-- Module J.E.U. pour le Journal d'Évolution Universel. Utilise le même
-       paramètre de version pour invalider le cache lorsque ce script évolue. -->
-  <script src="jeu.js?v=3.4.25"></script>
   <!-- Moteur d’auto‑priorisation pour calculer et appliquer des scores aux actions -->
   <script src="prioritizer.js?v=3.4.25"></script>
   <script>

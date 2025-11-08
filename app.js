@@ -16,12 +16,11 @@
 // Gantt chart) and finalises the red‑team fixes. Bumping the
 // version here ensures the UI and service worker cache are invalidated
 // appropriately when you deploy the updated files.
-// Mise à jour : version 3.4.9 intègre le module J.E.U. complet, les KPI routines,
+// Mise à jour : version 3.4.9 introduit les KPI routines,
 // les indicateurs Kairos (contribution, énergie, dilution) et la gestion
 // automatique de l'hibernation pour les projets à faible énergie.
-// Mise à jour de version : passage à v3.4.10 pour corriger la non-initialisation du module J.E.U.
-// Mise à jour de la version : inclut l’auto‑priorisation des actions et les améliorations du J.E.U. (Journal d’Évolution Universel)
-// Mise à jour de la version : ajout du flux Red‑Team automatisé et intégration des entrées Red‑Team
+// Mise à jour de la version : inclut l’auto‑priorisation des actions
+// et le flux Red‑Team automatisé avec intégration des entrées Red‑Team
 const APP_VERSION = '3.4.25';
 
   // Exposer la version de l’application sur l’objet global afin d’y accéder
@@ -428,47 +427,6 @@ const APP_VERSION = '3.4.25';
     // Activer le basculement des options avancées sur les formulaires.
     bindAdvancedToggles();
     refreshAll();
-    // Après l'initialisation et le rendu complet des vues, initialiser le module J.E.U. (Journal d'Évolution Universel)
-    // Certaines versions du code ne déclenchent pas correctement initJEU() via DOMContentLoaded lorsque
-    // le script est chargé dynamiquement. Ce rappel explicite garantit que les événements du module
-    // JEU sont bien attachés (bouton Nouveau commit, timeline, etc.).
-    if (typeof window.initJEU === 'function') {
-      try {
-        window.initJEU();
-      } catch (e) {
-        console.warn('Erreur lors de l\'initialisation du module JEU', e);
-      }
-    }
-
-    // En complément, attacher directement les gestionnaires pour le module JEU dans
-    // l'intégration au tableau de bord. Cela garantit que l'ouverture du formulaire
-    // fonctionne même si initJEU() n'a pas encore attaché ses propres écouteurs.
-    (function(){
-      const btnNew = document.getElementById('btnJEUNew');
-      const formJEU = document.getElementById('formJEU');
-      const btnReport = document.getElementById('btnJEUReport');
-      const btnCancelJEU = document.getElementById('cancelJEU');
-      if (btnNew && formJEU){
-        btnNew.addEventListener('click', () => {
-          formJEU.classList.remove('collapsed');
-          formJEU.style.display = '';
-          formJEU.dataset.editing = '';
-          try{ formJEU.scrollIntoView({ behavior:'smooth', block:'nearest' }); }catch(e){}
-        });
-      }
-      if (btnCancelJEU && formJEU){
-        btnCancelJEU.addEventListener('click', () => {
-          formJEU.reset();
-          formJEU.classList.add('collapsed');
-          formJEU.style.display = 'none';
-        });
-      }
-      if (btnReport){
-        btnReport.addEventListener('click', () => {
-          if (typeof window.generateMetaReport === 'function'){ window.generateMetaReport(); }
-        });
-      }
-    })();
 
     // Mettre à jour dynamiquement la version affichée dans l'entête pour qu'elle corresponde
     // à APP_VERSION. Cela évite de devoir modifier manuellement index.html à chaque
@@ -569,14 +527,14 @@ const APP_VERSION = '3.4.25';
     });
   }
 
-  // Sous-menu review : gérer les clics sur les sous-onglets (redteam, jeu).
+  // Sous-menu review : gérer les clics sur le sous-onglet Red-Team.
   function bindReviewSubnav(){
     const subnav = document.getElementById('reviewSubnav');
     if (!subnav) return;
     subnav.querySelectorAll('.subnav-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const target = btn.dataset.review;
-        // Afficher la vue correspondante (redteam ou jeu)
+        // Afficher la vue correspondante
         showView(target);
         // Laisser l'onglet principal "Review" actif
         document.querySelectorAll('.nav-btn').forEach(nb => {
@@ -1343,7 +1301,6 @@ const APP_VERSION = '3.4.25';
     if (name==='views') return refreshViews();
     if (name==='archives') return refreshArchives();
     if (name==='params') return refreshParams();
-    if (name==='jeu' && typeof window.renderJEUView === 'function') return window.renderJEUView();
     if (name==='redteam') return refreshRedTeam();
   }
 
@@ -1602,7 +1559,7 @@ const APP_VERSION = '3.4.25';
   /**
    * Génère un rapport complet de l’état de l’application et télécharge un PDF.
    * Le rapport compile l’ensemble des objectifs globaux, systèmes, projets,
-   * actions, routines, entrées Red‑Team et commits J.E.U. présents dans
+   * actions, routines et entrées Red‑Team présentes dans
    * l’application. Chaque section est structurée avec des titres et les
    * propriétés essentielles afin de fournir un aperçu exhaustif. Utilise
    * la bibliothèque jsPDF (chargée via CDN) pour composer le document.
@@ -1621,9 +1578,6 @@ const APP_VERSION = '3.4.25';
       // Charger les entrées Red‑Team via la fonction existante
       try { await loadRedTeam(); } catch(e) {}
       const redEntries = (typeof redTeamEntries !== 'undefined') ? redTeamEntries.slice() : [];
-      // Charger les commits JEU à partir du stockage local (journal_evolution)
-      let jeuEntries = [];
-      try { jeuEntries = JSON.parse(localStorage.getItem('journal_evolution') || '[]'); } catch(e) { jeuEntries = []; }
       // Obtenir l’instance jsPDF depuis le module UMD chargé via CDN
       if (!window.jspdf || !window.jspdf.jsPDF){
         alert('La bibliothèque jsPDF n’est pas disponible. Veuillez vérifier la connexion réseau.');
@@ -1651,7 +1605,7 @@ const APP_VERSION = '3.4.25';
       doc.text(10, y, `Rapport complet Kairos – ${dateStr}`);
       y += 10;
       doc.setFont(undefined,'normal');
-      addLine('Ce document présente un état exhaustif de toutes les entités enregistrées dans l’application : objectifs globaux, systèmes, projets, actions, routines, entrées Red‑Team et journal d’évolution (J.E.U.).', 0, 10);
+      addLine('Ce document présente un état exhaustif de toutes les entités enregistrées dans l’application : objectifs globaux, systèmes, projets, actions, routines et entrées Red‑Team.', 0, 10);
       // Section Globaux
       addLine('Objectifs globaux', 0, 14, true);
       globals.forEach(g => {
@@ -1722,19 +1676,6 @@ const APP_VERSION = '3.4.25';
         addLine(`ID : ${rt.id} | Tâche : ${rt.taskId || ''} | Titre : ${rt.title || ''}`, 2, 11, true);
         addLine(`Date : ${rt.dateAdded || ''} | Statut : ${rt.status || ''} | Suggestion : ${rt.suggestedTime || ''}`, 4);
         if (rt.autoSummary) addLine(`Résumé : ${rt.autoSummary}`, 4);
-        y+=2;
-      });
-      // Section Journal d’Évolution Universel (JEU)
-      addLine('Journal d’Évolution Universel (J.E.U.)', 0, 14, true);
-      jeuEntries.forEach(e => {
-        addLine(`ID : ${e.id || ''} | Date : ${e.date || ''} | Projet : ${e.projet || ''}`, 2, 11, true);
-        addLine(`Décision : ${e.decision || ''}`, 4);
-        addLine(`Cause : ${e.cause || ''}`, 4);
-        addLine(`Impact : ${e.impact || ''}`, 4);
-        addLine(`Correctif : ${e.correctif || ''}`, 4);
-        addLine(`Leçon : ${e.lecon || ''}`, 4);
-        addLine(`Énergie : ${(e.energie != null ? e.energie+'/10' : '')}`, 4);
-        if (e.lien_commit) addLine(`Lien commit : ${e.lien_commit}`, 4);
         y+=2;
       });
       // Générer et télécharger le PDF
@@ -2677,23 +2618,6 @@ async function refreshRedTeam(){
       await idb.put(db,'actions', action);
       await audit('update','actions', action.id);
     }
-    // Ajouter au J.E.U. minimalement si disponible
-    try{
-      if (typeof window.addCommitJEU === 'function'){
-        const jeuEntry = {
-          date: entry.dateCommitted,
-          projet: '',
-          decision: entry.decision || '(validation rapide)',
-          cause: entry.cause || '',
-          impact: entry.impact || '',
-          correctif: entry.correctif || '',
-          lecon: entry.lesson || '',
-          energie: Number(entry.energy) || '',
-          lien_commit: entry.lien_commit || ''
-        };
-        window.addCommitJEU(jeuEntry);
-      }
-    }catch(err){ console.warn('Erreur lors de l’appel à addCommitJEU', err); }
     showToast('Entrée Red‑Team validée');
     refreshRedTeam();
     refreshActions();
@@ -2776,23 +2700,6 @@ function handleRedTeamCommit(e){
     }
     refreshActions();
   })();
-  // Intégration J.E.U. : appeler addCommitJEU si disponible
-  try{
-    if (typeof window.addCommitJEU === 'function'){
-      const jeuEntry = {
-        date: entry.dateCommitted,
-        projet: '',
-        decision: entry.decision,
-        cause: entry.cause,
-        impact: entry.impact,
-        correctif: entry.correctif,
-        lecon: entry.lesson,
-        energie: Number(entry.energy) || '',
-        lien_commit: entry.lien_commit
-      };
-      window.addCommitJEU(jeuEntry);
-    }
-  }catch(err){ console.warn('Erreur lors de l’addCommitJEU', err); }
   showToast('✅ Commit structurel ajouté — vous pouvez maintenant archiver la tâche.');
   form.classList.add('collapsed');
   refreshRedTeam();
