@@ -624,21 +624,16 @@ const APP_VERSION = '3.5.0';
       btn.addEventListener('click', () => {
         if (!btn.dataset.nav) return;
         showView(btn.dataset.nav);
+        closeMobileNav();
       });
-      btn.addEventListener('animationend', () => btn.classList.remove('pulse'));
     });
     applyVisitedState();
   }
 
   function enhanceNavDrawer(){
     bindDrawerButtons();
-    document.body.classList.add('sidebar-expanded');
-    const toggle = document.getElementById('btnSettings');
-    if (toggle){
-      toggle.addEventListener('dblclick', () => {
-        document.body.classList.toggle('sidebar-collapsed');
-      });
-    }
+    setupResponsiveNav();
+    setupMoreMenu();
   }
 
   function bindDrawerButtons(){
@@ -647,6 +642,79 @@ const APP_VERSION = '3.5.0';
     });
     document.querySelectorAll('#reviewDrawer .subnav-btn').forEach(btn => {
       btn.addEventListener('click', () => showView(btn.dataset.review));
+    });
+  }
+
+  function closeMoreMenu(){
+    const morePanel = document.getElementById('navMorePanel');
+    const trigger = document.getElementById('btnNavMore');
+    if (morePanel){
+      morePanel.classList.remove('open');
+      morePanel.setAttribute('aria-hidden', 'true');
+    }
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+  }
+
+  function closeMobileNav(){
+    const toggle = document.getElementById('btnNavToggle');
+    document.body.classList.remove('nav-open');
+    if (toggle) toggle.setAttribute('aria-expanded', 'false');
+    closeMoreMenu();
+  }
+
+  function setupResponsiveNav(){
+    const navToggle = document.getElementById('btnNavToggle');
+    if (!navToggle) return;
+    navToggle.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const expanded = navToggle.getAttribute('aria-expanded') === 'true';
+      const next = !expanded;
+      navToggle.setAttribute('aria-expanded', String(next));
+      document.body.classList.toggle('nav-open', next);
+      if (!next) closeMoreMenu();
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 1024 && document.body.classList.contains('nav-open')){
+        closeMobileNav();
+      }
+    });
+    document.addEventListener('click', (event) => {
+      if (!document.body.classList.contains('nav-open')) return;
+      const primaryNav = document.getElementById('primaryNav');
+      if (!primaryNav) return;
+      if (!primaryNav.contains(event.target) && event.target !== navToggle){
+        closeMobileNav();
+        closeMoreMenu();
+      }
+    });
+  }
+
+  function setupMoreMenu(){
+    const trigger = document.getElementById('btnNavMore');
+    const panel = document.getElementById('navMorePanel');
+    if (!trigger || !panel) return;
+    const setOpen = (open) => {
+      trigger.setAttribute('aria-expanded', String(open));
+      panel.classList.toggle('open', open);
+      panel.setAttribute('aria-hidden', open ? 'false' : 'true');
+    };
+    trigger.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const expanded = trigger.getAttribute('aria-expanded') === 'true';
+      setOpen(!expanded);
+      if (!expanded && window.innerWidth <= 1024){
+        document.body.classList.add('nav-open');
+      }
+    });
+    document.addEventListener('click', (event) => {
+      if (panel.contains(event.target) || trigger.contains(event.target)) return;
+      setOpen(false);
+    });
+    panel.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape'){ setOpen(false); trigger.focus(); }
+    });
+    trigger.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape'){ setOpen(false); trigger.blur(); }
     });
   }
 
@@ -717,7 +785,6 @@ const APP_VERSION = '3.5.0';
     applyVisitedState();
     const activeBtn = Array.from(document.querySelectorAll('.nav-btn')).find(btn => btn.classList.contains('active'));
     if (activeBtn){
-      activeBtn.classList.add('pulse');
       activeBtn.style.setProperty('--nav-progress', '100%');
     }
   }
@@ -767,7 +834,6 @@ const APP_VERSION = '3.5.0';
       const online = navigator.onLine;
       badge.classList.toggle('online', online);
       badge.classList.toggle('offline', !online);
-      if (dot) dot.classList.toggle('pulse', online);
       if (text) text.textContent = online ? 'En ligne' : 'Hors ligne';
       badge.setAttribute('data-state', online ? 'online' : 'offline');
     };
@@ -779,11 +845,12 @@ const APP_VERSION = '3.5.0';
   function bindNotifications(){
     const btn = document.getElementById('btnNotifications');
     if (!btn) return;
+    btn.dataset.count = btn.dataset.count || '0';
     btn.addEventListener('click', () => {
       showToast('Centre de notifications bientôt disponible');
-      btn.classList.remove('has-alert');
       const badge = btn.querySelector('.badge');
       if (badge) badge.textContent = '0';
+      btn.dataset.count = '0';
     });
   }
   function bindTheme(){
@@ -2648,8 +2715,8 @@ const APP_VERSION = '3.5.0';
       if (notif){
         const total = alerts;
         notif.textContent = total > 99 ? '99+' : String(total);
-        const parent = notif.closest('.notifications');
-        if (parent){ parent.classList.toggle('has-alert', total > 0); parent.setAttribute('data-count', String(total)); }
+        const parent = document.getElementById('btnNotifications') || notif.closest('.icon-btn');
+        if (parent){ parent.dataset.count = String(total); }
       }
     }catch(e){ console.warn('Erreur calcul KPI actions', e); }
 

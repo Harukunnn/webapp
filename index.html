@@ -10,8 +10,8 @@
 </head>
 <body>
   <a class="skip" href="#app">Aller au contenu</a>
-  <header class="topbar glass" role="banner">
-    <div class="topbar-left">
+  <header class="topbar" role="banner">
+    <div class="topbar-section topbar-left">
       <div class="logo-wrap" aria-hidden="true">
         <svg viewBox="0 0 64 64" role="presentation" focusable="false">
           <defs>
@@ -28,57 +28,90 @@
       </div>
       <div class="brand-stack" aria-label="Nom de l'application">
         <span class="brand-title">Klaro</span>
-        <span class="brand-version">Planificateur v3.5.0</span>
+        <span class="brand-badge">Planificateur v3.5.0</span>
       </div>
+    </div>
+    <div class="topbar-section topbar-center">
+      <button id="btnNavToggle" class="nav-toggle" aria-label="Ouvrir la navigation" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M4 6h16M4 12h16M4 18h16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+        </svg>
+      </button>
+      <nav id="primaryNav" class="nav primary-nav" aria-label="Navigation principale">
+        <button data-nav="dashboard" class="nav-btn active" aria-pressed="true">Dashboard</button>
+        <button data-nav="objects" class="nav-btn">Objectifs</button>
+        <button data-nav="views" class="nav-btn">Vues</button>
+        <button data-nav="review" class="nav-btn">Review</button>
+        <button data-nav="params" class="nav-btn">Paramètres</button>
+        <div class="nav-more">
+          <button id="btnNavMore" class="nav-more-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="navMorePanel">
+            Plus
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <div id="navMorePanel" class="nav-more-panel" role="menu" aria-hidden="true">
+            <button data-nav="globals" class="nav-btn" role="menuitem">Obj. Globaux</button>
+            <button data-nav="systems" class="nav-btn" role="menuitem">Obj. Système</button>
+            <button data-nav="projects" class="nav-btn" role="menuitem">Projets</button>
+            <button data-nav="actions" class="nav-btn" role="menuitem">Actions</button>
+            <button data-nav="routines" class="nav-btn" role="menuitem">Routines</button>
+            <button data-nav="archives" class="nav-btn" role="menuitem">Archivés</button>
+            <button data-nav="redteam" class="nav-btn" role="menuitem">Red‑Team</button>
+          </div>
+        </div>
+      </nav>
+      <div class="nav-drawer" id="navDrawer" aria-live="polite">
+        <div id="objectDrawer" class="drawer-panel" data-source="objects" aria-label="Sous-menu Objectifs">
+          <div class="drawer-title">Objectifs</div>
+          <div class="drawer-buttons">
+            <button data-subview="globals" class="subnav-btn" aria-pressed="false">Globaux</button>
+            <button data-subview="systems" class="subnav-btn" aria-pressed="false">Systèmes</button>
+            <button data-subview="projects" class="subnav-btn" aria-pressed="false">Projets</button>
+            <button data-subview="actions" class="subnav-btn" aria-pressed="false">Actions</button>
+            <button data-subview="routines" class="subnav-btn" aria-pressed="false">Routines</button>
+            <button data-subview="archives" class="subnav-btn" aria-pressed="false">Archivés</button>
+          </div>
+        </div>
+        <div id="reviewDrawer" class="drawer-panel" data-source="review" aria-label="Sous-menu Review">
+          <div class="drawer-title">Review</div>
+          <div class="drawer-buttons">
+            <button data-review="redteam" class="subnav-btn" aria-pressed="false">Red‑Team</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="topbar-section topbar-right">
       <span id="statusBadge" class="status-badge offline" role="status" aria-live="polite">
         <span class="dot" aria-hidden="true"></span>
         <span class="status-text">Hors ligne</span>
       </span>
-      <button id="btnNotifications" class="notifications" aria-label="Notifications">
-        <span class="icon" aria-hidden="true">🔔</span>
-        <span class="badge" id="notifCount">0</span>
-      </button>
-    </div>
-    <div class="topbar-right">
-      <div class="nav-stack">
-        <nav class="nav primary-nav" aria-label="Navigation principale">
-          <button data-nav="dashboard" class="nav-btn active" aria-pressed="true">Dashboard</button>
-          <button data-nav="objects" class="nav-btn">Objet</button>
-          <button data-nav="globals" class="nav-btn hidden">Obj. Globaux</button>
-          <button data-nav="systems" class="nav-btn hidden">Obj. Système</button>
-          <button data-nav="projects" class="nav-btn hidden">Projets</button>
-          <button data-nav="actions" class="nav-btn hidden">Actions</button>
-          <button data-nav="routines" class="nav-btn hidden">Routines</button>
-          <button data-nav="views" class="nav-btn">Vues</button>
-          <button data-nav="review" class="nav-btn">Review</button>
-          <button data-nav="archives" class="nav-btn hidden">Archivés</button>
-          <button data-nav="params" class="nav-btn hidden">Paramètres</button>
-          <button data-nav="redteam" class="nav-btn hidden">Red‑Team</button>
-        </nav>
-        <div class="nav-drawer" id="navDrawer" aria-live="polite">
-          <div id="objectDrawer" class="drawer-panel" data-source="objects" aria-label="Sous-menu Objet">
-            <div class="drawer-title">Objectifs</div>
-            <div class="drawer-buttons">
-              <button data-subview="globals" class="subnav-btn" aria-pressed="false">Globaux</button>
-              <button data-subview="systems" class="subnav-btn" aria-pressed="false">Systèmes</button>
-              <button data-subview="projects" class="subnav-btn" aria-pressed="false">Projets</button>
-              <button data-subview="actions" class="subnav-btn" aria-pressed="false">Actions</button>
-              <button data-subview="routines" class="subnav-btn" aria-pressed="false">Routines</button>
-              <button data-subview="archives" class="subnav-btn" aria-pressed="false">Archivés</button>
-            </div>
-          </div>
-          <div id="reviewDrawer" class="drawer-panel" data-source="review" aria-label="Sous-menu Review">
-            <div class="drawer-title">Review</div>
-            <div class="drawer-buttons">
-              <button data-review="redteam" class="subnav-btn" aria-pressed="false">Red‑Team</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="toolbar">
-        <button id="btnTheme" title="Basculer thème">🌓</button>
-        <button id="btnPrivacy" title="Mode confidentialité (masquer noms/€)">🙈</button>
-        <button id="btnSettings" title="Paramètres">⚙️</button>
+      <div class="action-cluster">
+        <button id="btnNotifications" class="icon-btn has-badge" aria-label="Notifications" data-count="0">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M6 8a6 6 0 0 1 12 0v5l2 2H4l2-2Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M9 18v.5a3 3 0 0 0 6 0V18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span class="badge" id="notifCount" aria-live="polite">0</span>
+        </button>
+        <button id="btnTheme" class="icon-btn" title="Basculer thème" aria-label="Basculer thème">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12 3a9 9 0 1 0 9 9 6 6 0 0 1-9-9Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <button id="btnPrivacy" class="icon-btn" title="Mode confidentialité (masquer noms/€)" aria-label="Mode confidentialité">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M2 12s3-6 10-6 10 6 10 6-3 6-10 6S2 12 2 12Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.6" />
+            <path d="m3 3 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+          </svg>
+        </button>
+        <button id="btnSettings" class="icon-btn" title="Paramètres" aria-label="Paramètres">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12 15a3 3 0 1 0-3-3 3 3 0 0 0 3 3Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.18a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
       </div>
     </div>
   </header>
