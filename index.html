@@ -15,32 +15,12 @@
         <strong>Atlas Luxury Ops</strong>
       </div>
     </div>
-    <div class="topbar-stats" aria-label="Statuts de confiance">
-      <div class="stat" id="uptimeStat" role="status">
-        <span class="dot online" aria-hidden="true"></span>
-        <div>
-          <p class="muted">Uptime</p>
-          <strong>99.99%</strong>
-        </div>
-      </div>
-      <div class="stat" id="latencyStat" role="status">
-        <span class="dot" aria-hidden="true"></span>
-        <div>
-          <p class="muted">Latence</p>
-          <strong>&lt; 280ms</strong>
-        </div>
-      </div>
-      <div class="stat" id="privacyStat" role="status">
-        <span class="dot" aria-hidden="true"></span>
-        <div>
-          <p class="muted">Données</p>
-          <strong>Chiffrées & RGPD</strong>
-        </div>
-      </div>
+    <div class="service-health" id="serviceHealth" role="status">
+      <span class="dot online" aria-hidden="true"></span>
+      <span class="health-text">Service stable · Uptime 99.9% · Latence &lt; 280ms · Données chiffrées</span>
     </div>
     <div class="topbar-actions">
-      <button type="button" id="btnConcierge" class="ghost">Parler au concierge</button>
-      <button type="button" id="btnUrgent" class="primary ghost">Assistance 24/7</button>
+      <button type="button" id="btnConcierge" class="ghost">Concierge 24/7</button>
     </div>
   </nav>
 
@@ -54,8 +34,8 @@
       </div>
     </div>
     <div class="hero-meta">
-      <div class="badge">Flux : Découverte → Profil → Vols → Hôtels → Activités → Itinéraire → Budget</div>
-      <div class="badge badge-soft" id="intelStatus">Recherche non lancée</div>
+      <div class="badge">Parcours linéaire : Profil → Vols → Hôtels → Activités → Récap</div>
+      <p class="muted" id="intelStatus">Recherche non lancée</p>
     </div>
   </header>
 
@@ -70,59 +50,27 @@
       <header class="panel-header">
         <div>
           <p class="eyebrow">Transparence temps réel</p>
-          <h2 id="trust-title">Fiabilité visible & engagements</h2>
-        </div>
-        <div class="panel-actions">
-          <span class="pill pill-soft" id="slaBadge">SLA 99.9%</span>
-          <span class="pill" id="trustCTA">Preuves live activées</span>
+          <h2 id="trust-title">Fiabilité visible</h2>
         </div>
       </header>
-      <div class="trust-grid" aria-label="Indicateurs de confiance">
-        <article class="trust-card">
-          <h3>Perf & uptime</h3>
-          <p class="muted" id="uptimeCopy">Monitoré en continu, statut nominal.</p>
-          <div class="sparkline" id="sparkline"></div>
-        </article>
-        <article class="trust-card">
-          <h3>Protection des données</h3>
-          <p class="muted">Chiffrement bout-en-bout, traces minimales, consentement explicite.</p>
-          <ul class="checklist">
-            <li>Stockage UE</li>
-            <li>RGPD by design</li>
-            <li>Rotation des journaux</li>
-          </ul>
-        </article>
-        <article class="trust-card">
-          <h3>Qualité de service</h3>
-          <p class="muted">Récap post-action, jalons, SLA concierge 24/7.</p>
-          <div class="timeline">
-            <span class="dot online"></span>
-            <span class="dot"></span>
-            <span class="dot"></span>
-            <span class="dot"></span>
-          </div>
-        </article>
-      </div>
+      <ul class="trust-list" aria-label="Indicateurs de confiance">
+        <li id="uptimeCopy">Monitoring actif, uptime 99.9%, latence stable.</li>
+        <li>Données chiffrées, stockage UE, consentement explicite.</li>
+        <li>Concierge prioritaire 24/7, SLA appliqué.</li>
+      </ul>
     </section>
 
     <section class="panel audit" aria-labelledby="audit-title">
       <header class="panel-header">
         <div>
           <p class="eyebrow">Red team UX/UI</p>
-          <h2 id="audit-title">Contrôle qualité 120 points</h2>
-        </div>
-        <div class="panel-actions">
-          <span class="pill">Strict mode activé</span>
-          <span class="pill pill-soft">Délais simulés 5–10s</span>
+          <h2 id="audit-title">Contrôles essentiels</h2>
         </div>
       </header>
       <div class="audit-grid">
-        <article class="audit-card"><h3>Accessibilité</h3><p>Contraste AA, focus visible, aria-live sur flux agentique.</p></article>
-        <article class="audit-card"><h3>Réalisme</h3><p>Scraping réel injecté sur chaque option A/B/C + délais aléatoires.</p></article>
-        <article class="audit-card"><h3>Ergonomie</h3><p>Navigation par étapes, badges d’état, bouton reset rapide.</p></article>
-        <article class="audit-card"><h3>Images</h3><p>Strip responsive, légendes descriptives, chargement paresseux.</p></article>
-        <article class="audit-card"><h3>Sécurité</h3><p>Blocage destinations sensibles + alertes cohérence.</p></article>
-        <article class="audit-card"><h3>Fidélité prompt</h3><p>6 agents séquencés, options courtes, résumé final exportable.</p></article>
+        <article class="audit-card"><h3>Accessibilité</h3><p>Contraste AA, focus visible, aria-live sur le flux.</p></article>
+        <article class="audit-card"><h3>Sécurité</h3><p>Blocage des destinations sensibles + vérifications cohérence.</p></article>
+        <article class="audit-card"><h3>Fidélité</h3><p>Parcours linéaire, options limitées, résumé exportable.</p></article>
       </div>
     </section>
 
@@ -130,15 +78,11 @@
       <header class="panel-header">
         <div>
           <p class="eyebrow">Onboarding concierge</p>
-          <h2 id="concierge-title">Personalisation immédiate & actions rapides</h2>
-        </div>
-        <div class="panel-actions">
-          <span class="pill">3 questions clés</span>
-          <span class="pill pill-soft">Accès humain 24/7</span>
+          <h2 id="concierge-title">Personalisation immédiate</h2>
         </div>
       </header>
       <div class="concierge-grid">
-        <div class="concierge-card">
+        <div class="concierge-card concierge-card--accent">
           <h3>Mini-entretien</h3>
           <form id="conciergeForm" class="micro-form">
             <label class="field">
@@ -170,9 +114,9 @@
             </div>
           </form>
         </div>
-        <div class="concierge-card concierge-card--accent">
+        <div class="concierge-card">
           <h3>Concierge & assistance</h3>
-          <p class="muted">Disponible partout via le bouton flottant. Rappel sous 2 minutes en moyenne.</p>
+          <p class="muted">Disponible en un clic. Rappel sous 2 minutes en moyenne.</p>
           <ul class="checklist">
             <li>Chat sécurisé</li>
             <li>Rappel téléphonique</li>
@@ -180,17 +124,8 @@
           </ul>
           <div class="concierge-actions">
             <button type="button" class="ghost" id="btnCallMe">Demander un rappel</button>
-            <button type="button" class="ghost" id="btnShareSummary">Partager le dossier</button>
           </div>
-        </div>
-        <div class="concierge-card">
-          <h3>Actions rapides</h3>
-          <div class="quick-actions" id="quickActions" aria-live="polite">
-            <button type="button" class="chip ghost">Préparer un dossier PDF</button>
-            <button type="button" class="chip ghost">Planifier un check-in express</button>
-            <button type="button" class="chip ghost">Réserver un transfert premium</button>
-          </div>
-          <p class="muted" id="conciergeNote">Personnalisation en attente des 3 réponses.</p>
+          <p class="muted" id="conciergeNote">Personnalisation en attente des réponses clés.</p>
         </div>
       </div>
     </section>
@@ -199,26 +134,29 @@
       <header class="panel-header">
         <div>
           <p class="eyebrow">Agent de sécurité</p>
-          <h2 id="safety-title">Filtre risques &amp; destinations bannies</h2>
+          <h2 id="safety-title">Filtre risques</h2>
         </div>
         <div class="panel-actions">
           <button id="btnReset" class="ghost">Réinitialiser</button>
         </div>
       </header>
-      <p class="muted">Le système refuse automatiquement toute demande illégale ou dangereuse, puis propose des alternatives sûres.</p>
-      <div class="banned-grid" aria-label="Liste des zones bannies">
-        <article class="chip">Corée du Nord</article>
-        <article class="chip">Syrie</article>
-        <article class="chip">Afghanistan</article>
-        <article class="chip">Yémen</article>
-        <article class="chip">Somalie</article>
-        <article class="chip">Libye</article>
-        <article class="chip">Gaza</article>
-        <article class="chip">Zones de guerre actives</article>
-        <article class="chip">Bases militaires restreintes</article>
-        <article class="chip">Destinations fictives ou impossibles</article>
-        <article class="chip">Activités illégales ou immorales</article>
-      </div>
+      <p class="muted">Le système bloque automatiquement toute demande illégale ou dangereuse et propose des alternatives sûres.</p>
+      <details class="banned-summary">
+        <summary>Destinations bannies (aperçu)</summary>
+        <div class="banned-grid" aria-label="Liste des zones bannies">
+          <article class="chip">Corée du Nord</article>
+          <article class="chip">Syrie</article>
+          <article class="chip">Afghanistan</article>
+          <article class="chip">Yémen</article>
+          <article class="chip">Somalie</article>
+          <article class="chip">Libye</article>
+          <article class="chip">Gaza</article>
+          <article class="chip">Zones de guerre actives</article>
+          <article class="chip">Bases militaires restreintes</article>
+          <article class="chip">Destinations fictives ou impossibles</article>
+          <article class="chip">Activités illégales ou immorales</article>
+        </div>
+      </details>
     </section>
 
     <section class="panel" aria-labelledby="discovery-title">
@@ -226,8 +164,9 @@
         <div>
           <p class="eyebrow">Agent 0 — Découverte</p>
           <h2 id="discovery-title">Collecte rapide des intentions</h2>
+          <p class="muted">Champs essentiels en premier, préférences en option.</p>
         </div>
-        <div class="panel-actions">
+        <div class="panel-actions" aria-live="polite">
           <span class="pill" id="status">En attente</span>
         </div>
       </header>
@@ -252,39 +191,44 @@
           <span>Durée souhaitée (jours)</span>
           <input name="duration" type="number" min="2" max="21" value="7" />
         </label>
-        <label class="field">
-          <span>Vibe principale</span>
-          <select name="vibe">
-            <option value="relax">Relax</option>
-            <option value="aventure">Aventure</option>
-            <option value="city">City break</option>
-            <option value="romantic">Romantique</option>
-            <option value="famille">Famille</option>
-            <option value="mix">Mix</option>
-          </select>
-        </label>
-        <label class="field">
-          <span>Flexibilité</span>
-          <select name="flex">
-            <option value="dates-fixes">Dates fixes</option>
-            <option value="dates-flex">Dates flexibles</option>
-            <option value="destination-flex">Destination ouverte</option>
-          </select>
-        </label>
-        <label class="field">
-          <span>Voyageurs</span>
-          <select name="travelers">
-            <option value="solo">Solo</option>
-            <option value="couple">Couple</option>
-            <option value="famille">Famille</option>
-            <option value="amis">Amis</option>
-            <option value="business">Business</option>
-          </select>
-        </label>
-        <label class="field full">
-          <span>Contraintes ou préférences clés</span>
-          <textarea name="notes" rows="2" placeholder="ex. éviter les nuits trop chargées, besoin d’accès fauteuil…"></textarea>
-        </label>
+        <details class="full optional">
+          <summary>Préférences (facultatif)</summary>
+          <div class="grid compact">
+            <label class="field">
+              <span>Vibe principale</span>
+              <select name="vibe">
+                <option value="relax">Relax</option>
+                <option value="aventure">Aventure</option>
+                <option value="city">City break</option>
+                <option value="romantic">Romantique</option>
+                <option value="famille">Famille</option>
+                <option value="mix">Mix</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Flexibilité</span>
+              <select name="flex">
+                <option value="dates-fixes">Dates fixes</option>
+                <option value="dates-flex">Dates flexibles</option>
+                <option value="destination-flex">Destination ouverte</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Voyageurs</span>
+              <select name="travelers">
+                <option value="solo">Solo</option>
+                <option value="couple">Couple</option>
+                <option value="famille">Famille</option>
+                <option value="amis">Amis</option>
+                <option value="business">Business</option>
+              </select>
+            </label>
+            <label class="field full">
+              <span>Contraintes ou préférences clés</span>
+              <textarea name="notes" rows="2" placeholder="ex. éviter les nuits trop chargées, besoin d’accès fauteuil…"></textarea>
+            </label>
+          </div>
+        </details>
         <div class="actions full">
           <button type="submit" class="primary">Lancer le flux agentique</button>
         </div>
@@ -294,14 +238,14 @@
     <section class="panel" aria-labelledby="intel-title">
       <header class="panel-header">
         <div>
-          <p class="eyebrow">Scraping éthique</p>
-          <h2 id="intel-title">Signal d'information & images</h2>
+          <p class="eyebrow">Recherche & preuves visuelles</p>
+          <h2 id="intel-title">Signal d'information</h2>
         </div>
         <div class="panel-actions">
-          <button id="btnRefreshIntel" class="ghost" disabled>Relancer la recherche</button>
+          <button id="btnRefreshIntel" class="ghost" disabled>Actualiser</button>
         </div>
       </header>
-      <p class="muted">Recherche factuelle (résumés, hôtels/lieux) + vignettes d'images libres de droits. Les erreurs réseau sont signalées clairement.</p>
+      <p class="muted">Résumé factuel et quelques visuels. Les alternatives ne s’affichent que sur demande.</p>
       <div class="intel-grid">
         <div>
           <h3 class="intel-heading">Infos clés</h3>
@@ -326,10 +270,7 @@
       <header class="panel-header">
         <div>
           <p class="eyebrow">Agents 1 → 6</p>
-          <h2 id="workflow-title">Itinéraire guidé par options A/B/C</h2>
-        </div>
-        <div class="panel-actions">
-          <span class="pill pill-soft">Options limitées pour vitesse &amp; clarté</span>
+          <h2 id="workflow-title">Itinéraire guidé et épuré</h2>
         </div>
       </header>
       <div class="workflow">
@@ -357,7 +298,6 @@
         </div>
         <div class="panel-actions">
           <button id="btnExport" class="ghost" disabled>Copier le texte</button>
-          <button id="btnDownload" class="ghost" disabled>Télécharger en Markdown</button>
         </div>
       </header>
       <div id="summary" class="summary" aria-live="polite"></div>
@@ -367,19 +307,15 @@
       <header class="panel-header">
         <div>
           <p class="eyebrow">Boucle d'amélioration</p>
-          <h2 id="feedback-title">Feedback ultra-court</h2>
-        </div>
-        <div class="panel-actions">
-          <span class="pill pill-soft" id="npsBadge">NPS live</span>
+          <h2 id="feedback-title">Feedback express</h2>
         </div>
       </header>
       <form id="feedbackForm" class="micro-form">
         <label class="field">
           <span>Votre satisfaction globale</span>
           <div class="nps" role="radiogroup" aria-label="Note de satisfaction">
-            <label><input type="radio" name="score" value="9" checked /> 9</label>
-            <label><input type="radio" name="score" value="10" /> 10</label>
-            <label><input type="radio" name="score" value="8" /> 8</label>
+            <label><input type="radio" name="score" value="satisfait" checked /> Satisfait</label>
+            <label><input type="radio" name="score" value="ameliorer" /> À améliorer</label>
           </div>
         </label>
         <label class="field">
@@ -387,7 +323,7 @@
           <input type="text" name="comment" placeholder="ex. alléger l'étape vols" />
         </label>
         <div class="actions">
-          <button class="primary" type="submit">Envoyer au concierge</button>
+          <button class="primary" type="submit">Envoyer</button>
           <p class="muted" id="feedbackStatus" role="status"></p>
         </div>
       </form>

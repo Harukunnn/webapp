@@ -93,7 +93,6 @@ const conversation = document.getElementById("conversation");
 const stepList = Array.from(document.querySelectorAll("#stepList .step"));
 const summaryBlock = document.getElementById("summary");
 const exportBtn = document.getElementById("btnExport");
-const downloadBtn = document.getElementById("btnDownload");
 const statusPill = document.getElementById("status");
 const resetBtn = document.getElementById("btnReset");
 const thinkingIndicator = document.getElementById("thinkingIndicator");
@@ -105,19 +104,11 @@ const refreshIntelBtn = document.getElementById("btnRefreshIntel");
 const liveScrapeList = document.getElementById("liveScrapeList");
 const conciergeForm = document.getElementById("conciergeForm");
 const conciergeNote = document.getElementById("conciergeNote");
-const quickActions = document.getElementById("quickActions");
 const feedbackForm = document.getElementById("feedbackForm");
 const feedbackStatus = document.getElementById("feedbackStatus");
-const npsBadge = document.getElementById("npsBadge");
 const btnCallMe = document.getElementById("btnCallMe");
-const btnShareSummary = document.getElementById("btnShareSummary");
 const btnConcierge = document.getElementById("btnConcierge");
-const btnUrgent = document.getElementById("btnUrgent");
-const uptimeStat = document.getElementById("uptimeStat");
-const latencyStat = document.getElementById("latencyStat");
-const privacyStat = document.getElementById("privacyStat");
-const slaBadge = document.getElementById("slaBadge");
-const trustCTA = document.getElementById("trustCTA");
+const serviceHealth = document.getElementById("serviceHealth");
 
 function getScrapedSnippet(destination, stage) {
   const key = (destination || "").trim().toLowerCase();
@@ -160,7 +151,7 @@ function setStatus(text, tone = "neutral") {
 function setIntelStatus(text, tone = "neutral") {
   if (!intelStatus) return;
   intelStatus.textContent = text;
-  intelStatus.className = `badge ${tone === "danger" ? "danger" : tone === "success" ? "success" : "badge-soft"}`;
+  intelStatus.className = `muted ${tone}`;
 }
 
 function setThinking(text) {
@@ -251,7 +242,6 @@ function clearUI(skipPersist = false) {
   conversation.innerHTML = '<p class="muted">Démarrez le flux pour que l’IA multi‑rôle simule chaque étape comme dans le prompt original. Chaque étape propose 2 à 3 options maximum et attend votre validation.</p>';
   summaryBlock.innerHTML = "";
   exportBtn.disabled = true;
-  downloadBtn.disabled = true;
   intelCards.innerHTML = "";
   imageStrip.innerHTML = "";
   showIntelError("");
@@ -326,19 +316,14 @@ function showIntelError(message, tone = "error") {
 }
 
 function applyConciergeProfile(reason = "") {
-  if (!quickActions) return;
   const { priority, pace, service } = state.concierge;
   const destination = state.discovery?.destination || "votre destination";
-  const actions = [
-    `Dossier premium pour ${destination} (${priority})`,
-    pace === "soft" ? "Planning 2 temps forts/jour" : pace === "dense" ? "Planning 4 temps forts/jour" : "Planning équilibré 3 temps forts",
-    service === "dedicated" ? "Butler dédié + accueil VIP" : service === "hybrid" ? "Check-in express + ligne prioritaire" : "Parcours 100% digital sécurisé",
-  ];
-  quickActions.innerHTML = actions
-    .map((a) => `<button type=\"button\" class=\"chip ghost\">${a}</button>`)
-    .join("");
   if (conciergeNote) {
-    conciergeNote.textContent = reason ? `${reason} : expérience calibrée.` : "Concierge prêt à ajuster en direct.";
+    const pacing = pace === "soft" ? "2 temps forts/jour" : pace === "dense" ? "4 temps forts/jour" : "3 temps forts/jour";
+    const serviceCopy = service === "dedicated" ? "Butler dédié + accueil VIP" : service === "hybrid" ? "Humain si besoin" : "100% digital sécurisé";
+    conciergeNote.textContent = reason
+      ? `${reason} : dossier ${priority}, ${pacing}, ${serviceCopy}.`
+      : `Dossier ${destination} prêt : ${priority}, ${pacing}, ${serviceCopy}.`;
   }
   persistState();
 }
@@ -346,12 +331,10 @@ function applyConciergeProfile(reason = "") {
 function updateTrustMetrics() {
   const uptime = (99.9 + Math.random() * 0.09).toFixed(2);
   const latency = 180 + Math.round(Math.random() * 120);
-  const sla = "SLA 99.9%";
-  if (uptimeStat) uptimeStat.querySelector("strong").textContent = `${uptime}%`;
-  if (latencyStat) latencyStat.querySelector("strong").textContent = `< ${latency}ms`;
-  if (privacyStat) privacyStat.querySelector("strong").textContent = "Chiffrées & RGPD";
-  if (slaBadge) slaBadge.textContent = sla;
-  if (trustCTA) trustCTA.textContent = "Preuves live activées";
+  if (serviceHealth) {
+    const label = serviceHealth.querySelector(".health-text");
+    if (label) label.textContent = `Service stable · Uptime ${uptime}% · Latence < ${latency}ms · Données chiffrées`;
+  }
   const copy = document.getElementById("uptimeCopy");
   if (copy) copy.textContent = `Monitoring actif, uptime ${uptime}% / latence ${latency}ms.`;
 }
@@ -467,24 +450,23 @@ function validateDiscovery(data) {
 }
 
 function conceptOptions(discovery) {
-  const vibeLabel = discovery.vibe === "city" ? "City break" : discovery.vibe.charAt(0).toUpperCase() + discovery.vibe.slice(1);
+  const vibeLabel = discovery.vibe
+    ? discovery.vibe === "city"
+      ? "City break"
+      : discovery.vibe.charAt(0).toUpperCase() + discovery.vibe.slice(1)
+    : "Mix";
   const options = [
     {
       id: "A",
-      title: "Escapade tropicale / plage",
-      bullets: ["Repos + 1 expérience signature", "Durée flexible", "Mix budget + luxe léger"],
+      title: "Immersion urbaine culturelle",
+      bullets: ["Musées, food tours, rooftops", "Déplacements simples", `Vibe ${vibeLabel}`],
     },
     {
       id: "B",
-      title: "Immersion urbaine culturelle",
-      bullets: ["Musées, food tours, rooftops", "Déplacements simples", "Rythme équilibré"],
+      title: "Nature ou littoral reposant",
+      bullets: ["Rythme léger", "1 expérience signature", "Transports simplifiés"],
     },
-    {
-      id: "C",
-      title: "Nature & aventure modérée",
-      bullets: ["Randos douces + paysages", "1 activité premium guidée", "Hébergement cosy"],
-    },
-    ];
+  ];
   return attachScrapeToOptions(options, "discovery").map((opt) => ({
       ...opt,
       onSelect: (o) => {
@@ -805,7 +787,6 @@ const builders = {
 
 function buildSummary() {
   exportBtn.disabled = false;
-  downloadBtn.disabled = false;
   const blocks = [];
   const { discovery, concept, choices } = state;
 
@@ -843,7 +824,6 @@ function buildSummary() {
   state.summary = blocks;
   persistState();
 }
-
 exportBtn.addEventListener("click", () => {
   if (!state.summary) return;
   const text = state.summary
@@ -853,20 +833,6 @@ exportBtn.addEventListener("click", () => {
     exportBtn.textContent = "Copié !";
     setTimeout(() => (exportBtn.textContent = "Copier le texte"), 2000);
   });
-});
-
-downloadBtn.addEventListener("click", () => {
-  if (!state.summary) return;
-  const markdown = state.summary
-    .map((b) => `## ${b.title}\n${b.items.map((i) => `- ${i}`).join("\n")}`)
-    .join("\n\n");
-  const blob = new Blob([markdown], { type: "text/markdown" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "itineraire-agentique.md";
-  a.click();
-  URL.revokeObjectURL(url);
 });
 
 function handleConciergeSubmit(event) {
@@ -879,9 +845,7 @@ function handleConciergeSubmit(event) {
 function handleFeedbackSubmit(event) {
   event.preventDefault();
   const data = Object.fromEntries(new FormData(event.target).entries());
-  if (feedbackStatus) feedbackStatus.textContent = `Merci, note ${data.score}/10 envoyée.`;
-  if (npsBadge) npsBadge.textContent = `NPS live ${data.score}`;
-  trustCTA.textContent = "Feedback remonté";
+  if (feedbackStatus) feedbackStatus.textContent = data.score === "satisfait" ? "Merci pour votre validation." : "Merci, nous allons améliorer.";
 }
 
 function onDiscoverySubmit(event) {
@@ -928,15 +892,7 @@ refreshIntelBtn.addEventListener("click", () => {
 conciergeForm?.addEventListener("submit", handleConciergeSubmit);
 feedbackForm?.addEventListener("submit", handleFeedbackSubmit);
 btnCallMe?.addEventListener("click", () => applyConciergeProfile("Rappel concierge programmé"));
-btnShareSummary?.addEventListener("click", () => {
-  applyConciergeProfile("Dossier partagé");
-  if (summaryBlock.innerText) navigator.clipboard.writeText(summaryBlock.innerText);
-});
 btnConcierge?.addEventListener("click", () => applyConciergeProfile("Concierge en ligne"));
-btnUrgent?.addEventListener("click", () => {
-  trustCTA.textContent = "Escalade prioritaire";
-  applyConciergeProfile("Escalade 24/7");
-});
 
 updateTrustMetrics();
 setInterval(updateTrustMetrics, 8000);
