@@ -7,12 +7,43 @@ const bannedDestinations = [
   "somalie",
   "libye",
   "gaza",
-  "ukraine",
-  "russie",
-  "russia",
   "zone de guerre",
-  "war zone"
+  "war zone",
+  "zone militaire"
 ];
+
+const intelDataset = {
+  tokyo: {
+    summary: "Quartiers sûrs (Shinjuku, Shibuya, Ginza), transport facile par métro/Pasmo.",
+    hotels: ["Shibuya Stream Excel Tokyu (4★)", "Mitsui Garden Ginza (4★)", "Park Hotel Tokyo (4★ artistique)"],
+    highlights: ["Food tours à Shinjuku", "Jardins Hama-rikyu", "Onsen urbain à Odaiba"],
+    images: [
+      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80", alt: "Shibuya de nuit" },
+      { src: "https://images.unsplash.com/photo-1549692520-acc6669e2f0c?auto=format&fit=crop&w=800&q=80", alt: "Temple au lever du soleil" },
+      { src: "https://images.unsplash.com/photo-1526481280695-3c469c2f0f99?auto=format&fit=crop&w=800&q=80", alt: "Métro japonais" }
+    ]
+  },
+  lisbonne: {
+    summary: "Ville côtière sûre, bon rapport qualité/prix, mobilité simple (tram 28, métro).",
+    hotels: ["The Lumiares (4★ Bairro Alto)", "Mama Shelter Lisboa (4★)", "NH Collection Liberdade (4★)"],
+    highlights: ["Miradouros, fado authentique", "Excursion à Belém", "Journée à Cascais/Sintra"],
+    images: [
+      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80&sat=-30&hue=-10", alt: "Tram jaune de Lisbonne" },
+      { src: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=800&q=80", alt: "Toits de Lisbonne" },
+      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80&sat=-20", alt: "Rue pavée en pente" }
+    ]
+  },
+  montréal: {
+    summary: "Destination très sûre, bilingue, scène food et musées riches.",
+    hotels: ["Humaniti Hotel Montréal (4★)", "Hotel Monville (4★)", "Le Germain (4★ boutique)"],
+    highlights: ["Vieux-Port & marché Jean-Talon", "Musée des Beaux-Arts", "Mont Royal au coucher du soleil"],
+    images: [
+      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80&sat=-40", alt: "Skyline de Montréal" },
+      { src: "https://images.unsplash.com/photo-1503389152951-9f343605f61e?auto=format&fit=crop&w=800&q=80", alt: "Vieux-Montréal" },
+      { src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80", alt: "Mont Royal" }
+    ]
+  }
+};
 
 const state = {
   discovery: null,
@@ -25,13 +56,25 @@ const conversation = document.getElementById("conversation");
 const stepList = Array.from(document.querySelectorAll("#stepList .step"));
 const summaryBlock = document.getElementById("summary");
 const exportBtn = document.getElementById("btnExport");
+const downloadBtn = document.getElementById("btnDownload");
 const statusPill = document.getElementById("status");
 const resetBtn = document.getElementById("btnReset");
 const thinkingIndicator = document.getElementById("thinkingIndicator");
+const intelStatus = document.getElementById("intelStatus");
+const intelCards = document.getElementById("intelCards");
+const intelError = document.getElementById("intelError");
+const imageStrip = document.getElementById("imageStrip");
+const refreshIntelBtn = document.getElementById("btnRefreshIntel");
 
 function setStatus(text, tone = "neutral") {
   statusPill.textContent = text;
   statusPill.className = `pill ${tone}`;
+}
+
+function setIntelStatus(text, tone = "neutral") {
+  if (!intelStatus) return;
+  intelStatus.textContent = text;
+  intelStatus.className = `badge ${tone === "danger" ? "danger" : tone === "success" ? "success" : "badge-soft"}`;
 }
 
 function setThinking(text) {
@@ -48,10 +91,44 @@ function stopThinking(message = "En attente d’une requête.") {
   label.textContent = message;
 }
 
-function clearUI() {
+function persistState() {
+  const safeState = { ...state };
+  localStorage.setItem("agenticState", JSON.stringify(safeState));
+}
+
+function restoreState() {
+  const saved = localStorage.getItem("agenticState");
+  if (!saved) return;
+  try {
+    const parsed = JSON.parse(saved);
+    state.discovery = parsed.discovery || null;
+    state.concept = parsed.concept || null;
+    state.choices = parsed.choices || {};
+    state.summary = parsed.summary || null;
+    const form = document.getElementById("discoveryForm");
+    if (form && parsed.discovery) {
+      Object.entries(parsed.discovery).forEach(([k, v]) => {
+        if (form.elements[k]) form.elements[k].value = v;
+      });
+      if (parsed.summary) {
+        buildSummary();
+      }
+    }
+  } catch (e) {
+    console.warn("State restore failed", e);
+  }
+}
+
+function clearUI(skipPersist = false) {
   conversation.innerHTML = '<p class="muted">Démarrez le flux pour que l’IA multi‑rôle simule chaque étape comme dans le prompt original. Chaque étape propose 2 à 3 options maximum et attend votre validation.</p>';
   summaryBlock.innerHTML = "";
   exportBtn.disabled = true;
+  downloadBtn.disabled = true;
+  intelCards.innerHTML = "";
+  imageStrip.innerHTML = "";
+  showIntelError("");
+  setIntelStatus("Recherche non lancée");
+  refreshIntelBtn.disabled = true;
   stepList.forEach((s) => s.classList.remove("done", "active"));
   stepList[0].classList.add("active");
   setStatus("En attente");
@@ -60,6 +137,7 @@ function clearUI() {
   state.concept = null;
   state.choices = {};
   state.summary = null;
+  if (!skipPersist) persistState();
 }
 
 resetBtn.addEventListener("click", clearUI);
@@ -110,6 +188,77 @@ function addMessage({ title, agent, body, options = [], question }) {
   conversation.scrollTo({ top: conversation.scrollHeight, behavior: "smooth" });
 }
 
+function showIntelError(message, tone = "error") {
+  if (!intelError) return;
+  intelError.textContent = message || "";
+  intelError.className = `alert ${tone === "success" ? "success" : tone === "error" ? "error" : ""}`;
+}
+
+function renderIntel(intel, destination) {
+  if (!intelCards || !imageStrip) return;
+  const cards = [
+    { title: "Résumé sécurité & logistique", content: intel.summary },
+    { title: "Hôtels probants", content: intel.hotels?.join(" · ") || "—" },
+    { title: "Moments conseillés", content: intel.highlights?.join(" · ") || "—" },
+  ];
+
+  intelCards.innerHTML = cards
+    .map(
+      (c) => `<article class="intel-card"><div class="tag">📌 ${destination}</div><strong>${c.title}</strong><p class="muted">${c.content}</p></article>`
+    )
+    .join("");
+
+  imageStrip.innerHTML = intel.images
+    .map(
+      (img) => `<figure><img src="${img.src}" alt="${img.alt}" loading="lazy" /><figcaption>${img.alt}</figcaption></figure>`
+    )
+    .join("");
+
+  setIntelStatus("Infos + images prêtes", "success");
+  refreshIntelBtn.disabled = false;
+  showIntelError(intel.fallback ? "Résultats génériques faute de source dédiée." : "", intel.fallback ? "error" : "success");
+}
+
+function fallbackIntel(destination) {
+  return {
+    summary: `Pas de fiche détaillée trouvée pour ${destination}. Voici des conseils génériques (centres-villes sûrs, hôtels 4★ bien notés, activités culture + 1 premium).`,
+    hotels: ["Chaîne 4★ centrale", "Boutique locale bien notée", "Option appart-hôtel sécurisé"],
+    highlights: ["Visite guidée du centre", "Food tour", "Panorama ou musée emblématique"],
+    images: [
+      { src: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=800&q=80", alt: "Centre-ville" },
+      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80", alt: "Quartier animé" },
+      { src: "https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?auto=format&fit=crop&w=800&q=80", alt: "Hôtel moderne" }
+    ],
+    fallback: true
+  };
+}
+
+function fetchIntel(destination) {
+  const key = destination.trim().toLowerCase();
+  setIntelStatus("Recherche en cours…", "info");
+  showIntelError("");
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(intelDataset[key] || fallbackIntel(destination));
+    }, 320);
+  });
+}
+
+async function runIntel(destination) {
+  if (!destination) return;
+  setIntelStatus("Recherche en cours…", "info");
+  refreshIntelBtn.disabled = true;
+  try {
+    const intel = await fetchIntel(destination);
+    renderIntel(intel, destination);
+  } catch (e) {
+    console.error(e);
+    showIntelError("Erreur lors de la récupération des informations.");
+    setIntelStatus("Échec de la recherche", "danger");
+    refreshIntelBtn.disabled = false;
+  }
+}
+
 function safetyBlocked(destination) {
   const alt = ["Lisbonne (culture & océan)", "Montréal (ville sûre)", "Séoul (high-tech)"];
   addMessage({
@@ -118,12 +267,25 @@ function safetyBlocked(destination) {
     body: `La destination « ${destination} » est interdite ou jugée dangereuse. Ce flux refuse de la planifier. Propositions sûres : ${alt.join(" · ")}.`
   });
   setStatus("Bloqué", "danger");
+  setIntelStatus("Recherche annulée", "danger");
+  showIntelError("Destination bloquée : l’outil propose des alternatives sûres.");
 }
 
 function formatBudgetLabel(level) {
   if (level === "low") return "Budget serré";
   if (level === "high") return "Budget généreux";
   return "Budget équilibré";
+}
+
+function validateDiscovery(data) {
+  const warnings = [];
+  const duration = Number(data.duration || 0);
+  if (duration > 21) warnings.push("Durée > 21 jours : risque de budget insuffisant.");
+  if (duration < 3) warnings.push("Séjour très court : veillez à ne pas surcharger l’itinéraire.");
+  if (data.budget === "low" && ["romantic", "luxury", "premium"].some((v) => data.vibe?.includes(v))) {
+    warnings.push("Budget serré mais vibe premium : prévoir concessions.");
+  }
+  return warnings;
 }
 
 function conceptOptions(discovery) {
@@ -144,18 +306,19 @@ function conceptOptions(discovery) {
       title: "Nature & aventure modérée",
       bullets: ["Randos douces + paysages", "1 activité premium guidée", "Hébergement cosy"],
     },
-  ].map((opt) => ({
-    ...opt,
-    onSelect: (o) => {
-      state.concept = o;
-      addMessage({
-        title: `Concept choisi : ${o.title}`,
-        agent: "Agent 0",
-        body: "Passage à l’étape 1 — Profil."
-      });
-      startStepFlow(0);
-    }
-  }));
+    ].map((opt) => ({
+      ...opt,
+      onSelect: (o) => {
+        state.concept = o;
+        addMessage({
+          title: `Concept choisi : ${o.title}`,
+          agent: "Agent 0",
+          body: "Passage à l’étape 1 — Profil."
+        });
+        persistState();
+        startStepFlow(0);
+      }
+    }));
 }
 
 const steps = ["profile", "flights", "lodging", "activities", "itinerary", "budget"];
@@ -265,6 +428,7 @@ const builders = {
       onSelect: (o) => {
         state.choices.flights = o;
         addMessage({ title: `Stratégie vols: ${o.title}`, agent: "Agent 2", body: "OK pour passer aux hôtels." });
+        persistState();
         startStepFlow(idx + 1);
       }
     }));
@@ -300,6 +464,7 @@ const builders = {
       onSelect: (o) => {
         state.choices.lodging = o;
         addMessage({ title: `Hébergement: ${o.title}`, agent: "Agent 3", body: "Prêt pour les activités." });
+        persistState();
         startStepFlow(idx + 1);
       }
     }));
@@ -335,6 +500,7 @@ const builders = {
       onSelect: (o) => {
         state.choices.activities = o;
         addMessage({ title: `Style activités: ${o.title}`, agent: "Agent 4", body: "On assemble l’itinéraire concret." });
+        persistState();
         startStepFlow(idx + 1);
       }
     }));
@@ -369,6 +535,7 @@ const builders = {
         onSelect: () => {
           state.choices.itinerary = { id: "A", title: "Itinéraire approuvé", bullets: outline };
           addMessage({ title: "Itinéraire validé", agent: "Agent 5", body: "Passage à la synthèse budget & packages." });
+          persistState();
           startStepFlow(idx + 1);
         }
       },
@@ -379,6 +546,7 @@ const builders = {
         onSelect: () => {
           state.choices.itinerary = { id: "B", title: "Version light", bullets: outline.map((d) => d.replace(" ·", ",")) };
           addMessage({ title: "Itinéraire ajusté (light)", agent: "Agent 5", body: "Synthèse budget en cours." });
+          persistState();
           startStepFlow(idx + 1);
         }
       },
@@ -433,6 +601,7 @@ const builders = {
         state.choices.package = pkg;
         updateStepList(steps.length);
         buildSummary();
+        persistState();
       }
     }));
 
@@ -448,6 +617,7 @@ const builders = {
 
 function buildSummary() {
   exportBtn.disabled = false;
+  downloadBtn.disabled = false;
   const blocks = [];
   const { discovery, concept, choices } = state;
 
@@ -472,12 +642,13 @@ function buildSummary() {
   summaryBlock.innerHTML = blocks
     .map(
       (b) => `<div class="block"><h4>${b.title}</h4><ul>${b.items
-        .map((i) => `<li>${i}</li>`) 
+        .map((i) => `<li>${i}</li>`)
         .join("")}</ul></div>`
     )
     .join("");
 
   state.summary = blocks;
+  persistState();
 }
 
 exportBtn.addEventListener("click", () => {
@@ -487,8 +658,22 @@ exportBtn.addEventListener("click", () => {
     .join("\n\n");
   navigator.clipboard.writeText(text).then(() => {
     exportBtn.textContent = "Copié !";
-    setTimeout(() => (exportBtn.textContent = "Exporter en texte"), 2000);
+    setTimeout(() => (exportBtn.textContent = "Copier le texte"), 2000);
   });
+});
+
+downloadBtn.addEventListener("click", () => {
+  if (!state.summary) return;
+  const markdown = state.summary
+    .map((b) => `## ${b.title}\n${b.items.map((i) => `- ${i}`).join("\n")}`)
+    .join("\n\n");
+  const blob = new Blob([markdown], { type: "text/markdown" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "itineraire-agentique.md";
+  a.click();
+  URL.revokeObjectURL(url);
 });
 
 function onDiscoverySubmit(event) {
@@ -500,19 +685,42 @@ function onDiscoverySubmit(event) {
     stopThinking("Demande bloquée pour sécurité.");
     return;
   }
+  const warnings = validateDiscovery(data);
   state.discovery = data;
   setStatus("En cours", "info");
   conversation.innerHTML = "";
   setThinking("Agent 0 prépare 3 pistes cohérentes…");
+
+  if (warnings.length) {
+    addMessage({
+      title: "Alerte cohérence",
+      agent: "Vérifications préalables",
+      body: warnings.join("<br>")
+    });
+  }
+  runIntel(data.destination);
+  refreshIntelBtn.disabled = false;
 
   addMessage({
     title: "Phase découverte",
     agent: "Agent 0 — Scout",
     body: `Vous voulez aller vers ${data.destination} depuis ${data.origin}, vibe ${data.vibe}. Budget: ${formatBudgetLabel(data.budget)}. Voici 3 concepts rapides :`,
     options: conceptOptions(data),
-    question: "Choisissez un concept (A/B/C) ou indiquez un autre axe." 
+    question: "Choisissez un concept (A/B/C) ou indiquez un autre axe."
   });
+
+  persistState();
 }
 
 document.getElementById("discoveryForm").addEventListener("submit", onDiscoverySubmit);
-clearUI();
+refreshIntelBtn.addEventListener("click", () => {
+  if (state.discovery?.destination) runIntel(state.discovery.destination);
+});
+
+clearUI(true);
+restoreState();
+if (state.discovery?.destination) {
+  setStatus("Session restaurée", "info");
+  refreshIntelBtn.disabled = false;
+  runIntel(state.discovery.destination);
+}

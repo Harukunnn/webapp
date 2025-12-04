@@ -13,22 +13,14 @@
       <div>
         <p class="eyebrow">Système rôle — IA de voyage unifiée</p>
         <h1>Orchestrateur Agentique à 6 rôles</h1>
-        <p class="lede">Recrée le prompt ultra-optimisé directement dans une web‑app interactive. Chaque étape applique les règles de sécurité, limite les options, et demande une validation explicite.</p>
+        <p class="lede">Flux sobre et professionnel : sécurité stricte, options courtes, vérification continue et recherche d'informations + visuels en ligne.</p>
       </div>
     </div>
     <div class="hero-meta">
-      <div class="badge">Flux complet : Découverte → Profil → Vols → Hôtels → Activités → Itinéraire → Budget</div>
+      <div class="badge">Flux : Découverte → Profil → Vols → Hôtels → Activités → Itinéraire → Budget</div>
+      <div class="badge badge-soft" id="intelStatus">Recherche non lancée</div>
     </div>
   </header>
-
-  <div class="ai-visualizer" aria-hidden="true">
-    <div class="orbit orbit-1"></div>
-    <div class="orbit orbit-2"></div>
-    <div class="orbit orbit-3"></div>
-    <div class="pulse"></div>
-    <div class="scanline"></div>
-    <div class="visual-label">Agentic AI en réflexion active</div>
-  </div>
 
   <main class="layout">
     <div class="thinking-indicator" id="thinkingIndicator">
@@ -133,6 +125,30 @@
       </form>
     </section>
 
+    <section class="panel" aria-labelledby="intel-title">
+      <header class="panel-header">
+        <div>
+          <p class="eyebrow">Scraping éthique</p>
+          <h2 id="intel-title">Signal d'information & images</h2>
+        </div>
+        <div class="panel-actions">
+          <button id="btnRefreshIntel" class="ghost" disabled>Relancer la recherche</button>
+        </div>
+      </header>
+      <p class="muted">Recherche factuelle (résumés, hôtels/lieux) + vignettes d'images libres de droits. Les erreurs réseau sont signalées clairement.</p>
+      <div class="intel-grid">
+        <div>
+          <h3 class="intel-heading">Infos clés</h3>
+          <div id="intelCards" class="intel-cards"></div>
+        </div>
+        <div>
+          <h3 class="intel-heading">Images contextuelles</h3>
+          <div id="imageStrip" class="image-strip" aria-live="polite"></div>
+        </div>
+      </div>
+      <div id="intelError" class="alert" role="status" aria-live="polite"></div>
+    </section>
+
     <section class="panel" aria-labelledby="workflow-title">
       <header class="panel-header">
         <div>
@@ -167,7 +183,8 @@
           <h2 id="summary-title">Résumé conforme au prompt</h2>
         </div>
         <div class="panel-actions">
-          <button id="btnExport" class="ghost" disabled>Exporter en texte</button>
+          <button id="btnExport" class="ghost" disabled>Copier le texte</button>
+          <button id="btnDownload" class="ghost" disabled>Télécharger en Markdown</button>
         </div>
       </header>
       <div id="summary" class="summary" aria-live="polite"></div>
