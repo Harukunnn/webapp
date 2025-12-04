@@ -14,57 +14,37 @@
     </div>
     <div class="service-health" id="serviceHealth" role="status">
       <span class="dot online" aria-hidden="true"></span>
-      <span class="health-text">99.9% · &lt;280ms · Chiffré</span>
+      <span class="health-text">Linéaire</span>
     </div>
-    <div class="topbar-actions">
-      <button type="button" id="btnConcierge" class="ghost">Concierge</button>
-    </div>
+    <button type="button" id="btnConcierge" class="ghost">Concierge</button>
   </nav>
 
   <header class="hero">
-    <div class="hero-brand">
-      <div class="hero-icon" aria-hidden="true">🜚</div>
-      <div>
-        <p class="eyebrow">Conciergerie noire</p>
-        <h1>Atlas Luxe</h1>
-        <p class="lede">Silence. Service total. Zéro superflu.</p>
-      </div>
+    <div>
+      <p class="eyebrow">Orchestration noire</p>
+      <h1>Atlas</h1>
+      <p class="lede">Deux choix. Zéro bruit.</p>
     </div>
-    <div class="hero-meta">
-      <div class="badge">Profil → Vols → Séjour</div>
-      <p class="muted" id="intelStatus">Prêt</p>
-    </div>
+    <p class="muted" id="intelStatus">Prêt</p>
   </header>
 
   <main class="layout">
     <div class="thinking-indicator" id="thinkingIndicator">
-      <div class="glow"></div>
-      <div class="dots" aria-hidden="true"><span></span><span></span><span></span></div>
-      <p class="label">Prêt à opérer.</p>
+      <p class="label">Prêt.</p>
     </div>
 
     <section class="panel compact" aria-labelledby="trust-title">
-      <header class="panel-header">
-        <div>
-          <p class="eyebrow">Statut</p>
-          <h2 id="trust-title">Fiabilité & contrôle</h2>
-        </div>
-      </header>
-      <div class="duo tight">
-        <p id="uptimeCopy">Uptime 99.9% · latence stable · RGPD UE.</p>
-        <p class="muted">Concierge prioritaire 24/7 · Audit AA.</p>
+      <div class="panel-header solo">
+        <p class="eyebrow">Statut</p>
+        <h2 id="trust-title">Fiable · 99.9% · &lt;260ms</h2>
       </div>
+      <p class="muted" id="uptimeCopy">Chiffré · monitoring actif.</p>
     </section>
 
     <section class="panel concierge" aria-labelledby="concierge-title">
-      <header class="panel-header">
-        <div>
-          <p class="eyebrow">Concierge</p>
-          <h2 id="concierge-title">Réglages express</h2>
-        </div>
-        <div class="panel-actions">
-          <button type="button" class="ghost" id="btnCallMe">Rappel</button>
-        </div>
+      <header class="panel-header solo">
+        <p class="eyebrow">Concierge</p>
+        <h2 id="concierge-title">Réglage</h2>
       </header>
       <form id="conciergeForm" class="micro-form trio">
         <label class="field">
@@ -93,39 +73,25 @@
         </label>
         <div class="actions full">
           <button type="submit" class="primary">Calibrer</button>
-          <p class="muted" id="conciergeNote">Dossier prêt.</p>
+          <p class="muted" id="conciergeNote">Prêt.</p>
         </div>
       </form>
     </section>
 
     <section class="panel" aria-labelledby="safety-title">
-      <header class="panel-header">
-        <div>
-          <p class="eyebrow">Sécurité</p>
-          <h2 id="safety-title">Filtre</h2>
-        </div>
-        <div class="panel-actions">
-          <button id="btnReset" class="ghost">Reset</button>
-        </div>
-      </header>
-      <p class="muted">Blocage auto. Liste restreinte.</p>
-      <div class="chips" aria-label="Liste des zones bannies">
-        <article class="chip">Corée du Nord</article>
-        <article class="chip">Syrie</article>
-        <article class="chip">Afghanistan</article>
-        <article class="chip">Yémen</article>
+      <div class="panel-header solo">
+        <p class="eyebrow">Sécurité</p>
+        <h2 id="safety-title">Filtre fermé</h2>
       </div>
+      <p class="muted">Zones rouges bloquées.</p>
+      <button id="btnReset" class="ghost">Reset</button>
     </section>
 
     <section class="panel" aria-labelledby="discovery-title">
-      <header class="panel-header">
-        <div>
-          <p class="eyebrow">Découverte</p>
-          <h2 id="discovery-title">Intentions</h2>
-        </div>
-        <div class="panel-actions" aria-live="polite">
-          <span class="pill" id="status">En attente</span>
-        </div>
+      <header class="panel-header solo">
+        <p class="eyebrow">Découverte</p>
+        <h2 id="discovery-title">Brief</h2>
+        <span class="pill" id="status">En attente</span>
       </header>
       <form id="discoveryForm" class="grid compact">
         <label class="field">
@@ -193,49 +159,31 @@
     </section>
 
     <section class="panel" aria-labelledby="intel-title">
-      <header class="panel-header">
-        <div>
-          <p class="eyebrow">Signal</p>
-          <h2 id="intel-title">Recherche</h2>
-        </div>
-        <div class="panel-actions">
-          <button id="btnRefreshIntel" class="ghost" disabled>Pulse</button>
-        </div>
+      <header class="panel-header solo">
+        <p class="eyebrow">Signal</p>
+        <h2 id="intel-title">Recherche</h2>
+        <button id="btnRefreshIntel" class="ghost" disabled>Pulse</button>
       </header>
-      <div class="intel-grid compact">
-        <div>
-          <div id="intelCards" class="intel-cards"></div>
-        </div>
-        <div>
-          <div id="imageStrip" class="image-strip" aria-live="polite"></div>
-        </div>
-        <div class="live-scrape">
-          <div class="live-scrape__head">
-            <h3 class="intel-heading">Flux temps réel</h3>
-            <span class="pill pill-soft">Sources</span>
-          </div>
-          <ul id="liveScrapeList" class="live-scrape__list" aria-live="polite"></ul>
-        </div>
+      <div class="intel-grid compact slim">
+        <div id="intelCards" class="intel-cards"></div>
+        <div id="imageStrip" class="image-strip" aria-live="polite"></div>
+        <ul id="liveScrapeList" class="live-scrape__list" aria-live="polite"></ul>
       </div>
       <div id="intelError" class="alert" role="status" aria-live="polite"></div>
     </section>
 
     <section class="panel" aria-labelledby="workflow-title">
-      <header class="panel-header">
-        <div>
-          <p class="eyebrow">Parcours</p>
-          <h2 id="workflow-title">Itinéraire</h2>
-        </div>
+      <header class="panel-header solo">
+        <p class="eyebrow">Parcours</p>
+        <h2 id="workflow-title">Itinéraire</h2>
       </header>
       <div class="workflow minimal">
-        <aside class="steps" aria-label="Progression des agents">
-          <ol id="stepList">
-            <li class="step active">Profil</li>
-            <li class="step">Vols</li>
-            <li class="step">Séjour</li>
-            <li class="step">Récap</li>
-          </ol>
-        </aside>
+        <ol id="stepList" class="steps inline">
+          <li class="step active">Profil</li>
+          <li class="step">Vols</li>
+          <li class="step">Séjour</li>
+          <li class="step">Récap</li>
+        </ol>
         <div class="content" id="conversation" aria-live="polite">
           <p class="muted">Flux réduit, 2 options premium.</p>
         </div>
@@ -243,24 +191,18 @@
     </section>
 
     <section class="panel" aria-labelledby="summary-title">
-      <header class="panel-header">
-        <div>
-          <p class="eyebrow">Sortie</p>
-          <h2 id="summary-title">Résumé</h2>
-        </div>
-        <div class="panel-actions">
-          <button id="btnExport" class="ghost" disabled>Copier</button>
-        </div>
+      <header class="panel-header solo">
+        <p class="eyebrow">Sortie</p>
+        <h2 id="summary-title">Résumé</h2>
+        <button id="btnExport" class="ghost" disabled>Copier</button>
       </header>
       <div id="summary" class="summary" aria-live="polite"></div>
     </section>
 
     <section class="panel feedback" aria-labelledby="feedback-title">
-      <header class="panel-header">
-        <div>
-          <p class="eyebrow">Boucle</p>
-          <h2 id="feedback-title">Feedback</h2>
-        </div>
+      <header class="panel-header solo">
+        <p class="eyebrow">Boucle</p>
+        <h2 id="feedback-title">Feedback</h2>
       </header>
       <form id="feedbackForm" class="micro-form slim">
         <label class="field">
@@ -279,7 +221,7 @@
   </main>
 
   <footer class="footer">
-    <p>Ultra‑Optimized Mega Agentic Prompt.</p>
+    <p>Ultra‑Optimized.</p>
   </footer>
 
   <script src="app.js"></script>
