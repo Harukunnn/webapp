@@ -27,10 +27,25 @@ const summaryBlock = document.getElementById("summary");
 const exportBtn = document.getElementById("btnExport");
 const statusPill = document.getElementById("status");
 const resetBtn = document.getElementById("btnReset");
+const thinkingIndicator = document.getElementById("thinkingIndicator");
 
 function setStatus(text, tone = "neutral") {
   statusPill.textContent = text;
   statusPill.className = `pill ${tone}`;
+}
+
+function setThinking(text) {
+  if (!thinkingIndicator) return;
+  const label = thinkingIndicator.querySelector(".label");
+  label.textContent = text;
+  thinkingIndicator.classList.add("active");
+}
+
+function stopThinking(message = "En attente d’une requête.") {
+  if (!thinkingIndicator) return;
+  thinkingIndicator.classList.remove("active");
+  const label = thinkingIndicator.querySelector(".label");
+  label.textContent = message;
 }
 
 function clearUI() {
@@ -40,6 +55,7 @@ function clearUI() {
   stepList.forEach((s) => s.classList.remove("done", "active"));
   stepList[0].classList.add("active");
   setStatus("En attente");
+  stopThinking();
   state.discovery = null;
   state.concept = null;
   state.choices = {};
@@ -49,6 +65,7 @@ function clearUI() {
 resetBtn.addEventListener("click", clearUI);
 
 function addMessage({ title, agent, body, options = [], question }) {
+  stopThinking("L’IA attend votre validation.");
   const card = document.createElement("article");
   card.className = "message";
   const heading = document.createElement("h3");
@@ -161,7 +178,8 @@ function startStepFlow(index) {
   updateStepList(index);
   const id = steps[index];
   const builder = builders[id];
-  builder(index);
+  setThinking(`Agent ${index + 1} réfléchit…`);
+  setTimeout(() => builder(index), 380);
 }
 
 const builders = {
@@ -479,11 +497,13 @@ function onDiscoverySubmit(event) {
   const destinationLC = data.destination.trim().toLowerCase();
   if (bannedDestinations.some((d) => destinationLC.includes(d))) {
     safetyBlocked(data.destination);
+    stopThinking("Demande bloquée pour sécurité.");
     return;
   }
   state.discovery = data;
   setStatus("En cours", "info");
   conversation.innerHTML = "";
+  setThinking("Agent 0 prépare 3 pistes cohérentes…");
 
   addMessage({
     title: "Phase découverte",
