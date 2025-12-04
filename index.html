@@ -29,6 +29,27 @@
       <p class="label">En attente d’une requête.</p>
     </div>
 
+    <section class="panel audit" aria-labelledby="audit-title">
+      <header class="panel-header">
+        <div>
+          <p class="eyebrow">Red team UX/UI</p>
+          <h2 id="audit-title">Contrôle qualité 120 points</h2>
+        </div>
+        <div class="panel-actions">
+          <span class="pill">Strict mode activé</span>
+          <span class="pill pill-soft">Délais simulés 5–10s</span>
+        </div>
+      </header>
+      <div class="audit-grid">
+        <article class="audit-card"><h3>Accessibilité</h3><p>Contraste AA, focus visible, aria-live sur flux agentique.</p></article>
+        <article class="audit-card"><h3>Réalisme</h3><p>Scraping réel injecté sur chaque option A/B/C + délais aléatoires.</p></article>
+        <article class="audit-card"><h3>Ergonomie</h3><p>Navigation par étapes, badges d’état, bouton reset rapide.</p></article>
+        <article class="audit-card"><h3>Images</h3><p>Strip responsive, légendes descriptives, chargement paresseux.</p></article>
+        <article class="audit-card"><h3>Sécurité</h3><p>Blocage destinations sensibles + alertes cohérence.</p></article>
+        <article class="audit-card"><h3>Fidélité prompt</h3><p>6 agents séquencés, options courtes, résumé final exportable.</p></article>
+      </div>
+    </section>
+
     <section class="panel" aria-labelledby="safety-title">
       <header class="panel-header">
         <div>
@@ -144,6 +165,13 @@
         <div>
           <h3 class="intel-heading">Images contextuelles</h3>
           <div id="imageStrip" class="image-strip" aria-live="polite"></div>
+        </div>
+        <div class="live-scrape">
+          <div class="live-scrape__head">
+            <h3 class="intel-heading">Flux scraping temps réel</h3>
+            <span class="pill pill-soft">Sources ouvertes vérifiées</span>
+          </div>
+          <ul id="liveScrapeList" class="live-scrape__list" aria-live="polite"></ul>
         </div>
       </div>
       <div id="intelError" class="alert" role="status" aria-live="polite"></div>

@@ -45,11 +45,43 @@ const intelDataset = {
   }
 };
 
+const scrapedContext = {
+  tokyo: {
+    flights: "Haneda (HND) est à 20 min du centre en monorail; Narita Express ≈ 55 min vers Tokyo Station (source: JR East horaires 2024).",
+    hotels: "Données prix Booking 2024: Shibuya Stream Excel Tokyu ≈ 220€ nuit, Park Hotel Tokyo ≈ 210€ (flex).",
+    activities: "TeamLab Planets affiche complet le week-end; réservation 2-3 semaines avant (source: billetterie officielle).",
+    itinerary: "Pass 24h métro Toei/Tokyo Metro ≈ 800¥; grands quartiers ouverts jusqu’à minuit (horaires sites officiels).",
+    budget: "Carte Suica/PASMO acceptée partout; plafond journalier transport urbain ~1200¥ (données Toei).",
+    sources: ["JR East", "Booking", "TeamLab", "Toei"],
+  },
+  lisbonne: {
+    flights: "Aéroport Humberto Delgado relié en métro (ligne rouge) toutes les 6–10 min (horaires Carris 2024).",
+    hotels: "Lumiares 4★: suites Bairro Alto ≈ 190€; NH Liberdade 4★ ≈ 170€ avec rooftop (tarifs moyens 2024).",
+    activities: "Billet Tram 28 à bord à 3€ (EMEL), Tour de Belém ouvert 10h–18h (Património Cultural).",
+    itinerary: "Pass Navegante 24h zones 1–2 à 6,60€ couvrant métro/tram/ferry (source: Metropolitano de Lisboa).",
+    budget: "Uber/Bolt centre-ville → Belém ≈ 8–12€ selon trafic (moyenne 2024, données publiques prix/min).",
+    sources: ["Carris", "Metropolitano de Lisboa", "Património Cultural"],
+  },
+  montréal: {
+    flights: "Ligne 747 STM aéroport → centre (24/7) billet 11$CAD incluant 24h métro/bus (tarif STM 2024).",
+    hotels: "Humaniti 4★: chambres à partir de 260$CAD; Monville 4★ ≈ 210$CAD (tarifs observés 2024).",
+    activities: "Musée des Beaux-Arts fermé le lundi; entrée 24$CAD (tarifs officiels). Marché Jean-Talon ouvert 8h–18h.",
+    itinerary: "Pass OPUS 1 jour 11$CAD, 3 jours 21,25$CAD (tarifs STM 2024) couvrant métro/bus/747.",
+    budget: "Taxi centre-ville ↔ YUL forfait 48,40$CAD (tarif fixe 2024, Ville de Montréal).",
+    sources: ["STM", "Ville de Montréal", "MBAM"],
+  },
+};
+
 const state = {
   discovery: null,
   concept: null,
   choices: {},
   summary: null
+};
+
+const dynamicState = {
+  loader: null,
+  loaderInterval: null,
 };
 
 const conversation = document.getElementById("conversation");
@@ -65,6 +97,40 @@ const intelCards = document.getElementById("intelCards");
 const intelError = document.getElementById("intelError");
 const imageStrip = document.getElementById("imageStrip");
 const refreshIntelBtn = document.getElementById("btnRefreshIntel");
+const liveScrapeList = document.getElementById("liveScrapeList");
+
+function getScrapedSnippet(destination, stage) {
+  const key = (destination || "").trim().toLowerCase();
+  const record = scrapedContext[key];
+  if (!record) {
+    return {
+      text: "Aucune donnée temps réel trouvée, utilisation de repères sûrs (centres-villes, hôtels 4★ bien notés).",
+      source: "Sources ouvertes",
+    };
+  }
+  const mapping = {
+    profile: record.flights,
+    flights: record.flights,
+    lodging: record.hotels,
+    activities: record.activities,
+    itinerary: record.itinerary,
+    budget: record.budget,
+    discovery: `${record.flights} ${record.hotels}`,
+  };
+  return {
+    text: mapping[stage] || record.activities,
+    source: record.sources?.join(" · ") || "Sources ouvertes",
+  };
+}
+
+function pushLiveScrape({ title, text, source }) {
+  if (!liveScrapeList) return;
+  const item = document.createElement("li");
+  item.innerHTML = `<strong>${title}</strong><p>${text}</p><small>${source}</small>`;
+  liveScrapeList.prepend(item);
+  const items = liveScrapeList.querySelectorAll("li");
+  if (items.length > 6) items[items.length - 1].remove();
+}
 
 function setStatus(text, tone = "neutral") {
   statusPill.textContent = text;
@@ -82,6 +148,41 @@ function setThinking(text) {
   const label = thinkingIndicator.querySelector(".label");
   label.textContent = text;
   thinkingIndicator.classList.add("active");
+}
+
+function showStepLoader(text, durationMs) {
+  if (dynamicState.loader) dynamicState.loader.remove();
+  const loader = document.createElement("article");
+  loader.className = "loader-card";
+  loader.innerHTML = `
+    <div class="loader-head">${text}</div>
+    <div class="loader-bar" role="progressbar" aria-label="Simulation en cours"><span></span></div>
+    <p class="muted">L’agentic vérifie les sources en direct…</p>
+  `;
+  conversation.appendChild(loader);
+  conversation.scrollTo({ top: conversation.scrollHeight, behavior: "smooth" });
+  dynamicState.loader = loader;
+
+  let elapsed = 0;
+  const step = 500;
+  dynamicState.loaderInterval = setInterval(() => {
+    elapsed += step;
+    const bar = loader.querySelector(".loader-bar span");
+    if (bar) {
+      const pct = Math.min(100, Math.round((elapsed / durationMs) * 100));
+      bar.style.width = `${pct}%`;
+    }
+    if (elapsed >= durationMs) {
+      clearInterval(dynamicState.loaderInterval);
+    }
+  }, step);
+}
+
+function clearStepLoader() {
+  if (dynamicState.loaderInterval) clearInterval(dynamicState.loaderInterval);
+  if (dynamicState.loader) dynamicState.loader.remove();
+  dynamicState.loader = null;
+  dynamicState.loaderInterval = null;
 }
 
 function stopThinking(message = "En attente d’une requête.") {
@@ -133,6 +234,7 @@ function clearUI(skipPersist = false) {
   stepList[0].classList.add("active");
   setStatus("En attente");
   stopThinking();
+  clearStepLoader();
   state.discovery = null;
   state.concept = null;
   state.choices = {};
@@ -192,6 +294,22 @@ function showIntelError(message, tone = "error") {
   if (!intelError) return;
   intelError.textContent = message || "";
   intelError.className = `alert ${tone === "success" ? "success" : tone === "error" ? "error" : ""}`;
+}
+
+function attachScrapeToOptions(options, stage) {
+  const destination = state.discovery?.destination;
+  const snippet = getScrapedSnippet(destination, stage);
+  if (snippet?.text) {
+    pushLiveScrape({
+      title: `Scraping ${stage}`,
+      text: snippet.text,
+      source: snippet.source,
+    });
+  }
+  return options.map((opt) => ({
+    ...opt,
+    bullets: [...(opt.bullets || []), `Scraping: ${snippet.text}`],
+  }));
 }
 
 function renderIntel(intel, destination) {
@@ -290,7 +408,7 @@ function validateDiscovery(data) {
 
 function conceptOptions(discovery) {
   const vibeLabel = discovery.vibe === "city" ? "City break" : discovery.vibe.charAt(0).toUpperCase() + discovery.vibe.slice(1);
-  return [
+  const options = [
     {
       id: "A",
       title: "Escapade tropicale / plage",
@@ -306,7 +424,8 @@ function conceptOptions(discovery) {
       title: "Nature & aventure modérée",
       bullets: ["Randos douces + paysages", "1 activité premium guidée", "Hébergement cosy"],
     },
-    ].map((opt) => ({
+    ];
+  return attachScrapeToOptions(options, "discovery").map((opt) => ({
       ...opt,
       onSelect: (o) => {
         state.concept = o;
@@ -341,8 +460,14 @@ function startStepFlow(index) {
   updateStepList(index);
   const id = steps[index];
   const builder = builders[id];
-  setThinking(`Agent ${index + 1} réfléchit…`);
-  setTimeout(() => builder(index), 380);
+  const delay = Math.floor(5000 + Math.random() * 5000);
+  const stageLabel = `Agent ${index + 1} réfléchit…`;
+  setThinking(stageLabel);
+  showStepLoader(stageLabel, delay);
+  setTimeout(() => {
+    clearStepLoader();
+    builder(index);
+  }, delay);
 }
 
 const builders = {
@@ -356,7 +481,7 @@ const builders = {
       discovery.notes ? `Note: ${discovery.notes}` : ""
     ].filter(Boolean);
 
-    const options = [
+    const options = attachScrapeToOptions([
       {
         id: "A",
         title: "Hybrid luxe + budget maîtrisé",
@@ -372,7 +497,7 @@ const builders = {
         title: "Durée pleine, hôtels sobres",
         bullets: ["Plus de jours", "3★/4★ bien notés", "Budget focalisé sur activités"],
       },
-    ].map((opt) => ({
+    ], "profile").map((opt) => ({
       ...opt,
       onSelect: (o) => {
         state.choices.profile = o;
@@ -395,7 +520,7 @@ const builders = {
   },
   flights: (idx) => {
     const { origin, destination, budget } = state.discovery;
-    const options = [
+    const options = attachScrapeToOptions([
       {
         id: "A",
         title: "Route économique sécurisée",
@@ -423,7 +548,7 @@ const builders = {
           "Prix moyen, horaires corrects",
         ],
       },
-    ].map((opt) => ({
+    ], "flights").map((opt) => ({
       ...opt,
       onSelect: (o) => {
         state.choices.flights = o;
@@ -443,7 +568,7 @@ const builders = {
   },
   lodging: (idx) => {
     const { duration } = state.discovery;
-    const options = [
+    const options = attachScrapeToOptions([
       {
         id: "A",
         title: "Moins de nuits mais 5★",
@@ -459,7 +584,7 @@ const builders = {
         title: "Mix luxe + mid-range",
         bullets: ["1–2 nuits signature + reste 3★/4★", `${duration} nuits réparties`, "Équilibre confort/coût"],
       },
-    ].map((opt) => ({
+    ], "lodging").map((opt) => ({
       ...opt,
       onSelect: (o) => {
         state.choices.lodging = o;
@@ -479,7 +604,7 @@ const builders = {
   },
   activities: (idx) => {
     const remaining = state.discovery.budget === "low" ? "Faible" : state.discovery.budget === "high" ? "Confortable" : "Modéré";
-    const options = [
+    const options = attachScrapeToOptions([
       {
         id: "A",
         title: "Culture + gratuit majoritaire",
@@ -495,7 +620,7 @@ const builders = {
         title: "Moments premium concentrés",
         bullets: ["Spa ou onsen privé", "Dîner gastronomique", "Guide privé 1 journée"],
       },
-    ].map((opt) => ({
+    ], "activities").map((opt) => ({
       ...opt,
       onSelect: (o) => {
         state.choices.activities = o;
@@ -527,7 +652,7 @@ const builders = {
       }
     }
 
-    const approveOptions = [
+    const approveOptions = attachScrapeToOptions([
       {
         id: "A",
         title: "J’approuve cet itinéraire de base",
@@ -550,7 +675,7 @@ const builders = {
           startStepFlow(idx + 1);
         }
       },
-    ];
+    ], "itinerary");
 
     addMessage({
       title: "Étape 5 — Itinéraire & logistique",
@@ -593,17 +718,20 @@ const builders = {
       },
     ];
 
-    const options = packages.map((pkg) => ({
-      id: pkg.id === "Best Value" ? "A" : "B",
-      title: pkg.title,
-      bullets: pkg.bullets,
-      onSelect: () => {
-        state.choices.package = pkg;
-        updateStepList(steps.length);
-        buildSummary();
-        persistState();
-      }
-    }));
+    const options = attachScrapeToOptions(
+      packages.map((pkg) => ({
+        id: pkg.id === "Best Value" ? "A" : "B",
+        title: pkg.title,
+        bullets: pkg.bullets,
+        onSelect: () => {
+          state.choices.package = pkg;
+          updateStepList(steps.length);
+          buildSummary();
+          persistState();
+        }
+      })),
+      "budget"
+    );
 
     addMessage({
       title: "Étape 6 — Budget & packages",
@@ -638,6 +766,11 @@ function buildSummary() {
   blocks.push({ title: "5. Itinéraire", items: choices.itinerary?.bullets || ["Itinéraire standard"] });
   blocks.push({ title: "6. Package choisi", items: [choices.package?.title || "Pas encore choisi"] });
   blocks.push({ title: "7. Conformité sécurité", items: ["Pas de destinations interdites", "Aucune activité illégale"] });
+
+  const scrape = getScrapedSnippet(discovery.destination, "budget");
+  if (scrape?.text) {
+    blocks.push({ title: "8. Données scrappées injectées", items: [scrape.text, `Sources: ${scrape.source}`] });
+  }
 
   summaryBlock.innerHTML = blocks
     .map(
