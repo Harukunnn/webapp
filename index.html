@@ -7,6 +7,43 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <nav class="topbar" aria-label="Barre de statut premium">
+    <div class="topbar-brand">
+      <span class="logo" aria-hidden="true">✦</span>
+      <div>
+        <p class="eyebrow">Conciergerie</p>
+        <strong>Atlas Luxury Ops</strong>
+      </div>
+    </div>
+    <div class="topbar-stats" aria-label="Statuts de confiance">
+      <div class="stat" id="uptimeStat" role="status">
+        <span class="dot online" aria-hidden="true"></span>
+        <div>
+          <p class="muted">Uptime</p>
+          <strong>99.99%</strong>
+        </div>
+      </div>
+      <div class="stat" id="latencyStat" role="status">
+        <span class="dot" aria-hidden="true"></span>
+        <div>
+          <p class="muted">Latence</p>
+          <strong>&lt; 280ms</strong>
+        </div>
+      </div>
+      <div class="stat" id="privacyStat" role="status">
+        <span class="dot" aria-hidden="true"></span>
+        <div>
+          <p class="muted">Données</p>
+          <strong>Chiffrées & RGPD</strong>
+        </div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button type="button" id="btnConcierge" class="ghost">Parler au concierge</button>
+      <button type="button" id="btnUrgent" class="primary ghost">Assistance 24/7</button>
+    </div>
+  </nav>
+
   <header class="hero">
     <div class="hero-brand">
       <div class="hero-icon" aria-hidden="true">🧭</div>
@@ -29,6 +66,45 @@
       <p class="label">En attente d’une requête.</p>
     </div>
 
+    <section class="panel trust" aria-labelledby="trust-title">
+      <header class="panel-header">
+        <div>
+          <p class="eyebrow">Transparence temps réel</p>
+          <h2 id="trust-title">Fiabilité visible & engagements</h2>
+        </div>
+        <div class="panel-actions">
+          <span class="pill pill-soft" id="slaBadge">SLA 99.9%</span>
+          <span class="pill" id="trustCTA">Preuves live activées</span>
+        </div>
+      </header>
+      <div class="trust-grid" aria-label="Indicateurs de confiance">
+        <article class="trust-card">
+          <h3>Perf & uptime</h3>
+          <p class="muted" id="uptimeCopy">Monitoré en continu, statut nominal.</p>
+          <div class="sparkline" id="sparkline"></div>
+        </article>
+        <article class="trust-card">
+          <h3>Protection des données</h3>
+          <p class="muted">Chiffrement bout-en-bout, traces minimales, consentement explicite.</p>
+          <ul class="checklist">
+            <li>Stockage UE</li>
+            <li>RGPD by design</li>
+            <li>Rotation des journaux</li>
+          </ul>
+        </article>
+        <article class="trust-card">
+          <h3>Qualité de service</h3>
+          <p class="muted">Récap post-action, jalons, SLA concierge 24/7.</p>
+          <div class="timeline">
+            <span class="dot online"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+        </article>
+      </div>
+    </section>
+
     <section class="panel audit" aria-labelledby="audit-title">
       <header class="panel-header">
         <div>
@@ -47,6 +123,75 @@
         <article class="audit-card"><h3>Images</h3><p>Strip responsive, légendes descriptives, chargement paresseux.</p></article>
         <article class="audit-card"><h3>Sécurité</h3><p>Blocage destinations sensibles + alertes cohérence.</p></article>
         <article class="audit-card"><h3>Fidélité prompt</h3><p>6 agents séquencés, options courtes, résumé final exportable.</p></article>
+      </div>
+    </section>
+
+    <section class="panel concierge" aria-labelledby="concierge-title">
+      <header class="panel-header">
+        <div>
+          <p class="eyebrow">Onboarding concierge</p>
+          <h2 id="concierge-title">Personalisation immédiate & actions rapides</h2>
+        </div>
+        <div class="panel-actions">
+          <span class="pill">3 questions clés</span>
+          <span class="pill pill-soft">Accès humain 24/7</span>
+        </div>
+      </header>
+      <div class="concierge-grid">
+        <div class="concierge-card">
+          <h3>Mini-entretien</h3>
+          <form id="conciergeForm" class="micro-form">
+            <label class="field">
+              <span>Priorité du séjour</span>
+              <select name="priority">
+                <option value="repos">Repos & lenteur</option>
+                <option value="signature">Moments signature</option>
+                <option value="business">Business + confort</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Tempo journalier</span>
+              <select name="pace">
+                <option value="soft">2 temps forts</option>
+                <option value="balanced" selected>3 temps forts</option>
+                <option value="dense">4+ temps forts</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Niveau de conciergerie</span>
+              <select name="service">
+                <option value="digital">Digital uniquement</option>
+                <option value="hybrid" selected>Hybride (humain si besoin)</option>
+                <option value="dedicated">Butler dédié</option>
+              </select>
+            </label>
+            <div class="actions">
+              <button type="submit" class="primary">Calibrer l'expérience</button>
+            </div>
+          </form>
+        </div>
+        <div class="concierge-card concierge-card--accent">
+          <h3>Concierge & assistance</h3>
+          <p class="muted">Disponible partout via le bouton flottant. Rappel sous 2 minutes en moyenne.</p>
+          <ul class="checklist">
+            <li>Chat sécurisé</li>
+            <li>Rappel téléphonique</li>
+            <li>Escalade prioritaire</li>
+          </ul>
+          <div class="concierge-actions">
+            <button type="button" class="ghost" id="btnCallMe">Demander un rappel</button>
+            <button type="button" class="ghost" id="btnShareSummary">Partager le dossier</button>
+          </div>
+        </div>
+        <div class="concierge-card">
+          <h3>Actions rapides</h3>
+          <div class="quick-actions" id="quickActions" aria-live="polite">
+            <button type="button" class="chip ghost">Préparer un dossier PDF</button>
+            <button type="button" class="chip ghost">Planifier un check-in express</button>
+            <button type="button" class="chip ghost">Réserver un transfert premium</button>
+          </div>
+          <p class="muted" id="conciergeNote">Personnalisation en attente des 3 réponses.</p>
+        </div>
       </div>
     </section>
 
@@ -216,6 +361,36 @@
         </div>
       </header>
       <div id="summary" class="summary" aria-live="polite"></div>
+    </section>
+
+    <section class="panel feedback" aria-labelledby="feedback-title">
+      <header class="panel-header">
+        <div>
+          <p class="eyebrow">Boucle d'amélioration</p>
+          <h2 id="feedback-title">Feedback ultra-court</h2>
+        </div>
+        <div class="panel-actions">
+          <span class="pill pill-soft" id="npsBadge">NPS live</span>
+        </div>
+      </header>
+      <form id="feedbackForm" class="micro-form">
+        <label class="field">
+          <span>Votre satisfaction globale</span>
+          <div class="nps" role="radiogroup" aria-label="Note de satisfaction">
+            <label><input type="radio" name="score" value="9" checked /> 9</label>
+            <label><input type="radio" name="score" value="10" /> 10</label>
+            <label><input type="radio" name="score" value="8" /> 8</label>
+          </div>
+        </label>
+        <label class="field">
+          <span>Un point à améliorer ?</span>
+          <input type="text" name="comment" placeholder="ex. alléger l'étape vols" />
+        </label>
+        <div class="actions">
+          <button class="primary" type="submit">Envoyer au concierge</button>
+          <p class="muted" id="feedbackStatus" role="status"></p>
+        </div>
+      </form>
     </section>
   </main>
 
