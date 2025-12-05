@@ -154,11 +154,14 @@ const scrapeInventory = {
   },
 };
 
+const scrapeStoreKey = "agenticScrapeStore";
+
 const state = {
   discovery: null,
   concept: null,
   choices: {},
-  summary: null
+  summary: null,
+  scrapeCache: {},
 };
 
 const dynamicState = {
@@ -180,8 +183,131 @@ const imageStrip = document.getElementById("imageStrip");
 const refreshIntelBtn = document.getElementById("btnRefreshIntel");
 const liveScrapeList = document.getElementById("liveScrapeList");
 
+function slugify(text) {
+  return (text || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function loadScrapeCache() {
+  try {
+    const cached = localStorage.getItem(scrapeStoreKey);
+    state.scrapeCache = cached ? JSON.parse(cached) : {};
+  } catch (e) {
+    state.scrapeCache = {};
+  }
+}
+
+function saveScrapeCache() {
+  try {
+    localStorage.setItem(scrapeStoreKey, JSON.stringify(state.scrapeCache));
+  } catch (e) {
+    console.warn("Scrape cache save failed", e);
+  }
+}
+
+function upsertScrapeRecord(destination, payload) {
+  const key = slugify(destination);
+  if (!key) return;
+  state.scrapeCache[key] = {
+    ...(state.scrapeCache[key] || {}),
+    ...payload,
+    updatedAt: Date.now(),
+  };
+  saveScrapeCache();
+}
+
+function hydrateScrapeSources() {
+  Object.entries(state.scrapeCache || {}).forEach(([key, value]) => {
+    if (value.inventory) {
+      scrapeInventory[key] = value.inventory;
+    }
+    if (value.intel) {
+      intelDataset[key] = value.intel;
+    }
+  });
+}
+
+function buildDynamicImages(destination, topics = []) {
+  const slug = slugify(destination) || "destination";
+  const seeds = [
+    "1505761671935-60b3a7427bad",
+    "1467269204594-9661b134dd2b",
+    "1503389152951-9f343605f61e",
+    "1500530855697-b586d89ba3ee",
+    "1470124182917-cc6e71b22ecc",
+    "1504197906862-1c1f9e5e39e2",
+    "1542314831-068cd1dbfeeb",
+    "1523275335684-37898b6baf30",
+    "1526481280695-3c469c2f0f99",
+  ];
+  return topics.map((topic, idx) => {
+    const photoId = seeds[idx % seeds.length];
+    return {
+      src: `https://images.unsplash.com/photo-${photoId}?auto=format&fit=crop&w=900&q=80&sig=${encodeURIComponent(
+        `${slug}-${topic}-${idx}`
+      )}`,
+      alt: `${destination} — ${topic}`,
+    };
+  });
+}
+
+function createSyntheticScrape(destination) {
+  const city = destination || "Destination";
+  const slug = slugify(city);
+  const baseTopics = ["quartier", "skyline", "gastronomie", "art", "parc", "rooftop", "architecture", "nature"];
+  const images = buildDynamicImages(city, baseTopics);
+  const pickImage = (idx) => images[idx % images.length]?.src;
+
+  const synthInventory = {
+    flights: [
+      { title: `${city} Direct Confort`, detail: "Vol direct 4–6h", price: 420, currency: "€", mode: "avion", valid: true, link: "https://www.skyscanner.fr", image: pickImage(0) },
+      { title: `${city} Eco rapide`, detail: "1 escale courte", price: 290, currency: "€", mode: "avion", valid: true, link: "https://www.kayak.fr", image: pickImage(1) },
+      { title: `${city} Train premium`, detail: "Itinéraire optimisé", price: 180, currency: "€", mode: "train", valid: true, link: "https://www.thetrainline.com", image: pickImage(2) },
+    ],
+    lodging: [
+      { title: `${city} Boutique 4★`, detail: "Central & design", price: 190, currency: "€", sejour: "mix", valid: true, link: "https://www.booking.com", image: pickImage(3) },
+      { title: `${city} Hôtel 5★ vue`, detail: "Service club", price: 320, currency: "€", sejour: "luxe", valid: true, link: "https://www.tablethotels.com", image: pickImage(4) },
+      { title: `${city} Éco-smart`, detail: "Label vert", price: 140, currency: "€", sejour: "eco", valid: true, link: "https://www.ecobnb.com", image: pickImage(5) },
+    ],
+    activities: [
+      { title: `Food tour ${city}`, detail: "3h guidé", price: 75, currency: "€", valid: true, link: "https://www.viator.com", image: pickImage(6) },
+      { title: `Musée clé ${city}`, detail: "Billet daté", price: 24, currency: "€", valid: true, link: "https://www.getyourguide.fr", image: pickImage(7) },
+      { title: `Quartier ${city} by night`, detail: "Balade encadrée", price: 0, currency: "€", valid: true, link: "https://www.atlas-noir.app", image: pickImage(8) },
+    ],
+    itinerary: [
+      { title: "Jour 1", detail: "Centre + panoramas", valid: true, image: pickImage(5) },
+      { title: "Jour 2", detail: "Musées + food tour", valid: true, image: pickImage(6) },
+      { title: "Jour 3", detail: "Parcs + rooftops", valid: true, image: pickImage(7) },
+    ],
+  };
+
+  const intel = {
+    summary: `${city} : zones centrales sécurisées, mobilité simple, contrastes culture/food.`,
+    hotels: [
+      `${city} Boutique 4★ — quartier central`,
+      `${city} 5★ vue — service club`,
+      `${city} éco-smart — label vert`,
+    ],
+    highlights: [
+      `Food tour ${city} nuit`,
+      `Musée emblématique ${city}`,
+      `Parc ou rooftop ${city} pour le coucher de soleil`,
+    ],
+    images,
+    fallback: true,
+  };
+
+  upsertScrapeRecord(destination, { intel, inventory: synthInventory });
+  scrapeInventory[slug] = synthInventory;
+  intelDataset[slug] = intel;
+  return { intel, inventory: synthInventory };
+}
+
 function getScrapedSnippet(destination, stage) {
-  const key = (destination || "").trim().toLowerCase();
+  const key = slugify(destination || "");
   const record = scrapedContext[key];
   if (!record) {
     return {
@@ -218,7 +344,7 @@ function getStageScrapePlan(stage) {
 }
 
 function filterScrapeItems(destination, stage, discovery) {
-  const key = (destination || "").trim().toLowerCase();
+  const key = slugify(destination || "");
   const inventory = scrapeInventory[key]?.[stage] || [];
   const validOnly = inventory.filter((item) => item.valid !== false);
   const priorSelections = Object.values(state.choices || {})
@@ -361,6 +487,8 @@ function restoreState() {
     state.concept = parsed.concept || null;
     state.choices = parsed.choices || {};
     state.summary = parsed.summary || null;
+    state.scrapeCache = parsed.scrapeCache || {};
+    hydrateScrapeSources();
     const form = document.getElementById("discoveryForm");
     if (form && parsed.discovery) {
       Object.entries(parsed.discovery).forEach(([k, v]) => {
@@ -393,6 +521,7 @@ function clearUI(skipPersist = false) {
   state.concept = null;
   state.choices = {};
   state.summary = null;
+  hydrateScrapeSources();
   if (!skipPersist) persistState();
 }
 
@@ -530,12 +659,22 @@ function fallbackIntel(destination) {
 }
 
 function fetchIntel(destination) {
-  const key = destination.trim().toLowerCase();
+  const key = slugify(destination.trim());
   setIntelStatus("Recherche en cours…", "info");
   showIntelError("");
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve(intelDataset[key] || fallbackIntel(destination));
+      const cachedIntel = state.scrapeCache[key]?.intel;
+      if (cachedIntel) {
+        intelDataset[key] = cachedIntel;
+        return resolve(cachedIntel);
+      }
+      if (intelDataset[key]) {
+        upsertScrapeRecord(destination, { intel: intelDataset[key] });
+        return resolve(intelDataset[key]);
+      }
+      const synthetic = createSyntheticScrape(destination);
+      resolve(synthetic.intel || fallbackIntel(destination));
     }, 320);
   });
 }
@@ -1050,6 +1189,8 @@ if (refreshIntelBtn) {
   });
 }
 
+loadScrapeCache();
+hydrateScrapeSources();
 clearUI(true);
 restoreState();
 if (state.discovery?.destination) {
