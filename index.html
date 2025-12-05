@@ -143,6 +143,29 @@
       </div>
     </section>
 
+    <section class="panel" aria-labelledby="intel-title">
+      <header class="panel-header solo">
+        <div>
+          <p class="eyebrow">Scraping</p>
+          <h2 id="intel-title">Sources actives</h2>
+        </div>
+        <div class="actions tight">
+          <button id="btnRefreshIntel" class="ghost" disabled>Rafraîchir</button>
+        </div>
+      </header>
+      <div class="intel-grid compact">
+        <div id="intelCards" class="intel-cards" aria-live="polite"></div>
+        <div class="intel-side">
+          <div class="live-scrape">
+            <p class="muted live-scrape__head">Flux de scraping</p>
+            <ul id="liveScrapeList" class="live-scrape__list" aria-live="polite"></ul>
+            <div id="intelError" class="alert" role="status"></div>
+          </div>
+          <div class="image-strip" id="imageStrip" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
     <section class="panel" aria-labelledby="summary-title">
       <header class="panel-header solo">
         <div>
