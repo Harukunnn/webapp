@@ -255,6 +255,25 @@ function buildDynamicImages(destination, topics = []) {
   });
 }
 
+function generateStageImage(destination, stage, idx) {
+  const seeds = [
+    "1505761671935-60b3a7427bad",
+    "1467269204594-9661b134dd2b",
+    "1503389152951-9f343605f61e",
+    "1500530855697-b586d89ba3ee",
+    "1470124182917-cc6e71b22ecc",
+    "1504197906862-1c1f9e5e39e2",
+    "1542314831-068cd1dbfeeb",
+    "1523275335684-37898b6baf30",
+    "1526481280695-3c469c2f0f99",
+    "1470246973918-29a93221c455",
+  ];
+  const photoId = seeds[idx % seeds.length];
+  return `https://images.unsplash.com/photo-${photoId}?auto=format&fit=crop&w=900&q=80&sat=-5&sig=${encodeURIComponent(
+    `${slugify(destination)}-${stage}-${idx}`
+  )}`;
+}
+
 function createSyntheticScrape(destination) {
   const city = destination || "Destination";
   const slug = slugify(city);
@@ -305,6 +324,44 @@ function createSyntheticScrape(destination) {
   scrapeInventory[slug] = synthInventory;
   intelDataset[slug] = intel;
   return { intel, inventory: synthInventory };
+}
+
+function ensureInventoryVolume(destination, inventory = {}, discovery) {
+  const stages = ["flights", "lodging", "activities", "itinerary", "profile", "discovery"];
+  const baseAddress = `${destination || "Destination"} centre`;
+  stages.forEach((stage) => {
+    const pool = inventory[stage] || (stage === "discovery" ? [] : []);
+    const desired = stage === "activities"
+      ? Math.max(18, (Number(discovery?.duration) || 6) * 2)
+      : 18;
+    let idx = pool.length;
+    while (pool.length < desired) {
+      const priceSeed = 40 + idx * 5;
+      const synthetic = {
+        title: `${destination || "Destination"} ${stage} ${idx + 1}`,
+        detail: stage === "flights" ? "Horaires fréquents" : stage === "lodging" ? "Adresse centrale" : "Sélection scrappée",
+        price: stage === "lodging" ? priceSeed + 80 : priceSeed,
+        currency: "€",
+        mode: stage === "flights" ? (idx % 2 ? "avion" : "train") : undefined,
+        sejour: stage === "lodging" ? (idx % 3 === 0 ? "luxe" : idx % 3 === 1 ? "mix" : "eco") : undefined,
+        valid: true,
+        link: "https://www.google.com/travel",
+        hours:
+          stage === "activities"
+            ? `${10 + (idx % 4)}h-${18 + (idx % 4)}h`
+            : stage === "flights"
+            ? `${6 + (idx % 5)}h-${22 - (idx % 3)}h`
+            : "24/7",
+        address: `${baseAddress} · secteur ${idx + 1}`,
+        tags: [stage, discovery?.focus, discovery?.culture, discovery?.night].filter(Boolean),
+        image: generateStageImage(destination, stage, idx),
+      };
+      pool.push(synthetic);
+      idx++;
+    }
+    inventory[stage] = pool;
+  });
+  return inventory;
 }
 
 function getScrapedSnippet(destination, stage) {
@@ -366,6 +423,10 @@ function filterScrapeItems(destination, stage, discovery) {
     discovery?.culture,
     discovery?.night,
     discovery?.outdoor,
+    discovery?.sport,
+    discovery?.wellness,
+    discovery?.shopping,
+    discovery?.season,
     discovery?.access,
     discovery?.kids === "famille" ? "famille" : null,
   ].filter(Boolean);
@@ -405,6 +466,8 @@ function scoreItemByDiscovery(item, stage, discovery) {
     if (pref && tags.includes(pref)) score += 2;
   });
   if (discovery?.access && tags.includes(discovery.access)) score += 1;
+  if (discovery?.pace === "slow" && stage === "itinerary") score += 1;
+  if (discovery?.pace === "dense" && stage === "activities") score += 1;
   if (discovery?.kids === "famille" && tags.includes("famille")) score += 2;
   if (state.choices?.activities && stage === "itinerary") score += 1;
   if (item.link) score += 1;
@@ -415,18 +478,19 @@ function rankScrapeItems(pool, stage, discovery) {
   return [...pool].sort((a, b) => scoreItemByDiscovery(b, stage, discovery) - scoreItemByDiscovery(a, stage, discovery));
 }
 
-function sampleScrapedItems(destination, stage, discovery, desired = 12) {
+function sampleScrapedItems(destination, stage, discovery, desired = 18) {
   const pool = filterScrapeItems(destination, stage, discovery);
   const ranked = rankScrapeItems(pool, stage, discovery);
-  const count = Math.max(6, Math.min(desired, 12, ranked.length || desired));
+  const count = Math.max(9, Math.min(desired, ranked.length || desired));
   const picked = ranked.slice(0, count);
   const uniqueImages = new Set();
-  return picked.map((item) => {
-    const img = uniqueImages.has(item.image)
+  return picked.map((item, idx) => {
+    const imgCandidate = uniqueImages.has(item.image)
       ? ranked.find((alt) => !uniqueImages.has(alt.image) && alt.image)
       : item;
-    if (img?.image) uniqueImages.add(img.image);
-    return { ...item, image: img?.image || item.image };
+    const fallbackImg = imgCandidate?.image || generateStageImage(destination, stage, idx + picked.length);
+    uniqueImages.add(fallbackImg);
+    return { ...item, image: fallbackImg };
   });
 }
 
@@ -611,6 +675,15 @@ function addMessage({ title, agent, body, options = [], question }) {
       btn.addEventListener("click", () => opt.onSelect(opt));
       grid.appendChild(btn);
     });
+    const skip = document.createElement("button");
+    skip.type = "button";
+    skip.className = "ghost icon skip";
+    skip.textContent = "Passer (choix auto)";
+    skip.addEventListener("click", () => {
+      const randomOpt = options[Math.floor(Math.random() * options.length)];
+      if (randomOpt?.onSelect) randomOpt.onSelect(randomOpt);
+    });
+    grid.appendChild(skip);
     card.appendChild(grid);
   }
 
@@ -634,7 +707,10 @@ function showIntelError(message, tone = "error") {
 
 function attachScrapeToOptions(options, stage) {
   const destination = state.discovery?.destination;
-  const scrapedSet = sampleScrapedItems(destination, stage, state.discovery, 12);
+  const desiredCount = stage === "activities"
+    ? Math.max(18, (Number(state.discovery?.duration) || 5) * 3)
+    : 18;
+  const scrapedSet = sampleScrapedItems(destination, stage, state.discovery, desiredCount);
   const stagePlan = getStageScrapePlan(stage).join(" · ");
   if (scrapedSet?.length) {
     pushLiveScrape({
@@ -764,15 +840,16 @@ function fetchInventory(destination) {
     setTimeout(() => {
       const cachedInventory = state.scrapeCache[key]?.inventory;
       if (cachedInventory) {
-        scrapeInventory[key] = cachedInventory;
-        return resolve(cachedInventory);
+        scrapeInventory[key] = ensureInventoryVolume(destination, cachedInventory, state.discovery);
+        return resolve(scrapeInventory[key]);
       }
       if (scrapeInventory[key]) {
+        scrapeInventory[key] = ensureInventoryVolume(destination, scrapeInventory[key], state.discovery);
         upsertScrapeRecord(destination, { inventory: scrapeInventory[key] });
         return resolve(scrapeInventory[key]);
       }
       const synthetic = createSyntheticScrape(destination);
-      resolve(synthetic.inventory);
+      resolve(ensureInventoryVolume(destination, synthetic.inventory, state.discovery));
     }, 320);
   });
 }
@@ -796,7 +873,7 @@ async function ensureScrapeDataset(destination, stageLabel = "Scraping sécuris�
   const key = slugify(destination || "");
   if (!key) return {};
   if (state.scrapeReady === key && scrapeInventory[key]) {
-    return { intel: intelDataset[key], inventory: scrapeInventory[key] };
+    return { intel: intelDataset[key], inventory: ensureInventoryVolume(destination, scrapeInventory[key], state.discovery) };
   }
   setStatus("Scraping", "info");
   setThinking(stageLabel);
@@ -808,12 +885,14 @@ async function ensureScrapeDataset(destination, stageLabel = "Scraping sécuris�
     fetchIntel(destination),
     fetchInventory(destination),
   ]);
+  const normalizedInventory = ensureInventoryVolume(destination, inventory, state.discovery);
+  scrapeInventory[key] = normalizedInventory;
   renderIntel(intel, destination);
   state.scrapeReady = key;
   if (needsLoader) clearStepLoader();
   setIntelStatus("Sources scrappées prêtes", "success");
   refreshIntelBtn.disabled = false;
-  return { intel, inventory };
+  return { intel, inventory: normalizedInventory };
 }
 
 function safetyBlocked(destination) {
@@ -832,6 +911,23 @@ function formatBudgetLabel(level) {
   if (level === "low") return "Budget serré";
   if (level === "high") return "Budget généreux";
   return "Budget équilibré";
+}
+
+function variantTitle(base, stage, discovery, id) {
+  const vibe = discovery?.vibe || "mix";
+  const pace = discovery?.pace === "equilibre" ? "équilibré" : discovery?.pace || "équilibré";
+  const palette = {
+    discovery: ["signature", "curation locale", "mix immersif", "atlas premium"],
+    profile: ["vibe alignée", `cadence ${pace}`, `focus ${vibe}`, "sur mesure"],
+    flights: ["sky", "express", "long-courrier doux", "connecté"],
+    lodging: ["collection", "suite & vues", "mix hôtelier", "adresses sûres"],
+    activities: ["culture & food", "nocturne", "panoramas", "sur-mesure"],
+    itinerary: ["rythme fin", `cadence ${pace}`, "flow", "ligne directrice"],
+    budget: ["précision", "premium", "équilibre", "surclassement"],
+  };
+  const variants = palette[stage] || palette.discovery;
+  const suffix = variants[Math.floor(Math.random() * variants.length)] || "signature";
+  return `${base} · ${suffix}${id ? ` (${id})` : ""}`;
 }
 
 function validateDiscovery(data) {
@@ -857,7 +953,7 @@ function conceptOptions(discovery) {
   const options = [
     {
       id: "A",
-      title: `Immersion ${destinationLabel} sur mesure`,
+      title: variantTitle(`Immersion ${destinationLabel} sur mesure`, "discovery", discovery, "A"),
       bullets: [
         `${vibeLabel} + adresses ${focusLabel}`,
         `Transports ${discovery.transport} affinés`,
@@ -866,7 +962,7 @@ function conceptOptions(discovery) {
     },
     {
       id: "B",
-      title: "Nature ou littoral reposant",
+      title: variantTitle("Nature ou littoral reposant", "discovery", discovery, "B"),
       bullets: [
         "Rythme léger & panoramas",
         `${discovery.duration}-jour(s) avec sorties ciblées`,
@@ -875,7 +971,7 @@ function conceptOptions(discovery) {
     },
     {
       id: "C",
-      title: `${destinationLabel} nocturne & design`,
+      title: variantTitle(`${destinationLabel} nocturne & design`, "discovery", discovery, "C"),
       bullets: [
         "Quartiers vivants + rooftops",
         "Bars/cafés signature scrappés",
@@ -949,7 +1045,7 @@ const builders = {
     const options = attachScrapeToOptions([
       {
         id: "A",
-        title: "Hybrid luxe + budget maîtrisé",
+        title: variantTitle("Hybrid luxe + budget maîtrisé", "profile", discovery, "A"),
         bullets: [
           `Moments premium ${discovery.duration > 5 ? "étalés" : "ciblés"}`,
           `Hôtels/vols triés sur ${focusTag}`,
@@ -958,7 +1054,7 @@ const builders = {
       },
       {
         id: "B",
-        title: "Séjour court très confortable",
+        title: variantTitle("Séjour court très confortable", "profile", discovery, "B"),
         bullets: [
           `${discovery.duration - 1 > 0 ? discovery.duration - 1 : 3}-4 jours intenses`,
           `Vols courts + transferts ${transportTag}`,
@@ -967,7 +1063,7 @@ const builders = {
       },
       {
         id: "C",
-        title: "Durée pleine, hôtels sobres",
+        title: variantTitle("Durée pleine, hôtels sobres", "profile", discovery, "C"),
         bullets: [
           `${discovery.duration + 1} jours avec pics culture ${focusTag}`,
           `3★/4★ très bien notés + accès ${transportTag}`,
@@ -1002,7 +1098,7 @@ const builders = {
     const options = attachScrapeToOptions([
       {
         id: "A",
-        title: "Route économique sécurisée",
+        title: variantTitle("Route économique sécurisée", "flights", state.discovery, "A"),
         bullets: [
           `${origin} → escale → ${destination}`,
           "Classe éco, horaires étalés",
@@ -1011,7 +1107,7 @@ const builders = {
       },
       {
         id: "B",
-        title: "Confort + horaires courts",
+        title: variantTitle("Confort + horaires courts", "flights", state.discovery, "B"),
         bullets: [
           `${origin} → ${destination} ou escale courte`,
           "Éco premium/siège extra",
@@ -1020,7 +1116,7 @@ const builders = {
       },
       {
         id: "C",
-        title: "Équilibré budget/temps",
+        title: variantTitle("Équilibré budget/temps", "flights", state.discovery, "C"),
         bullets: [
           `${origin} → escale unique → ${destination}`,
           "Durée ~8–12h (selon distance)",
@@ -1050,17 +1146,17 @@ const builders = {
     const options = attachScrapeToOptions([
       {
         id: "A",
-        title: "Moins de nuits mais 5★",
+        title: variantTitle("Moins de nuits mais 5★", "lodging", state.discovery, "A"),
         bullets: ["2–3 nuits luxe", "Quartier central", "Budget concentré"],
       },
       {
         id: "B",
-        title: "4★ abordable toute la durée",
+        title: variantTitle("4★ abordable toute la durée", "lodging", state.discovery, "B"),
         bullets: ["Durée complète", "Zone pratique (métro/plage)", "Bon rapport qualité/prix"],
       },
       {
         id: "C",
-        title: "Mix luxe + mid-range",
+        title: variantTitle("Mix luxe + mid-range", "lodging", state.discovery, "C"),
         bullets: ["1–2 nuits signature + reste 3★/4★", `${duration} nuits réparties`, "Équilibre confort/coût"],
       },
     ], "lodging").map((opt) => ({
@@ -1086,17 +1182,17 @@ const builders = {
     const options = attachScrapeToOptions([
       {
         id: "A",
-        title: "Culture + gratuit majoritaire",
+        title: variantTitle("Culture + gratuit majoritaire", "activities", state.discovery, "A"),
         bullets: ["Musées/temples extérieurs", "Balades guidées", "1 expérience premium unique"],
       },
       {
         id: "B",
-        title: "Mix équilibré payant/gratuit",
+        title: variantTitle("Mix équilibré payant/gratuit", "activities", state.discovery, "B"),
         bullets: ["Visites emblématiques", "Street-food + rooftop", "1 activité par demi-journée"],
       },
       {
         id: "C",
-        title: "Moments premium concentrés",
+        title: variantTitle("Moments premium concentrés", "activities", state.discovery, "C"),
         bullets: ["Spa ou onsen privé", "Dîner gastronomique", "Guide privé 1 journée"],
       },
     ], "activities").map((opt) => ({
@@ -1227,6 +1323,20 @@ function buildSummary() {
   if (validateBtn) validateBtn.disabled = false;
   const blocks = [];
   const { discovery, concept, choices } = state;
+  const duration = Number(discovery.duration || 0) || 1;
+
+  const estimateStageCost = (choice, stage) => {
+    if (!choice?.scrapedItems?.length) return 0;
+    const prices = choice.scrapedItems
+      .map((i) => Number(i.price))
+      .filter((p) => !Number.isNaN(p) && p > 0);
+    if (!prices.length) return 0;
+    const average = prices.reduce((a, b) => a + b, 0) / prices.length;
+    if (stage === "lodging") return Math.round(average * duration);
+    if (stage === "activities") return Math.round(average * Math.max(duration, prices.length / 2));
+    if (stage === "flights") return Math.round(Math.min(...prices));
+    return Math.round(average);
+  };
 
   const formatScrapeLines = (choice, stage) => {
     if (!choice?.scrapedItems?.length) return [choice?.title || "—"];
@@ -1261,13 +1371,32 @@ function buildSummary() {
   blocks.push({ title: "6. Package choisi", items: formatScrapeLines(choices.package, "budget") });
   blocks.push({ title: "7. Conformité sécurité", items: ["Pas de destinations interdites", "Aucune activité illégale"] });
 
-  summaryBlock.innerHTML = blocks
-    .map(
-      (b) => `<div class="block"><h4>${b.title}</h4><ul>${b.items
-        .map((i) => `<li>${i}</li>`)
-        .join("")}</ul></div>`
-    )
-    .join("");
+  const totalFlights = estimateStageCost(choices.flights, "flights");
+  const totalLodging = estimateStageCost(choices.lodging, "lodging");
+  const totalActivities = estimateStageCost(choices.activities, "activities");
+  const totalLocal = Math.round(duration * 40);
+  const grandTotal = totalFlights + totalLodging + totalActivities + totalLocal;
+
+  summaryBlock.innerHTML = `
+    <div class="summary-header luxe">
+      <div>
+        <p class="muted mini">Atlas Noir — Synthèse premium</p>
+        <strong class="sum-total">${grandTotal ? `~${grandTotal}€ estimés` : "Budget à calibrer"}</strong>
+        <p class="muted">Vols ~${totalFlights}€ · Séjour ~${totalLodging}€ · Activités ~${totalActivities}€ · Transports locaux ~${totalLocal}€</p>
+      </div>
+      <div class="sum-chips">
+        <span class="pill">${formatBudgetLabel(discovery.budget)}</span>
+        <span class="pill">${discovery.duration} jours</span>
+        <span class="pill">${discovery.destination}</span>
+      </div>
+    </div>
+    <div class="block-grid luxe">${blocks
+      .map(
+        (b) => `<div class="block"><h4>${b.title}</h4><ul>${b.items
+          .map((i) => `<li>${i}</li>`)
+          .join("")}</ul></div>`
+      )
+      .join("")}</div>`;
 
   state.summary = blocks;
   persistState();
