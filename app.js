@@ -154,11 +154,15 @@ const scrapeInventory = {
   },
 };
 
+const scrapeStoreKey = "agenticScrapeStore";
+
 const state = {
   discovery: null,
   concept: null,
   choices: {},
-  summary: null
+  summary: null,
+  scrapeReady: null,
+  scrapeCache: {},
 };
 
 const dynamicState = {
@@ -180,8 +184,131 @@ const imageStrip = document.getElementById("imageStrip");
 const refreshIntelBtn = document.getElementById("btnRefreshIntel");
 const liveScrapeList = document.getElementById("liveScrapeList");
 
+function slugify(text) {
+  return (text || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function loadScrapeCache() {
+  try {
+    const cached = localStorage.getItem(scrapeStoreKey);
+    state.scrapeCache = cached ? JSON.parse(cached) : {};
+  } catch (e) {
+    state.scrapeCache = {};
+  }
+}
+
+function saveScrapeCache() {
+  try {
+    localStorage.setItem(scrapeStoreKey, JSON.stringify(state.scrapeCache));
+  } catch (e) {
+    console.warn("Scrape cache save failed", e);
+  }
+}
+
+function upsertScrapeRecord(destination, payload) {
+  const key = slugify(destination);
+  if (!key) return;
+  state.scrapeCache[key] = {
+    ...(state.scrapeCache[key] || {}),
+    ...payload,
+    updatedAt: Date.now(),
+  };
+  saveScrapeCache();
+}
+
+function hydrateScrapeSources() {
+  Object.entries(state.scrapeCache || {}).forEach(([key, value]) => {
+    if (value.inventory) {
+      scrapeInventory[key] = value.inventory;
+    }
+    if (value.intel) {
+      intelDataset[key] = value.intel;
+    }
+  });
+}
+
+function buildDynamicImages(destination, topics = []) {
+  const slug = slugify(destination) || "destination";
+  const seeds = [
+    "1505761671935-60b3a7427bad",
+    "1467269204594-9661b134dd2b",
+    "1503389152951-9f343605f61e",
+    "1500530855697-b586d89ba3ee",
+    "1470124182917-cc6e71b22ecc",
+    "1504197906862-1c1f9e5e39e2",
+    "1542314831-068cd1dbfeeb",
+    "1523275335684-37898b6baf30",
+    "1526481280695-3c469c2f0f99",
+  ];
+  return topics.map((topic, idx) => {
+    const photoId = seeds[idx % seeds.length];
+    return {
+      src: `https://images.unsplash.com/photo-${photoId}?auto=format&fit=crop&w=900&q=80&sig=${encodeURIComponent(
+        `${slug}-${topic}-${idx}`
+      )}`,
+      alt: `${destination} — ${topic}`,
+    };
+  });
+}
+
+function createSyntheticScrape(destination) {
+  const city = destination || "Destination";
+  const slug = slugify(city);
+  const baseTopics = ["quartier", "skyline", "gastronomie", "art", "parc", "rooftop", "architecture", "nature"];
+  const images = buildDynamicImages(city, baseTopics);
+  const pickImage = (idx) => images[idx % images.length]?.src;
+
+  const synthInventory = {
+    flights: [
+      { title: `${city} Direct Confort`, detail: "Vol direct 4–6h", price: 420, currency: "€", mode: "avion", valid: true, link: "https://www.skyscanner.fr", image: pickImage(0) },
+      { title: `${city} Eco rapide`, detail: "1 escale courte", price: 290, currency: "€", mode: "avion", valid: true, link: "https://www.kayak.fr", image: pickImage(1) },
+      { title: `${city} Train premium`, detail: "Itinéraire optimisé", price: 180, currency: "€", mode: "train", valid: true, link: "https://www.thetrainline.com", image: pickImage(2) },
+    ],
+    lodging: [
+      { title: `${city} Boutique 4★`, detail: "Central & design", price: 190, currency: "€", sejour: "mix", valid: true, link: "https://www.booking.com", image: pickImage(3) },
+      { title: `${city} Hôtel 5★ vue`, detail: "Service club", price: 320, currency: "€", sejour: "luxe", valid: true, link: "https://www.tablethotels.com", image: pickImage(4) },
+      { title: `${city} Éco-smart`, detail: "Label vert", price: 140, currency: "€", sejour: "eco", valid: true, link: "https://www.ecobnb.com", image: pickImage(5) },
+    ],
+    activities: [
+      { title: `Food tour ${city}`, detail: "3h guidé", price: 75, currency: "€", valid: true, link: "https://www.viator.com", image: pickImage(6) },
+      { title: `Musée clé ${city}`, detail: "Billet daté", price: 24, currency: "€", valid: true, link: "https://www.getyourguide.fr", image: pickImage(7) },
+      { title: `Quartier ${city} by night`, detail: "Balade encadrée", price: 0, currency: "€", valid: true, link: "https://www.atlas-noir.app", image: pickImage(8) },
+    ],
+    itinerary: [
+      { title: "Jour 1", detail: "Centre + panoramas", valid: true, image: pickImage(5) },
+      { title: "Jour 2", detail: "Musées + food tour", valid: true, image: pickImage(6) },
+      { title: "Jour 3", detail: "Parcs + rooftops", valid: true, image: pickImage(7) },
+    ],
+  };
+
+  const intel = {
+    summary: `${city} : zones centrales sécurisées, mobilité simple, contrastes culture/food.`,
+    hotels: [
+      `${city} Boutique 4★ — quartier central`,
+      `${city} 5★ vue — service club`,
+      `${city} éco-smart — label vert`,
+    ],
+    highlights: [
+      `Food tour ${city} nuit`,
+      `Musée emblématique ${city}`,
+      `Parc ou rooftop ${city} pour le coucher de soleil`,
+    ],
+    images,
+    fallback: true,
+  };
+
+  upsertScrapeRecord(destination, { intel, inventory: synthInventory });
+  scrapeInventory[slug] = synthInventory;
+  intelDataset[slug] = intel;
+  return { intel, inventory: synthInventory };
+}
+
 function getScrapedSnippet(destination, stage) {
-  const key = (destination || "").trim().toLowerCase();
+  const key = slugify(destination || "");
   const record = scrapedContext[key];
   if (!record) {
     return {
@@ -218,8 +345,15 @@ function getStageScrapePlan(stage) {
 }
 
 function filterScrapeItems(destination, stage, discovery) {
-  const key = (destination || "").trim().toLowerCase();
-  const inventory = scrapeInventory[key]?.[stage] || [];
+  const key = slugify(destination || "");
+  const inventory =
+    stage === "discovery"
+      ? [
+          ...(scrapeInventory[key]?.flights || []),
+          ...(scrapeInventory[key]?.lodging || []),
+          ...(scrapeInventory[key]?.activities || []),
+        ]
+      : scrapeInventory[key]?.[stage] || [];
   const validOnly = inventory.filter((item) => item.valid !== false);
   const priorSelections = Object.values(state.choices || {})
     .flatMap((c) => c?.scrapedItems || [])
@@ -245,15 +379,32 @@ function filterScrapeItems(destination, stage, discovery) {
   return base;
 }
 
-function sampleScrapedItems(destination, stage, discovery, desired = 8) {
+function scoreItemByDiscovery(item, stage, discovery) {
+  let score = 0;
+  const price = Number(item.price || 0);
+  if (discovery?.budget === "low" && price && price < 150) score += 2;
+  if (discovery?.budget === "high" && price && price > 200) score += 1;
+  if (stage === "flights" && discovery?.transport && item.mode === discovery.transport) score += 3;
+  if (stage === "lodging" && discovery?.sejour && item.sejour === discovery.sejour) score += 3;
+  if (stage === "activities" && discovery?.vibe && item.detail?.toLowerCase().includes(discovery.vibe)) score += 2;
+  if (state.choices?.activities && stage === "itinerary") score += 1;
+  if (item.link) score += 1;
+  return score;
+}
+
+function rankScrapeItems(pool, stage, discovery) {
+  return [...pool].sort((a, b) => scoreItemByDiscovery(b, stage, discovery) - scoreItemByDiscovery(a, stage, discovery));
+}
+
+function sampleScrapedItems(destination, stage, discovery, desired = 12) {
   const pool = filterScrapeItems(destination, stage, discovery);
-  const shuffled = [...pool].sort(() => 0.5 - Math.random());
-  const count = Math.max(5, Math.min(desired, 10, shuffled.length || desired));
-  const picked = shuffled.slice(0, count);
+  const ranked = rankScrapeItems(pool, stage, discovery);
+  const count = Math.max(6, Math.min(desired, 12, ranked.length || desired));
+  const picked = ranked.slice(0, count);
   const uniqueImages = new Set();
-  return picked.map((item, idx) => {
+  return picked.map((item) => {
     const img = uniqueImages.has(item.image)
-      ? shuffled.find((alt) => !uniqueImages.has(alt.image) && alt.image)
+      ? ranked.find((alt) => !uniqueImages.has(alt.image) && alt.image)
       : item;
     if (img?.image) uniqueImages.add(img.image);
     return { ...item, image: img?.image || item.image };
@@ -361,6 +512,9 @@ function restoreState() {
     state.concept = parsed.concept || null;
     state.choices = parsed.choices || {};
     state.summary = parsed.summary || null;
+    state.scrapeReady = parsed.scrapeReady || null;
+    state.scrapeCache = parsed.scrapeCache || {};
+    hydrateScrapeSources();
     const form = document.getElementById("discoveryForm");
     if (form && parsed.discovery) {
       Object.entries(parsed.discovery).forEach(([k, v]) => {
@@ -393,6 +547,8 @@ function clearUI(skipPersist = false) {
   state.concept = null;
   state.choices = {};
   state.summary = null;
+  state.scrapeReady = null;
+  hydrateScrapeSources();
   if (!skipPersist) persistState();
 }
 
@@ -452,7 +608,7 @@ function showIntelError(message, tone = "error") {
 
 function attachScrapeToOptions(options, stage) {
   const destination = state.discovery?.destination;
-  const scrapedSet = sampleScrapedItems(destination, stage, state.discovery, 9);
+  const scrapedSet = sampleScrapedItems(destination, stage, state.discovery, 12);
   const stagePlan = getStageScrapePlan(stage).join(" · ");
   if (scrapedSet?.length) {
     pushLiveScrape({
@@ -463,13 +619,13 @@ function attachScrapeToOptions(options, stage) {
   }
   const allocation = [...scrapedSet];
   const imagesUsed = new Set();
-  const perOption = Math.max(1, Math.floor(scrapedSet.length / options.length));
-  return options.map((opt) => {
+  const perOption = Math.max(3, Math.floor(scrapedSet.length / options.length));
+  return options.map((opt, idx) => {
     const subset = [];
     while (subset.length < perOption && allocation.length) {
       subset.push(allocation.shift());
     }
-    if (!subset.length) subset.push(...scrapedSet.slice(0, perOption));
+    if (!subset.length) subset.push(...scrapedSet.slice(idx * 2, idx * 2 + perOption));
     const mediaItem = subset.find((s) => s.image && !imagesUsed.has(s.image)) || subset[0] || scrapedSet[0];
     if (mediaItem?.image) imagesUsed.add(mediaItem.image);
     const scrapeBullets = subset.slice(0, 3).map((item) => {
@@ -477,15 +633,14 @@ function attachScrapeToOptions(options, stage) {
       const site = domainFromLink(item.link);
       return `${item.title} — ${price} (${site})`;
     });
-    const adaptiveLine = subset[1]
-      ? `Focus ${subset[0].title.toLowerCase()} + ${subset[1].title.toLowerCase()} selon vos préférences ${state.discovery?.vibe || "mix"}`
-      : subset[0]?.detail || "Curateur dédié.";
+    const baseBullets = Array.isArray(opt.bullets) ? opt.bullets : [];
+    const blended = [...scrapeBullets, ...baseBullets.slice(0, 2)];
     return {
       ...opt,
       media: mediaItem?.image,
       mediaAlt: mediaItem?.title,
       scrapedItems: subset,
-      bullets: [...scrapeBullets, adaptiveLine],
+      bullets: blended,
     };
   });
 }
@@ -530,12 +685,41 @@ function fallbackIntel(destination) {
 }
 
 function fetchIntel(destination) {
-  const key = destination.trim().toLowerCase();
+  const key = slugify(destination.trim());
   setIntelStatus("Recherche en cours…", "info");
   showIntelError("");
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve(intelDataset[key] || fallbackIntel(destination));
+      const cachedIntel = state.scrapeCache[key]?.intel;
+      if (cachedIntel) {
+        intelDataset[key] = cachedIntel;
+        return resolve(cachedIntel);
+      }
+      if (intelDataset[key]) {
+        upsertScrapeRecord(destination, { intel: intelDataset[key] });
+        return resolve(intelDataset[key]);
+      }
+      const synthetic = createSyntheticScrape(destination);
+      resolve(synthetic.intel || fallbackIntel(destination));
+    }, 320);
+  });
+}
+
+function fetchInventory(destination) {
+  const key = slugify(destination.trim());
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const cachedInventory = state.scrapeCache[key]?.inventory;
+      if (cachedInventory) {
+        scrapeInventory[key] = cachedInventory;
+        return resolve(cachedInventory);
+      }
+      if (scrapeInventory[key]) {
+        upsertScrapeRecord(destination, { inventory: scrapeInventory[key] });
+        return resolve(scrapeInventory[key]);
+      }
+      const synthetic = createSyntheticScrape(destination);
+      resolve(synthetic.inventory);
     }, 320);
   });
 }
@@ -553,6 +737,30 @@ async function runIntel(destination) {
     setIntelStatus("Échec de la recherche", "danger");
     refreshIntelBtn.disabled = false;
   }
+}
+
+async function ensureScrapeDataset(destination, stageLabel = "Scraping sécurisé…") {
+  const key = slugify(destination || "");
+  if (!key) return {};
+  if (state.scrapeReady === key && scrapeInventory[key]) {
+    return { intel: intelDataset[key], inventory: scrapeInventory[key] };
+  }
+  setStatus("Scraping", "info");
+  setThinking(stageLabel);
+  const delay = Math.floor(2500 + Math.random() * 2000);
+  const needsLoader = !dynamicState.loader;
+  if (needsLoader) showStepLoader(stageLabel, delay, "discovery");
+  await new Promise((resolve) => setTimeout(resolve, delay));
+  const [intel, inventory] = await Promise.all([
+    fetchIntel(destination),
+    fetchInventory(destination),
+  ]);
+  renderIntel(intel, destination);
+  state.scrapeReady = key;
+  if (needsLoader) clearStepLoader();
+  setIntelStatus("Sources scrappées prêtes", "success");
+  refreshIntelBtn.disabled = false;
+  return { intel, inventory };
 }
 
 function safetyBlocked(destination) {
@@ -610,6 +818,15 @@ function conceptOptions(discovery) {
         `Transport ${discovery.transport} + transfers filtrés`,
       ],
     },
+    {
+      id: "C",
+      title: `${destinationLabel} nocturne & design`,
+      bullets: [
+        "Quartiers vivants + rooftops",
+        "Bars/cafés signature scrappés",
+        "Logements proches des hubs sûrs",
+      ],
+    },
   ];
   return attachScrapeToOptions(options, "discovery").map((opt) => ({
       ...opt,
@@ -650,7 +867,8 @@ function startStepFlow(index) {
   const stageLabel = `Agent ${index + 1} réfléchit…`;
   setThinking(stageLabel);
   showStepLoader(stageLabel, delay, id);
-  setTimeout(() => {
+  setTimeout(async () => {
+    await ensureScrapeDataset(state.discovery?.destination, stageLabel);
     clearStepLoader();
     builder(index);
   }, delay);
@@ -1004,7 +1222,7 @@ if (validateBtn) {
   });
 }
 
-function onDiscoverySubmit(event) {
+async function onDiscoverySubmit(event) {
   event.preventDefault();
   const data = Object.fromEntries(new FormData(event.target).entries());
   const destinationLC = data.destination.trim().toLowerCase();
@@ -1015,12 +1233,10 @@ function onDiscoverySubmit(event) {
   }
   const warnings = validateDiscovery(data);
   state.discovery = data;
+  state.scrapeReady = null;
   setStatus("En cours", "info");
   conversation.innerHTML = "";
   setThinking("Agent 0 prépare 3 pistes cohérentes…");
-  const discoveryDelay = Math.floor(5000 + Math.random() * 5000);
-  showStepLoader("Scraping découverte sécurisé…", discoveryDelay, "discovery");
-  setTimeout(() => clearStepLoader(), discoveryDelay);
 
   if (warnings.length) {
     addMessage({
@@ -1029,8 +1245,8 @@ function onDiscoverySubmit(event) {
       body: warnings.join("<br>")
     });
   }
-  runIntel(data.destination);
-  if (refreshIntelBtn) refreshIntelBtn.disabled = false;
+
+  await ensureScrapeDataset(data.destination, "Scraping découverte sécurisé…");
 
   addMessage({
     title: "Phase découverte",
@@ -1050,6 +1266,8 @@ if (refreshIntelBtn) {
   });
 }
 
+loadScrapeCache();
+hydrateScrapeSources();
 clearUI(true);
 restoreState();
 if (state.discovery?.destination) {
