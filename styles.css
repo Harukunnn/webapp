@@ -500,9 +500,12 @@ button:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; 
 .message h3 { margin: 0 0 0.25rem; letter-spacing: 0.01em; }
 .meta { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.35rem; }
 .options { display: grid; gap: 0.35rem; margin-top: 0.2rem; }
-.option { text-align: left; border-radius: 0.8rem; border: 1px solid var(--border); background: rgba(255, 255, 255, 0.02); padding: 0.6rem 0.7rem; color: var(--text); cursor: pointer; transition: border 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease; }
+.option { text-align: left; border-radius: 0.8rem; border: 1px solid var(--border); background: rgba(255, 255, 255, 0.02); padding: 0.6rem 0.7rem; color: var(--text); cursor: pointer; transition: border 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease; display: grid; gap: 0.45rem; align-items: center; grid-template-columns: 90px 1fr; }
+.option .option-visual { width: 100%; height: 72px; border-radius: 0.7rem; overflow: hidden; background: linear-gradient(135deg, rgba(94, 231, 194, 0.22), rgba(132, 169, 255, 0.15)); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15); }
+.option img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .option:hover { border-color: rgba(209, 163, 80, 0.45); transform: translateY(-1px); box-shadow: 0 8px 20px rgba(209, 163, 80, 0.15); }
-.option ul { margin: 0.25rem 0 0; padding-left: 1rem; color: var(--muted); }
+.option strong { display: block; }
+.option ul { margin: 0.15rem 0 0; padding-left: 1rem; color: var(--muted); }
 
 .alert { margin-top: 0.5rem; color: #ffbfbf; }
 .alert.success { color: #c0fff0; }

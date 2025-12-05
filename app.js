@@ -79,6 +79,16 @@ const state = {
   summary: null
 };
 
+const scrapeTargetsByStage = {
+  discovery: ["Tarifs moyens par nuit", "Transferts aéroport", "Quartiers sûrs", "Pics saisonniers", "Visa/arrivée"],
+  profile: ["Notes clients 4★+", "Accès PMR", "Transferts rapides", "Quartiers calmes", "Politique d'annulation"],
+  flights: ["Durée de vol", "Correspondances < 2h", "Baggage inclus", "Taux de retard", "Aéroports secondaires"],
+  lodging: ["Prix/nuit", "Distance centre", "Petit-déjeuner", "Review > 8.5", "Late check-in"],
+  activities: ["Billets horodatés", "Files coupe-file", "Ouvertures", "Annulations météo", "Accès famille"],
+  itinerary: ["Temps de trajet", "Pass illimités", "Heures de pointe", "Derniers métros", "Marchabilité"],
+  budget: ["Dépenses journalières", "Taux de change", "Pourboires", "Taxes locales", "Transports urbains"],
+};
+
 const dynamicState = {
   loader: null,
   loaderInterval: null,
@@ -137,6 +147,75 @@ function pushLiveScrape({ title, text, source }) {
   if (items.length > 6) items[items.length - 1].remove();
 }
 
+function shuffle(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function validateScrapedItem(value = "") {
+  const normalized = value.trim().toLowerCase();
+  if (normalized.length < 8) return false;
+  return !bannedDestinations.some((d) => normalized.includes(d));
+}
+
+function simulateScrape(stage) {
+  const destination = state.discovery?.destination || "destination";
+  const destinationKey = destination.trim().toLowerCase();
+  const snippet = getScrapedSnippet(destination, stage);
+  const targets = scrapeTargetsByStage[stage] || [];
+  const intelImages = intelDataset[destinationKey]?.images || fallbackIntel(destination).images;
+  const rawPieces = (snippet.text || "")
+    .split(/;|\./)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  const contextual = targets.map((t) => `${t} validés pour ${destination}`);
+  const transport = state.discovery?.transport ? `Transport préféré: ${state.discovery.transport}` : null;
+  const lodgingStyle = state.discovery?.lodgingStyle ? `Style hôtel: ${state.discovery.lodgingStyle}` : null;
+  const activityFocus = state.discovery?.activitiesFocus
+    ? `Focus activités: ${state.discovery.activitiesFocus}`
+    : null;
+
+  const pool = [...rawPieces, ...contextual, transport, lodgingStyle, activityFocus]
+    .filter(Boolean)
+    .filter((value, index, self) => validateScrapedItem(value) && self.indexOf(value) === index);
+
+  const paddedPool = pool.length < 5
+    ? [...pool, ...targets.map((t) => `${t} (${destination})`)].filter((v, idx, self) => self.indexOf(v) === idx)
+    : pool;
+
+  const shuffled = shuffle(paddedPool).slice(0, Math.max(5, Math.min(10, paddedPool.length)));
+  pushLiveScrape({
+    title: `Scraping ${stage} (${shuffled.length} éléments)`,
+    text: shuffled.slice(0, 3).join(" · "),
+    source: snippet.source || "Sources ouvertes"
+  });
+  return { items: shuffled, images: intelImages };
+}
+
+function distributeScrapeToOptions(options, stage) {
+  const { items, images } = simulateScrape(stage);
+  if (!items?.length) return options;
+  const shuffledItems = shuffle(items);
+  const sliceSize = Math.max(2, Math.floor(shuffledItems.length / options.length));
+  return options.map((opt, idx) => {
+    const start = idx * sliceSize;
+    const subset = shuffledItems.slice(start, start + sliceSize);
+    const paddedSubset = subset.length ? subset : shuffledItems.slice(0, 3);
+    const uniqueSubset = [...new Set(paddedSubset)].slice(0, 3);
+    const image = images?.[idx % (images?.length || 1)];
+    return {
+      ...opt,
+      scrapeHighlights: uniqueSubset,
+      image,
+    };
+  });
+}
+
 function setStatus(text, tone = "neutral") {
   statusPill.textContent = text;
   statusPill.className = `pill ${tone}`;
@@ -155,14 +234,16 @@ function setThinking(text) {
   thinkingIndicator.classList.add("active");
 }
 
-function showStepLoader(text, durationMs) {
+function showStepLoader(text, durationMs, targets = []) {
   if (dynamicState.loader) dynamicState.loader.remove();
   const loader = document.createElement("article");
   loader.className = "loader-card";
+  const targetList = targets.length ? `<ul class="muted">${targets.map((t) => `<li>${t}</li>`).join("")}</ul>` : "";
   loader.innerHTML = `
     <div class="loader-head">${text}</div>
     <div class="loader-bar" role="progressbar" aria-label="Simulation en cours"><span></span></div>
-    <p class="muted">L’agentic vérifie les sources en direct…</p>
+    <p class="muted">Scraping sécurisé (5–10s) : validation des critères et tri des doublons.</p>
+    ${targetList}
   `;
   conversation.appendChild(loader);
   conversation.scrollTo({ top: conversation.scrollHeight, behavior: "smooth" });
@@ -274,7 +355,10 @@ function addMessage({ title, agent, body, options = [], question }) {
       btn.type = "button";
       btn.className = "option";
       btn.setAttribute("data-id", opt.id);
-      btn.innerHTML = `<strong>${opt.id}. ${opt.title}</strong>${opt.bullets ? `<ul>${opt.bullets.map((b) => `<li>${b}</li>`).join("")}</ul>` : ""}`;
+      const visual = opt.image
+        ? `<div class="option-visual"><img src="${opt.image.src}" alt="${opt.image.alt}" loading="lazy" /></div>`
+        : '<div class="option-visual" aria-hidden="true"></div>';
+      btn.innerHTML = `${visual}<div><strong>${opt.id}. ${opt.title}</strong>${opt.bullets ? `<ul>${opt.bullets.map((b) => `<li>${b}</li>`).join("")}</ul>` : ""}</div>`;
       btn.addEventListener("click", () => opt.onSelect(opt));
       grid.appendChild(btn);
     });
@@ -323,18 +407,10 @@ function updateTrustMetrics() {
 }
 
 function attachScrapeToOptions(options, stage) {
-  const destination = state.discovery?.destination;
-  const snippet = getScrapedSnippet(destination, stage);
-  if (snippet?.text) {
-    pushLiveScrape({
-      title: `Scraping ${stage}`,
-      text: snippet.text,
-      source: snippet.source,
-    });
-  }
-  return options.map((opt) => ({
+  const enriched = distributeScrapeToOptions(options, stage);
+  return enriched.map((opt) => ({
     ...opt,
-    bullets: [...(opt.bullets || []), `Scraping: ${snippet.text}`],
+    bullets: [...(opt.bullets || []), ...(opt.scrapeHighlights || []).map((s) => `Scraping validé: ${s}`)],
   }));
 }
 
@@ -429,6 +505,12 @@ function validateDiscovery(data) {
   if (data.budget === "low" && ["romantic", "luxury", "premium"].some((v) => data.vibe?.includes(v))) {
     warnings.push("Budget serré mais vibe premium : prévoir concessions.");
   }
+  if (data.transport === "chauffeur" && data.budget === "low") {
+    warnings.push("Chauffeur privé avec budget serré : risque de dépassement.");
+  }
+  if (data.lodgingStyle === "luxe" && data.budget === "low") {
+    warnings.push("Hébergement 5★ impossible en budget bas : reconsidérer le mix.");
+  }
   return warnings;
 }
 
@@ -438,16 +520,18 @@ function conceptOptions(discovery) {
       ? "City break"
       : discovery.vibe.charAt(0).toUpperCase() + discovery.vibe.slice(1)
     : "Mix";
+  const transportLabel = discovery.transport === "chauffeur" ? "chauffeur dédié" : discovery.transport === "public" ? "100% transports" : "mix";
+  const lodgingLabel = discovery.lodgingStyle === "luxe" ? "5★" : discovery.lodgingStyle === "sobre" ? "4★ sobres" : "boutique";
   const options = [
     {
       id: "A",
       title: "Immersion urbaine culturelle",
-      bullets: ["Musées, food tours, rooftops", "Déplacements simples", `Vibe ${vibeLabel}`],
+      bullets: ["Musées, food tours, rooftops", `Mobilité ${transportLabel}`, `Hôtels ${lodgingLabel}`, `Vibe ${vibeLabel}`],
     },
     {
       id: "B",
       title: "Nature ou littoral reposant",
-      bullets: ["Rythme léger", "1 expérience signature", "Transports simplifiés"],
+      bullets: ["Rythme léger", "1 expérience signature", `Transports ${transportLabel}`, `Hôtels ${lodgingLabel}`],
     },
   ];
   return attachScrapeToOptions(options, "discovery").map((opt) => ({
@@ -485,10 +569,11 @@ function startStepFlow(index) {
   updateStepList(index);
   const id = steps[index];
   const builder = builders[id];
-  const delay = Math.floor(5000 + Math.random() * 5000);
+  const delay = Math.max(5000, Math.floor(5000 + Math.random() * 5000));
   const stageLabel = `Agent ${index + 1} réfléchit…`;
+  const targets = scrapeTargetsByStage[id] || [];
   setThinking(stageLabel);
-  showStepLoader(stageLabel, delay);
+  showStepLoader(`${stageLabel} (scraping)`, delay, targets);
   setTimeout(() => {
     clearStepLoader();
     builder(index);
@@ -779,6 +864,9 @@ function buildSummary() {
       `${formatBudgetLabel(discovery.budget)} — ${discovery.duration} jours`,
       `Départ ${discovery.origin} → ${discovery.destination}`,
       `Vibe ${discovery.vibe}, flexibilité ${discovery.flex}`,
+      `Mobilité: ${discovery.transport || "mix"}`,
+      `Hébergement: ${discovery.lodgingStyle || "boutique"}`,
+      `Activités: ${discovery.activitiesFocus || "culture"}`,
       `Voyageurs: ${discovery.travelers}`,
       concept ? `Concept: ${concept.title}` : ""
     ].filter(Boolean)

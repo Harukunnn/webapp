@@ -187,6 +187,22 @@
           <span>Durée</span>
           <input name="duration" type="number" min="2" max="21" value="7" />
         </label>
+        <label class="field">
+          <span>Mobilité préférée</span>
+          <select name="transport">
+            <option value="public">Transports publics optimisés</option>
+            <option value="chauffeur">Chauffeur privé</option>
+            <option value="mix" selected>Mix (public + VTC)</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Style d'hébergement</span>
+          <select name="lodgingStyle">
+            <option value="boutique" selected>Boutique 4★</option>
+            <option value="luxe">5★ luxe</option>
+            <option value="sobre">Sobre mais central</option>
+          </select>
+        </label>
         <details class="full optional">
           <summary>Préférences (facultatif)</summary>
           <div class="grid compact">
@@ -217,6 +233,15 @@
                 <option value="famille">Famille</option>
                 <option value="amis">Amis</option>
                 <option value="business">Business</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Focus activités</span>
+              <select name="activitiesFocus">
+                <option value="culture" selected>Culture & gastronomie</option>
+                <option value="plein-air">Plein air / nature</option>
+                <option value="nightlife">Nightlife & rooftops</option>
+                <option value="shopping">Shopping & design</option>
               </select>
             </label>
             <label class="field full">
