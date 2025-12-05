@@ -669,6 +669,35 @@ function attachScrapeToOptions(options, stage) {
   });
 }
 
+function buildProfileIntel(destination, discovery) {
+  const key = slugify(destination || "");
+  const context = scrapedContext[key] || {};
+  const preview = sampleScrapedItems(destination, "profile", discovery, 9).slice(0, 3);
+  const chips = [
+    context.flights && { label: "Accès / transports", value: context.flights },
+    context.hotels && { label: "Hôtellerie / prix", value: context.hotels },
+    context.activities && { label: "Culture / sorties", value: context.activities },
+    context.itinerary && { label: "Rythme / horaires", value: context.itinerary },
+    context.budget && { label: "Budget local", value: context.budget },
+  ].filter(Boolean);
+
+  const chipHtml = chips
+    .map(
+      (c) =>
+        `<div class="profile-chip"><p class="chip-label">${c.label}</p><p class="chip-value">${c.value}</p></div>`
+    )
+    .join("");
+
+  const cards = preview
+    .map(
+      (item) =>
+        `<article class="profile-card"><figure><img src="${item.image}" alt="${item.title}" loading="lazy" /></figure><div><p class="muted mini">${item.address || item.detail || "Source vérifiée"}</p><strong>${item.title}</strong><p class="muted">${item.hours || formatScrapeBullet(item, "profile")}</p></div></article>`
+    )
+    .join("");
+
+  return `<div class="profile-intel"><div class="profile-chips">${chipHtml}</div><div class="profile-cards">${cards}</div></div>`;
+}
+
 function renderIntel(intel, destination) {
   if (!intelCards || !imageStrip) return;
   const cards = [
@@ -912,21 +941,38 @@ const builders = {
       discovery.notes ? `Note: ${discovery.notes}` : ""
     ].filter(Boolean);
 
+    const profileIntel = buildProfileIntel(discovery.destination, discovery);
+    const vibeTag = discovery.vibe ? discovery.vibe.replace(/-/g, " ") : "mix";
+    const focusTag = discovery.focus ? discovery.focus.replace(/-/g, " ") : "signature";
+    const transportTag = discovery.transport || "flex";
+
     const options = attachScrapeToOptions([
       {
         id: "A",
         title: "Hybrid luxe + budget maîtrisé",
-        bullets: ["Moments premium ciblés", "Hôtels 4★ compacts", "Activités équilibrées"],
+        bullets: [
+          `Moments premium ${discovery.duration > 5 ? "étalés" : "ciblés"}`,
+          `Hôtels/vols triés sur ${focusTag}`,
+          `Transport ${transportTag} + horaires lissés`,
+        ],
       },
       {
         id: "B",
         title: "Séjour court très confortable",
-        bullets: ["Moins de jours", "Vols confort", "Hôtel 5★ central"],
+        bullets: [
+          `${discovery.duration - 1 > 0 ? discovery.duration - 1 : 3}-4 jours intenses`,
+          `Vols courts + transferts ${transportTag}`,
+          `${focusTag} + vibe ${vibeTag} assumés`,
+        ],
       },
       {
         id: "C",
         title: "Durée pleine, hôtels sobres",
-        bullets: ["Plus de jours", "3★/4★ bien notés", "Budget focalisé sur activités"],
+        bullets: [
+          `${discovery.duration + 1} jours avec pics culture ${focusTag}`,
+          `3★/4★ très bien notés + accès ${transportTag}`,
+          `Budget prioritaire sur activités ${vibeTag}`,
+        ],
       },
     ], "profile").map((opt) => ({
       ...opt,
@@ -944,7 +990,9 @@ const builders = {
     addMessage({
       title: "Étape 1 — Profil client",
       agent: "Agent 1 — Architecte profil",
-      body: `<strong>Résumé compact</strong><ul>${summary.map((i) => `<li>${i}</li>`).join("")}</ul>Concept pressenti : ${concept ? concept.title : "-"}.`,
+      body: `<div class="profile-head"><div><strong>Résumé compact</strong><ul>${summary
+        .map((i) => `<li>${i}</li>`)
+        .join("")}</ul><p class="muted mini">Concept pressenti : ${concept ? concept.title : "-"}.</p></div><div class="profile-highlights"><span class="pill">${vibeTag}</span><span class="pill">${focusTag}</span><span class="pill">${transportTag}</span></div></div>${profileIntel}`,
       options,
       question: "Choisissez le profil A/B/C ou ajustez votre choix."
     });
