@@ -109,6 +109,68 @@
                 <option value="business">Business</option>
               </select>
             </label>
+            <label class="field">
+              <span>Focus</span>
+              <select name="focus">
+                <option value="gastro">Gastro</option>
+                <option value="art-design">Art / design</option>
+                <option value="nightlife">Nightlife</option>
+                <option value="outdoor">Outdoor</option>
+                <option value="shopping">Shopping</option>
+                <option value="bien-etre">Bien-être</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Food</span>
+              <select name="food">
+                <option value="street-food">Street food</option>
+                <option value="bistronomique">Bistronomique</option>
+                <option value="etoile">Etoilé</option>
+                <option value="veggie">Végétarien/vegan</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Culture</span>
+              <select name="culture">
+                <option value="musee">Musées</option>
+                <option value="architecture">Architecture</option>
+                <option value="tech">Tech / immersif</option>
+                <option value="patrimoine">Patrimoine</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Night</span>
+              <select name="night">
+                <option value="cocktail">Cocktails</option>
+                <option value="rooftop">Rooftop</option>
+                <option value="club">Club</option>
+                <option value="calme">Calme</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Outdoor</span>
+              <select name="outdoor">
+                <option value="mer">Mer / littoral</option>
+                <option value="montagne">Montagne</option>
+                <option value="ville">Ville</option>
+                <option value="mix">Mix</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Enfants</span>
+              <select name="kids">
+                <option value="adulte">Adultes</option>
+                <option value="famille">Famille</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Accès</span>
+              <select name="access">
+                <option value="standard">Standard</option>
+                <option value="fauteuil">Fauteuil / mobilité réduite</option>
+                <option value="bagages">Bagages volumineux</option>
+              </select>
+            </label>
             <label class="field full">
               <span>Contraintes</span>
               <textarea name="notes" rows="2" placeholder="Court et précis"></textarea>
@@ -133,10 +195,35 @@
           <li class="step active">Profil</li>
           <li class="step">Vols</li>
           <li class="step">Séjour</li>
-          <li class="step">Récap</li>
+          <li class="step">Activités</li>
+          <li class="step">Itinéraire</li>
+          <li class="step">Budget</li>
         </ol>
         <div class="content" id="conversation" aria-live="polite">
           <p class="muted">Flux réduit, 2 options premium.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="intel-title">
+      <header class="panel-header solo">
+        <div>
+          <p class="eyebrow">Scraping</p>
+          <h2 id="intel-title">Sources actives</h2>
+        </div>
+        <div class="actions tight">
+          <button id="btnRefreshIntel" class="ghost" disabled>Rafraîchir</button>
+        </div>
+      </header>
+      <div class="intel-grid compact">
+        <div id="intelCards" class="intel-cards" aria-live="polite"></div>
+        <div class="intel-side">
+          <div class="live-scrape">
+            <p class="muted live-scrape__head">Flux de scraping</p>
+            <ul id="liveScrapeList" class="live-scrape__list" aria-live="polite"></ul>
+            <div id="intelError" class="alert" role="status"></div>
+          </div>
+          <div class="image-strip" id="imageStrip" aria-live="polite"></div>
         </div>
       </div>
     </section>
