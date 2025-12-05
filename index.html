@@ -25,13 +25,10 @@
   </nav>
 
   <header class="hero">
-    <div class="hero-brand">
-      <div class="hero-icon" aria-hidden="true">🧭</div>
-      <div>
-        <p class="eyebrow">Système rôle — IA de voyage unifiée</p>
-        <h1>Orchestrateur Agentique à 6 rôles</h1>
-        <p class="lede">Flux sobre et professionnel : sécurité stricte, options courtes, vérification continue et recherche d'informations + visuels en ligne.</p>
-      </div>
+    <div>
+      <p class="eyebrow">Voyage privé</p>
+      <h1>Atlas</h1>
+      <p class="lede">Luxe silencieux. Signal pur.</p>
     </div>
     <div class="hero-meta">
       <div class="badge">Parcours linéaire : Profil → Vols → Hôtels → Activités → Récap</div>
@@ -41,9 +38,7 @@
 
   <main class="layout">
     <div class="thinking-indicator" id="thinkingIndicator">
-      <div class="glow"></div>
-      <div class="dots" aria-hidden="true"><span></span><span></span><span></span></div>
-      <p class="label">En attente d’une requête.</p>
+      <p class="label">Prêt.</p>
     </div>
 
     <section class="panel trust" aria-labelledby="trust-title">
@@ -160,7 +155,7 @@
     </section>
 
     <section class="panel" aria-labelledby="discovery-title">
-      <header class="panel-header">
+      <header class="panel-header solo">
         <div>
           <p class="eyebrow">Agent 0 — Découverte</p>
           <h2 id="discovery-title">Collecte rapide des intentions</h2>
@@ -169,18 +164,19 @@
         <div class="panel-actions" aria-live="polite">
           <span class="pill" id="status">En attente</span>
         </div>
+        <span class="pill" id="status">En attente</span>
       </header>
-      <form id="discoveryForm" class="grid">
+      <form id="discoveryForm" class="grid compact ultra">
         <label class="field">
-          <span>Ville de départ</span>
-          <input name="origin" type="text" placeholder="ex. Paris" required />
+          <span>Départ</span>
+          <input name="origin" type="text" placeholder="Paris" required />
         </label>
         <label class="field">
-          <span>Destination voulue</span>
-          <input name="destination" type="text" placeholder="ex. Tokyo" required />
+          <span>Destination</span>
+          <input name="destination" type="text" placeholder="Tokyo" required />
         </label>
         <label class="field">
-          <span>Budget global (approximatif)</span>
+          <span>Budget</span>
           <select name="budget">
             <option value="low">Bas</option>
             <option value="mid" selected>Moyen</option>
@@ -188,7 +184,7 @@
           </select>
         </label>
         <label class="field">
-          <span>Durée souhaitée (jours)</span>
+          <span>Durée</span>
           <input name="duration" type="number" min="2" max="21" value="7" />
         </label>
         <details class="full optional">
@@ -236,7 +232,7 @@
     </section>
 
     <section class="panel" aria-labelledby="intel-title">
-      <header class="panel-header">
+      <header class="panel-header solo">
         <div>
           <p class="eyebrow">Recherche & preuves visuelles</p>
           <h2 id="intel-title">Signal d'information</h2>
@@ -244,54 +240,42 @@
         <div class="panel-actions">
           <button id="btnRefreshIntel" class="ghost" disabled>Actualiser</button>
         </div>
+        <button id="btnRefreshIntel" class="ghost" disabled>Pulse</button>
       </header>
       <p class="muted">Résumé factuel et quelques visuels. Les alternatives ne s’affichent que sur demande.</p>
       <div class="intel-grid">
         <div>
           <h3 class="intel-heading">Infos clés</h3>
           <div id="intelCards" class="intel-cards"></div>
-        </div>
-        <div>
-          <h3 class="intel-heading">Images contextuelles</h3>
           <div id="imageStrip" class="image-strip" aria-live="polite"></div>
-        </div>
-        <div class="live-scrape">
-          <div class="live-scrape__head">
-            <h3 class="intel-heading">Flux scraping temps réel</h3>
-            <span class="pill pill-soft">Sources ouvertes vérifiées</span>
-          </div>
           <ul id="liveScrapeList" class="live-scrape__list" aria-live="polite"></ul>
         </div>
-      </div>
+      </details>
       <div id="intelError" class="alert" role="status" aria-live="polite"></div>
     </section>
 
     <section class="panel" aria-labelledby="workflow-title">
-      <header class="panel-header">
+      <header class="panel-header solo">
         <div>
           <p class="eyebrow">Agents 1 → 6</p>
           <h2 id="workflow-title">Itinéraire guidé et épuré</h2>
         </div>
       </header>
-      <div class="workflow">
-        <aside class="steps" aria-label="Progression des agents">
-          <ol id="stepList">
-            <li class="step active">1. Profil</li>
-            <li class="step">2. Vols</li>
-            <li class="step">3. Hôtels</li>
-            <li class="step">4. Activités</li>
-            <li class="step">5. Itinéraire</li>
-            <li class="step">6. Budget &amp; Packages</li>
-          </ol>
-        </aside>
+      <div class="workflow minimal">
+        <ol id="stepList" class="steps inline">
+          <li class="step active">Profil</li>
+          <li class="step">Vols</li>
+          <li class="step">Séjour</li>
+          <li class="step">Récap</li>
+        </ol>
         <div class="content" id="conversation" aria-live="polite">
-          <p class="muted">Démarrez le flux pour que l’IA multi‑rôle simule chaque étape comme dans le prompt original. Chaque étape propose 2 à 3 options maximum et attend votre validation.</p>
+          <p class="muted">Flux réduit, 2 options premium.</p>
         </div>
       </div>
     </section>
 
     <section class="panel" aria-labelledby="summary-title">
-      <header class="panel-header">
+      <header class="panel-header solo">
         <div>
           <p class="eyebrow">Sortie finale</p>
           <h2 id="summary-title">Résumé conforme au prompt</h2>
@@ -299,6 +283,7 @@
         <div class="panel-actions">
           <button id="btnExport" class="ghost" disabled>Copier le texte</button>
         </div>
+        <button id="btnExport" class="ghost" disabled>Copier</button>
       </header>
       <div id="summary" class="summary" aria-live="polite"></div>
     </section>
@@ -329,10 +314,6 @@
       </form>
     </section>
   </main>
-
-  <footer class="footer">
-    <p>Simulation fidèle du « Ultra-Optimized Mega Agentic Prompt » : sécurité d’abord, options limitées, validation step‑by‑step.</p>
-  </footer>
 
   <script src="app.js"></script>
 </body>

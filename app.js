@@ -76,12 +76,7 @@ const state = {
   discovery: null,
   concept: null,
   choices: {},
-  summary: null,
-  concierge: {
-    priority: "signature",
-    pace: "balanced",
-    service: "hybrid",
-  }
+  summary: null
 };
 
 const dynamicState = {
@@ -94,7 +89,6 @@ const stepList = Array.from(document.querySelectorAll("#stepList .step"));
 const summaryBlock = document.getElementById("summary");
 const exportBtn = document.getElementById("btnExport");
 const statusPill = document.getElementById("status");
-const resetBtn = document.getElementById("btnReset");
 const thinkingIndicator = document.getElementById("thinkingIndicator");
 const intelStatus = document.getElementById("intelStatus");
 const intelCards = document.getElementById("intelCards");
@@ -115,7 +109,7 @@ function getScrapedSnippet(destination, stage) {
   const record = scrapedContext[key];
   if (!record) {
     return {
-      text: "Aucune donnée temps réel trouvée, utilisation de repères sûrs (centres-villes, hôtels 4★ bien notés).",
+      text: "Pas de source dédiée. On reste sur les hubs sûrs et les hôtels 4★.",
       source: "Sources ouvertes",
     };
   }
@@ -217,7 +211,6 @@ function restoreState() {
     state.concept = parsed.concept || null;
     state.choices = parsed.choices || {};
     state.summary = parsed.summary || null;
-    state.concierge = parsed.concierge || state.concierge;
     const form = document.getElementById("discoveryForm");
     if (form && parsed.discovery) {
       Object.entries(parsed.discovery).forEach(([k, v]) => {
@@ -227,25 +220,19 @@ function restoreState() {
         buildSummary();
       }
     }
-    if (conciergeForm && parsed.concierge) {
-      Object.entries(parsed.concierge).forEach(([k, v]) => {
-        if (conciergeForm.elements[k]) conciergeForm.elements[k].value = v;
-      });
-      applyConciergeProfile("Profil restauré");
-    }
   } catch (e) {
     console.warn("State restore failed", e);
   }
 }
 
 function clearUI(skipPersist = false) {
-  conversation.innerHTML = '<p class="muted">Démarrez le flux pour que l’IA multi‑rôle simule chaque étape comme dans le prompt original. Chaque étape propose 2 à 3 options maximum et attend votre validation.</p>';
+  conversation.innerHTML = '<p class="muted">Flux prêt. Deux options ultra-courtes.</p>';
   summaryBlock.innerHTML = "";
   exportBtn.disabled = true;
   intelCards.innerHTML = "";
   imageStrip.innerHTML = "";
   showIntelError("");
-  setIntelStatus("Recherche non lancée");
+  setIntelStatus("En pause");
   refreshIntelBtn.disabled = true;
   stepList.forEach((s) => s.classList.remove("done", "active"));
   stepList[0].classList.add("active");
@@ -256,12 +243,8 @@ function clearUI(skipPersist = false) {
   state.concept = null;
   state.choices = {};
   state.summary = null;
-  state.concierge = { priority: "signature", pace: "balanced", service: "hybrid" };
-  applyConciergeProfile("Réinitialisation");
   if (!skipPersist) persistState();
 }
-
-resetBtn.addEventListener("click", clearUI);
 
 function addMessage({ title, agent, body, options = [], question }) {
   stopThinking("L’IA attend votre validation.");
@@ -382,7 +365,7 @@ function renderIntel(intel, destination) {
 
 function fallbackIntel(destination) {
   return {
-    summary: `Pas de fiche détaillée trouvée pour ${destination}. Voici des conseils génériques (centres-villes sûrs, hôtels 4★ bien notés, activités culture + 1 premium).`,
+    summary: `Pas de fiche ${destination}. On reste sur centres sûrs, 4★, culture + 1 premium.`,
     hotels: ["Chaîne 4★ centrale", "Boutique locale bien notée", "Option appart-hôtel sécurisé"],
     highlights: ["Visite guidée du centre", "Food tour", "Panorama ou musée emblématique"],
     images: [
@@ -872,7 +855,6 @@ function onDiscoverySubmit(event) {
   }
   runIntel(data.destination);
   refreshIntelBtn.disabled = false;
-  applyConciergeProfile("Destination détectée");
 
   addMessage({
     title: "Phase découverte",
