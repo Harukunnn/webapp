@@ -14,18 +14,20 @@
     </div>
     <div class="service-health" id="serviceHealth" role="status">
       <span class="dot online" aria-hidden="true"></span>
-      <span class="health-text">Linéaire</span>
+      <span class="health-text">Stable</span>
     </div>
-    <button type="button" id="btnConcierge" class="ghost">Concierge</button>
+    <button type="button" id="btnConcierge" class="ghost icon" aria-label="Ouvrir le concierge">◎</button>
   </nav>
 
   <header class="hero">
     <div>
-      <p class="eyebrow">Orchestration noire</p>
+      <p class="eyebrow">Voyage privé</p>
       <h1>Atlas</h1>
-      <p class="lede">Deux choix. Zéro bruit.</p>
+      <p class="lede">Luxe silencieux. Signal pur.</p>
     </div>
-    <p class="muted" id="intelStatus">Prêt</p>
+    <div class="hero-meta" aria-live="polite">
+      <p class="muted" id="intelStatus">Prêt</p>
+    </div>
   </header>
 
   <main class="layout">
@@ -33,20 +35,26 @@
       <p class="label">Prêt.</p>
     </div>
 
-    <section class="panel compact" aria-labelledby="trust-title">
-      <div class="panel-header solo">
+    <section class="panel statline" aria-labelledby="trust-title">
+      <div>
         <p class="eyebrow">Statut</p>
-        <h2 id="trust-title">Fiable · 99.9% · &lt;260ms</h2>
+        <h2 id="trust-title">99.9 · &lt;260ms · Chiffré</h2>
       </div>
-      <p class="muted" id="uptimeCopy">Chiffré · monitoring actif.</p>
+      <div class="statline-actions">
+        <p class="muted" id="uptimeCopy">Surveillance active.</p>
+        <button id="btnReset" class="ghost icon" aria-label="Réinitialiser">↺</button>
+      </div>
     </section>
 
     <section class="panel concierge" aria-labelledby="concierge-title">
       <header class="panel-header solo">
-        <p class="eyebrow">Concierge</p>
-        <h2 id="concierge-title">Réglage</h2>
+        <div>
+          <p class="eyebrow">Concierge</p>
+          <h2 id="concierge-title">Réglage</h2>
+        </div>
+        <p class="muted" id="conciergeNote">Prêt.</p>
       </header>
-      <form id="conciergeForm" class="micro-form trio">
+      <form id="conciergeForm" class="micro-form trio compact">
         <label class="field">
           <span>Priorité</span>
           <select name="priority">
@@ -71,29 +79,21 @@
             <option value="dedicated">Butler</option>
           </select>
         </label>
-        <div class="actions full">
+        <div class="actions full solo">
           <button type="submit" class="primary">Calibrer</button>
-          <p class="muted" id="conciergeNote">Prêt.</p>
         </div>
       </form>
     </section>
 
-    <section class="panel" aria-labelledby="safety-title">
-      <div class="panel-header solo">
-        <p class="eyebrow">Sécurité</p>
-        <h2 id="safety-title">Filtre fermé</h2>
-      </div>
-      <p class="muted">Zones rouges bloquées.</p>
-      <button id="btnReset" class="ghost">Reset</button>
-    </section>
-
     <section class="panel" aria-labelledby="discovery-title">
       <header class="panel-header solo">
-        <p class="eyebrow">Découverte</p>
-        <h2 id="discovery-title">Brief</h2>
+        <div>
+          <p class="eyebrow">Découverte</p>
+          <h2 id="discovery-title">Brief</h2>
+        </div>
         <span class="pill" id="status">En attente</span>
       </header>
-      <form id="discoveryForm" class="grid compact">
+      <form id="discoveryForm" class="grid compact ultra">
         <label class="field">
           <span>Départ</span>
           <input name="origin" type="text" placeholder="Paris" required />
@@ -114,7 +114,7 @@
           <span>Durée</span>
           <input name="duration" type="number" min="2" max="21" value="7" />
         </label>
-        <details class="full optional">
+        <details class="full optional stealth">
           <summary>Préférences fines</summary>
           <div class="grid compact">
             <label class="field">
@@ -152,7 +152,7 @@
             </label>
           </div>
         </details>
-        <div class="actions full">
+        <div class="actions full solo">
           <button type="submit" class="primary">Lancer</button>
         </div>
       </form>
@@ -160,22 +160,29 @@
 
     <section class="panel" aria-labelledby="intel-title">
       <header class="panel-header solo">
-        <p class="eyebrow">Signal</p>
-        <h2 id="intel-title">Recherche</h2>
+        <div>
+          <p class="eyebrow">Signal</p>
+          <h2 id="intel-title">Recherche</h2>
+        </div>
         <button id="btnRefreshIntel" class="ghost" disabled>Pulse</button>
       </header>
-      <div class="intel-grid compact slim">
-        <div id="intelCards" class="intel-cards"></div>
-        <div id="imageStrip" class="image-strip" aria-live="polite"></div>
-        <ul id="liveScrapeList" class="live-scrape__list" aria-live="polite"></ul>
-      </div>
+      <details class="stealth" open>
+        <summary class="muted">Aperçu instantané</summary>
+        <div class="intel-grid compact slim">
+          <div id="intelCards" class="intel-cards"></div>
+          <div id="imageStrip" class="image-strip" aria-live="polite"></div>
+          <ul id="liveScrapeList" class="live-scrape__list" aria-live="polite"></ul>
+        </div>
+      </details>
       <div id="intelError" class="alert" role="status" aria-live="polite"></div>
     </section>
 
     <section class="panel" aria-labelledby="workflow-title">
       <header class="panel-header solo">
-        <p class="eyebrow">Parcours</p>
-        <h2 id="workflow-title">Itinéraire</h2>
+        <div>
+          <p class="eyebrow">Parcours</p>
+          <h2 id="workflow-title">Itinéraire</h2>
+        </div>
       </header>
       <div class="workflow minimal">
         <ol id="stepList" class="steps inline">
@@ -192,8 +199,10 @@
 
     <section class="panel" aria-labelledby="summary-title">
       <header class="panel-header solo">
-        <p class="eyebrow">Sortie</p>
-        <h2 id="summary-title">Résumé</h2>
+        <div>
+          <p class="eyebrow">Sortie</p>
+          <h2 id="summary-title">Résumé</h2>
+        </div>
         <button id="btnExport" class="ghost" disabled>Copier</button>
       </header>
       <div id="summary" class="summary" aria-live="polite"></div>
@@ -201,8 +210,10 @@
 
     <section class="panel feedback" aria-labelledby="feedback-title">
       <header class="panel-header solo">
-        <p class="eyebrow">Boucle</p>
-        <h2 id="feedback-title">Feedback</h2>
+        <div>
+          <p class="eyebrow">Boucle</p>
+          <h2 id="feedback-title">Feedback</h2>
+        </div>
       </header>
       <form id="feedbackForm" class="micro-form slim">
         <label class="field">
@@ -212,7 +223,7 @@
             <label><input type="radio" name="score" value="ameliorer" /> ✕</label>
           </div>
         </label>
-        <div class="actions">
+        <div class="actions solo">
           <button class="primary" type="submit">Envoyer</button>
           <p class="muted" id="feedbackStatus" role="status"></p>
         </div>

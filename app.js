@@ -115,7 +115,7 @@ function getScrapedSnippet(destination, stage) {
   const record = scrapedContext[key];
   if (!record) {
     return {
-      text: "Aucune donnée temps réel trouvée, utilisation de repères sûrs (centres-villes, hôtels 4★ bien notés).",
+      text: "Pas de source dédiée. On reste sur les hubs sûrs et les hôtels 4★.",
       source: "Sources ouvertes",
     };
   }
@@ -239,7 +239,7 @@ function restoreState() {
 }
 
 function clearUI(skipPersist = false) {
-  conversation.innerHTML = '<p class="muted">Flux prêt. 2 options par étape, validation rapide.</p>';
+  conversation.innerHTML = '<p class="muted">Flux prêt. Deux options ultra-courtes.</p>';
   summaryBlock.innerHTML = "";
   exportBtn.disabled = true;
   intelCards.innerHTML = "";
@@ -322,8 +322,8 @@ function applyConciergeProfile(reason = "") {
     const pacing = pace === "soft" ? "2 temps forts/jour" : pace === "dense" ? "4 temps forts/jour" : "3 temps forts/jour";
     const serviceCopy = service === "dedicated" ? "Butler dédié + accueil VIP" : service === "hybrid" ? "Humain si besoin" : "100% digital sécurisé";
     conciergeNote.textContent = reason
-      ? `${reason} : dossier ${priority}, ${pacing}, ${serviceCopy}.`
-      : `Dossier ${destination} prêt : ${priority}, ${pacing}, ${serviceCopy}.`;
+      ? `${reason} : ${priority}, ${pacing}, ${serviceCopy}.`
+      : `${destination} prêt : ${priority}, ${pacing}, ${serviceCopy}.`;
   }
   persistState();
 }
@@ -336,7 +336,7 @@ function updateTrustMetrics() {
     if (label) label.textContent = `Stable · ${uptime}% · <${latency}ms · Chiffré`;
   }
   const copy = document.getElementById("uptimeCopy");
-  if (copy) copy.textContent = `Monitoring actif, uptime ${uptime}% / latence ${latency}ms.`;
+  if (copy) copy.textContent = `Monitoring ${uptime}% · ${latency}ms.`;
 }
 
 function attachScrapeToOptions(options, stage) {
@@ -382,7 +382,7 @@ function renderIntel(intel, destination) {
 
 function fallbackIntel(destination) {
   return {
-    summary: `Pas de fiche détaillée trouvée pour ${destination}. Voici des conseils génériques (centres-villes sûrs, hôtels 4★ bien notés, activités culture + 1 premium).`,
+    summary: `Pas de fiche ${destination}. On reste sur centres sûrs, 4★, culture + 1 premium.`,
     hotels: ["Chaîne 4★ centrale", "Boutique locale bien notée", "Option appart-hôtel sécurisé"],
     highlights: ["Visite guidée du centre", "Food tour", "Panorama ou musée emblématique"],
     images: [
@@ -459,12 +459,12 @@ function conceptOptions(discovery) {
     {
       id: "A",
       title: "Immersion urbaine culturelle",
-      bullets: ["Musées, food tours, rooftops", "Déplacements simples", `Vibe ${vibeLabel}`],
+      bullets: ["Musées & rooftops", "Déplacements simples", `Vibe ${vibeLabel}`],
     },
     {
       id: "B",
       title: "Nature ou littoral reposant",
-      bullets: ["Rythme léger", "1 expérience signature", "Transports simplifiés"],
+      bullets: ["Rythme léger", "1 signature", "Transports simplifiés"],
     },
   ];
   return attachScrapeToOptions(options, "discovery").map((opt) => ({
