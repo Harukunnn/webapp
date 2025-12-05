@@ -75,25 +75,25 @@ const scrapedContext = {
 const scrapeInventory = {
   tokyo: {
     flights: [
-      { title: "ANA nuit claire", detail: "HND → centre 22 min", price: 890, mode: "avion", valid: true, image: "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=600&q=80" },
-      { title: "JAL Premium Eco", detail: "1 bagage + siège large", price: 1240, mode: "avion", valid: true, image: "https://images.unsplash.com/photo-1504197906862-1c1f9e5e39e2?auto=format&fit=crop&w=600&q=80" },
-      { title: "Monorail HND", detail: "Monorail 20 min", price: 7, mode: "train", valid: true, image: "https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?auto=format&fit=crop&w=600&q=80" },
-      { title: "Narita Express", detail: "55 min Tokyo Station", price: 25, mode: "train", valid: true, image: "https://images.unsplash.com/photo-1526481280695-3c469c2f0f99?auto=format&fit=crop&w=600&q=80" },
-      { title: "Vol low-cost", detail: "Escale Séoul", price: 690, mode: "avion", valid: true, image: "https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=600&q=80" },
+      { title: "ANA nuit claire", detail: "HND → centre 22 min", price: 890, currency: "€", mode: "avion", valid: true, link: "https://www.ana.co.jp", image: "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=600&q=80" },
+      { title: "JAL Premium Eco", detail: "1 bagage + siège large", price: 1240, currency: "€", mode: "avion", valid: true, link: "https://www.jal.co.jp", image: "https://images.unsplash.com/photo-1504197906862-1c1f9e5e39e2?auto=format&fit=crop&w=600&q=80" },
+      { title: "Monorail HND", detail: "Monorail 20 min", price: 7, currency: "€", mode: "train", valid: true, link: "https://www.tokyo-monorail.co.jp", image: "https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?auto=format&fit=crop&w=600&q=80" },
+      { title: "Narita Express", detail: "55 min Tokyo Station", price: 25, currency: "€", mode: "train", valid: true, link: "https://www.jreast.co.jp/multi/fr/nex.html", image: "https://images.unsplash.com/photo-1526481280695-3c469c2f0f99?auto=format&fit=crop&w=600&q=80" },
+      { title: "Vol low-cost", detail: "Escale Séoul", price: 690, currency: "€", mode: "avion", valid: true, link: "https://www.skyscanner.fr", image: "https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=600&q=80" },
     ],
     lodging: [
-      { title: "Shibuya Stream 4★", detail: "220€ nuit", price: 220, sejour: "mix", valid: true, image: "https://images.unsplash.com/photo-1501117716987-c8e1ecb210af?auto=format&fit=crop&w=600&q=80" },
-      { title: "Park Hotel 4★ arty", detail: "210€ nuit", price: 210, sejour: "luxe", valid: true, image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80" },
-      { title: "Boutique Ginza", detail: "Sobre & central", price: 180, sejour: "sobre", valid: true, image: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=600&q=80" },
-      { title: "Ryokan discret", detail: "Tatamis + onsen", price: 240, sejour: "luxe", valid: true, image: "https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=600&q=80" },
-      { title: "Capsule premium", detail: "Option économique", price: 90, sejour: "eco", valid: true, image: "https://images.unsplash.com/photo-1578681143489-4662a462f8aa?auto=format&fit=crop&w=600&q=80" },
+      { title: "Shibuya Stream 4★", detail: "220€ nuit", price: 220, currency: "€", sejour: "mix", valid: true, link: "https://www.tokyu-hotels.co.jp/stream-e/", image: "https://images.unsplash.com/photo-1501117716987-c8e1ecb210af?auto=format&fit=crop&w=600&q=80" },
+      { title: "Park Hotel 4★ arty", detail: "210€ nuit", price: 210, currency: "€", sejour: "luxe", valid: true, link: "https://parkhoteltokyo.com", image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80" },
+      { title: "Boutique Ginza", detail: "Sobre & central", price: 180, currency: "€", sejour: "sobre", valid: true, link: "https://www.ginza-hotel.jp", image: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=600&q=80" },
+      { title: "Ryokan discret", detail: "Tatamis + onsen", price: 240, currency: "€", sejour: "luxe", valid: true, link: "https://www.hoshinoya.com/tokyo/", image: "https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=600&q=80" },
+      { title: "Capsule premium", detail: "Option économique", price: 90, currency: "€", sejour: "eco", valid: true, link: "https://ninehours.co.jp", image: "https://images.unsplash.com/photo-1578681143489-4662a462f8aa?auto=format&fit=crop&w=600&q=80" },
     ],
     activities: [
-      { title: "TeamLab Planets", detail: "Billet daté", price: 28, valid: true, image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80" },
-      { title: "Onsen Odaiba", detail: "No tattoo", price: 35, valid: true, image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80" },
-      { title: "Food tour Shinjuku", detail: "3h nocturne", price: 95, valid: true, image: "https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=600&q=80" },
-      { title: "Rooftop Ginza", detail: "Signature cocktail", price: 40, valid: true, image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80" },
-      { title: "Temple Asakusa", detail: "Lever du soleil", price: 0, valid: true, image: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=600&q=80" },
+      { title: "TeamLab Planets", detail: "Billet daté", price: 28, currency: "€", valid: true, link: "https://planets.teamlab.art/tokyo/", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80" },
+      { title: "Onsen Odaiba", detail: "No tattoo", price: 35, currency: "€", valid: true, link: "https://daiba.ooedoonsen.jp/en/", image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80" },
+      { title: "Food tour Shinjuku", detail: "3h nocturne", price: 95, currency: "€", valid: true, link: "https://www.arigatojapan.co.jp/tour/shinjuku-izakaya", image: "https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=600&q=80" },
+      { title: "Rooftop Ginza", detail: "Signature cocktail", price: 40, currency: "€", valid: true, link: "https://www.mandarinoriental.com/en/tokyo/nihonbashi/dine/mandarin-bar", image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80" },
+      { title: "Temple Asakusa", detail: "Lever du soleil", price: 0, currency: "€", valid: true, link: "https://www.senso-ji.jp/guide/", image: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=600&q=80" },
     ],
     itinerary: [
       { title: "Jour 1", detail: "Arrivée + Shibuya", valid: true, image: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=600&q=80" },
@@ -104,22 +104,22 @@ const scrapeInventory = {
   },
   lisbonne: {
     flights: [
-      { title: "Tap direct", detail: "Orly → LIS", price: 210, mode: "avion", valid: true, image: "https://images.unsplash.com/photo-1504198458649-3128b932f49b?auto=format&fit=crop&w=600&q=80" },
-      { title: "Low-cost", detail: "CDG via Madrid", price: 120, mode: "avion", valid: true, image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=600&q=80" },
-      { title: "Train Sud Express", detail: "Paris → Hendaye → Lisboa", price: 190, mode: "train", valid: true, image: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=600&q=80" },
-      { title: "Transfert metro", detail: "Ligne rouge 6-10 min", price: 2, mode: "train", valid: true, image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80" },
+      { title: "Tap direct", detail: "Orly → LIS", price: 210, currency: "€", mode: "avion", valid: true, link: "https://www.flytap.com", image: "https://images.unsplash.com/photo-1504198458649-3128b932f49b?auto=format&fit=crop&w=600&q=80" },
+      { title: "Low-cost", detail: "CDG via Madrid", price: 120, currency: "€", mode: "avion", valid: true, link: "https://www.iberia.com", image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=600&q=80" },
+      { title: "Train Sud Express", detail: "Paris → Hendaye → Lisboa", price: 190, currency: "€", mode: "train", valid: true, link: "https://www.sncf-connect.com", image: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=600&q=80" },
+      { title: "Transfert metro", detail: "Ligne rouge 6-10 min", price: 2, currency: "€", mode: "train", valid: true, link: "https://www.metrolisboa.pt", image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80" },
     ],
     lodging: [
-      { title: "Lumiares 4★", detail: "Bairro Alto", price: 190, sejour: "luxe", valid: true, image: "https://images.unsplash.com/photo-1501117716987-c8e1ecb210af?auto=format&fit=crop&w=600&q=80" },
-      { title: "Mama Shelter", detail: "Design + rooftop", price: 160, sejour: "mix", valid: true, image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80" },
-      { title: "Boutique Alfama", detail: "Sobre & fado", price: 150, sejour: "sobre", valid: true, image: "https://images.unsplash.com/photo-1470246973918-29a93221c455?auto=format&fit=crop&w=600&q=80" },
-      { title: "Eco hôtel LX", detail: "Label green", price: 130, sejour: "eco", valid: true, image: "https://images.unsplash.com/photo-1503389152951-9f343605f61e?auto=format&fit=crop&w=600&q=80" },
+      { title: "Lumiares 4★", detail: "Bairro Alto", price: 190, currency: "€", sejour: "luxe", valid: true, link: "https://www.thelumiares.com", image: "https://images.unsplash.com/photo-1501117716987-c8e1ecb210af?auto=format&fit=crop&w=600&q=80" },
+      { title: "Mama Shelter", detail: "Design + rooftop", price: 160, currency: "€", sejour: "mix", valid: true, link: "https://mamashelter.com/lisbon/", image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80" },
+      { title: "Boutique Alfama", detail: "Sobre & fado", price: 150, currency: "€", sejour: "sobre", valid: true, link: "https://www.boutique-hotel-alfama.com", image: "https://images.unsplash.com/photo-1470246973918-29a93221c455?auto=format&fit=crop&w=600&q=80" },
+      { title: "Eco hôtel LX", detail: "Label green", price: 130, currency: "€", sejour: "eco", valid: true, link: "https://www.memmo.pt", image: "https://images.unsplash.com/photo-1503389152951-9f343605f61e?auto=format&fit=crop&w=600&q=80" },
     ],
     activities: [
-      { title: "Tram 28", detail: "3€ billet", price: 3, valid: true, image: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=600&q=80" },
-      { title: "Belém tour", detail: "Torre + Pastéis", price: 15, valid: true, image: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=600&q=80" },
-      { title: "Fado Alfama", detail: "Soirée intimiste", price: 45, valid: true, image: "https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=600&q=80" },
-      { title: "Surf Cascais", detail: "Session matin", price: 60, valid: true, image: "https://images.unsplash.com/photo-1526481280695-3c469c2f0f99?auto=format&fit=crop&w=600&q=80" },
+      { title: "Tram 28", detail: "3€ billet", price: 3, currency: "€", valid: true, link: "https://www.carris.pt", image: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=600&q=80" },
+      { title: "Belém tour", detail: "Torre + Pastéis", price: 15, currency: "€", valid: true, link: "https://www.parquesdesintra.pt", image: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=600&q=80" },
+      { title: "Fado Alfama", detail: "Soirée intimiste", price: 45, currency: "€", valid: true, link: "https://www.visitlisboa.com", image: "https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=600&q=80" },
+      { title: "Surf Cascais", detail: "Session matin", price: 60, currency: "€", valid: true, link: "https://www.ericeirasurfhouse.com", image: "https://images.unsplash.com/photo-1526481280695-3c469c2f0f99?auto=format&fit=crop&w=600&q=80" },
     ],
     itinerary: [
       { title: "Jour 1", detail: "Baixa + Alfama", valid: true, image: "https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?auto=format&fit=crop&w=600&q=80" },
@@ -129,22 +129,22 @@ const scrapeInventory = {
   },
   montréal: {
     flights: [
-      { title: "Air Canada direct", detail: "CDG → YUL", price: 780, mode: "avion", valid: true, image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=600&q=80" },
-      { title: "Air Transat", detail: "Bagage inclus", price: 650, mode: "avion", valid: true, image: "https://images.unsplash.com/photo-1504197906862-1c1f9e5e39e2?auto=format&fit=crop&w=600&q=80" },
-      { title: "Train aéroport 747", detail: "24/7 11$", price: 11, mode: "train", valid: true, image: "https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?auto=format&fit=crop&w=600&q=80" },
-      { title: "Taxi fixe", detail: "48,40$ CAD", price: 48, mode: "route", valid: true, image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80" },
+      { title: "Air Canada direct", detail: "CDG → YUL", price: 780, currency: "€", mode: "avion", valid: true, link: "https://www.aircanada.com", image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=600&q=80" },
+      { title: "Air Transat", detail: "Bagage inclus", price: 650, currency: "€", mode: "avion", valid: true, link: "https://www.airtransat.com", image: "https://images.unsplash.com/photo-1504197906862-1c1f9e5e39e2?auto=format&fit=crop&w=600&q=80" },
+      { title: "Train aéroport 747", detail: "24/7 11$", price: 11, currency: "$", mode: "train", valid: true, link: "https://www.stm.info/en/info/networks/bus/747-yul-montreal-trudeau-airport-shuttle", image: "https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?auto=format&fit=crop&w=600&q=80" },
+      { title: "Taxi fixe", detail: "48,40$ CAD", price: 48, currency: "$", mode: "route", valid: true, link: "https://montreal.ca/en/articles/taxi-fares-between-yul-and-downtown", image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80" },
     ],
     lodging: [
-      { title: "Humaniti 4★", detail: "Design & spa", price: 260, sejour: "luxe", valid: true, image: "https://images.unsplash.com/photo-1501117716987-c8e1ecb210af?auto=format&fit=crop&w=600&q=80" },
-      { title: "Monville 4★", detail: "Vue skyline", price: 210, sejour: "mix", valid: true, image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80" },
-      { title: "Eco Mile-End", detail: "Certification verte", price: 160, sejour: "eco", valid: true, image: "https://images.unsplash.com/photo-1503389152951-9f343605f61e?auto=format&fit=crop&w=600&q=80" },
-      { title: "Boutique Old Port", detail: "Boiseries", price: 190, sejour: "sobre", valid: true, image: "https://images.unsplash.com/photo-1470246973918-29a93221c455?auto=format&fit=crop&w=600&q=80" },
+      { title: "Humaniti 4★", detail: "Design & spa", price: 260, currency: "$", sejour: "luxe", valid: true, link: "https://www.humanitihotel.com", image: "https://images.unsplash.com/photo-1501117716987-c8e1ecb210af?auto=format&fit=crop&w=600&q=80" },
+      { title: "Monville 4★", detail: "Vue skyline", price: 210, currency: "$", sejour: "mix", valid: true, link: "https://hotelmonville.com", image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80" },
+      { title: "Eco Mile-End", detail: "Certification verte", price: 160, currency: "$", sejour: "eco", valid: true, link: "https://zerohotel.ca", image: "https://images.unsplash.com/photo-1503389152951-9f343605f61e?auto=format&fit=crop&w=600&q=80" },
+      { title: "Boutique Old Port", detail: "Boiseries", price: 190, currency: "$", sejour: "sobre", valid: true, link: "https://www.aubergeduvieuxport.com", image: "https://images.unsplash.com/photo-1470246973918-29a93221c455?auto=format&fit=crop&w=600&q=80" },
     ],
     activities: [
-      { title: "Musée Beaux-Arts", detail: "Lundi fermé", price: 24, valid: true, image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80" },
-      { title: "Mont Royal", detail: "Coucher soleil", price: 0, valid: true, image: "https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?auto=format&fit=crop&w=600&q=80" },
-      { title: "Food tour Mile-End", detail: "3h", price: 75, valid: true, image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80" },
-      { title: "Hockey Centre Bell", detail: "Billets soirée", price: 120, valid: true, image: "https://images.unsplash.com/photo-1526481280695-3c469c2f0f99?auto=format&fit=crop&w=600&q=80" },
+      { title: "Musée Beaux-Arts", detail: "Lundi fermé", price: 24, currency: "$", valid: true, link: "https://www.mbam.qc.ca", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80" },
+      { title: "Mont Royal", detail: "Coucher soleil", price: 0, currency: "$", valid: true, link: "https://www.lemontroyal.qc.ca/en", image: "https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?auto=format&fit=crop&w=600&q=80" },
+      { title: "Food tour Mile-End", detail: "3h", price: 75, currency: "$", valid: true, link: "https://localmontrealtours.com", image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80" },
+      { title: "Hockey Centre Bell", detail: "Billets soirée", price: 120, currency: "$", valid: true, link: "https://www.centrebell.ca", image: "https://images.unsplash.com/photo-1526481280695-3c469c2f0f99?auto=format&fit=crop&w=600&q=80" },
     ],
     itinerary: [
       { title: "Jour 1", detail: "Vieux-Port + marché", valid: true, image: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=600&q=80" },
@@ -244,6 +244,22 @@ function sampleScrapedItems(destination, stage, discovery, desired = 8) {
   const shuffled = [...pool].sort(() => 0.5 - Math.random());
   const count = Math.max(5, Math.min(desired, 10, shuffled.length || desired));
   return shuffled.slice(0, count);
+}
+
+function domainFromLink(link) {
+  if (!link) return "source vérifiée";
+  try {
+    const url = new URL(link.startsWith("http") ? link : `https://${link}`);
+    return url.hostname.replace("www.", "");
+  } catch (e) {
+    return link.replace(/https?:\/\//, "").split("/")[0];
+  }
+}
+
+function formatPriceTag(item, stage) {
+  if (!item?.price && item?.price !== 0) return "tarif en cours";
+  const unit = item.currency || (stage === "flights" ? "€" : "€");
+  return `${item.price}${unit}`;
 }
 
 function pushLiveScrape({ title, text, source }) {
@@ -438,12 +454,15 @@ function attachScrapeToOptions(options, stage) {
     const picked = subset.length ? subset : scrapedSet.slice(0, chunkSize);
     const media = picked[0]?.image;
     const scrapeBullets = picked.slice(0, 3).map((item) => {
-      const price = item.price ? `${item.price}${stage === "flights" ? "€" : ""}` : "";
-      return `${item.title}${price ? ` — ${price}` : ""}`;
+      const price = formatPriceTag(item, stage);
+      const site = domainFromLink(item.link);
+      return `${item.title} — ${price} (${site})`;
     });
     return {
       ...opt,
       media,
+      mediaAlt: picked[0]?.title,
+      scrapedItems: picked,
       bullets: [...(opt.bullets || []), ...scrapeBullets, `Validation: ${picked.length} sources filtrées`],
     };
   });
@@ -470,7 +489,7 @@ function renderIntel(intel, destination) {
     .join("");
 
   setIntelStatus("Infos + images prêtes", "success");
-  refreshIntelBtn.disabled = false;
+  if (refreshIntelBtn) refreshIntelBtn.disabled = false;
   showIntelError(intel.fallback ? "Résultats génériques faute de source dédiée." : "", intel.fallback ? "error" : "success");
 }
 
@@ -549,16 +568,25 @@ function conceptOptions(discovery) {
       ? "City break"
       : discovery.vibe.charAt(0).toUpperCase() + discovery.vibe.slice(1)
     : "Mix";
+  const destinationLabel = discovery.destination || "la destination";
   const options = [
     {
       id: "A",
-      title: "Immersion urbaine culturelle",
-      bullets: ["Musées & rooftops", "Déplacements simples", `Vibe ${vibeLabel}`],
+      title: `Immersion ${destinationLabel} sur mesure`,
+      bullets: [
+        `${vibeLabel} + adresses confidentielles`,
+        `Transports ${discovery.transport} affinés`,
+        `Séjour ${discovery.sejour} calibré`,
+      ],
     },
     {
       id: "B",
       title: "Nature ou littoral reposant",
-      bullets: ["Rythme léger", "1 signature", "Transports simplifiés"],
+      bullets: [
+        "Rythme léger & panoramas",
+        `${discovery.duration}-jour(s) avec sorties ciblées`,
+        `Transport ${discovery.transport} + transfers filtrés`,
+      ],
     },
   ];
   return attachScrapeToOptions(options, "discovery").map((opt) => ({
@@ -885,6 +913,18 @@ function buildSummary() {
   const blocks = [];
   const { discovery, concept, choices } = state;
 
+  const formatScrapeLines = (choice, stage) => {
+    if (!choice?.scrapedItems?.length) return [choice?.title || "—"];
+    const top = choice.scrapedItems.slice(0, 3).map((item) => {
+      const price = formatPriceTag(item, stage);
+      const site = domainFromLink(item.link);
+      return `${item.title} — ${price} (${site})`;
+    });
+    const img = choice.mediaAlt ? `Visuel: ${choice.mediaAlt}` : null;
+    const linkLine = choice.scrapedItems[0]?.link ? `Site direct: ${choice.scrapedItems[0].link}` : null;
+    return [choice.title, ...(img ? [img] : []), ...(linkLine ? [linkLine] : []), ...top];
+  };
+
   blocks.push({
     title: "1. Profil client",
     items: [
@@ -896,11 +936,11 @@ function buildSummary() {
     ].filter(Boolean)
   });
 
-  blocks.push({ title: "2. Vols", items: [choices.flights?.title || "—"] });
-  blocks.push({ title: "3. Hôtels", items: [choices.lodging?.title || "—"] });
-  blocks.push({ title: "4. Activités", items: [choices.activities?.title || "—"] });
+  blocks.push({ title: "2. Vols", items: formatScrapeLines(choices.flights, "flights") });
+  blocks.push({ title: "3. Hôtels", items: formatScrapeLines(choices.lodging, "lodging") });
+  blocks.push({ title: "4. Activités", items: formatScrapeLines(choices.activities, "activities") });
   blocks.push({ title: "5. Itinéraire", items: choices.itinerary?.bullets || ["Itinéraire standard"] });
-  blocks.push({ title: "6. Package choisi", items: [choices.package?.title || "Pas encore choisi"] });
+  blocks.push({ title: "6. Package choisi", items: formatScrapeLines(choices.package, "budget") });
   blocks.push({ title: "7. Conformité sécurité", items: ["Pas de destinations interdites", "Aucune activité illégale"] });
 
   const scrape = getScrapedSnippet(discovery.destination, "budget");
@@ -956,7 +996,7 @@ function onDiscoverySubmit(event) {
     });
   }
   runIntel(data.destination);
-  refreshIntelBtn.disabled = false;
+  if (refreshIntelBtn) refreshIntelBtn.disabled = false;
 
   addMessage({
     title: "Phase découverte",
@@ -970,14 +1010,16 @@ function onDiscoverySubmit(event) {
 }
 
 document.getElementById("discoveryForm").addEventListener("submit", onDiscoverySubmit);
-refreshIntelBtn.addEventListener("click", () => {
-  if (state.discovery?.destination) runIntel(state.discovery.destination);
-});
+if (refreshIntelBtn) {
+  refreshIntelBtn.addEventListener("click", () => {
+    if (state.discovery?.destination) runIntel(state.discovery.destination);
+  });
+}
 
 clearUI(true);
 restoreState();
 if (state.discovery?.destination) {
   setStatus("Session restaurée", "info");
-  refreshIntelBtn.disabled = false;
+  if (refreshIntelBtn) refreshIntelBtn.disabled = false;
   runIntel(state.discovery.destination);
 }
