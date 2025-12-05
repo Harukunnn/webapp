@@ -76,12 +76,7 @@ const state = {
   discovery: null,
   concept: null,
   choices: {},
-  summary: null,
-  concierge: {
-    priority: "signature",
-    pace: "balanced",
-    service: "hybrid",
-  }
+  summary: null
 };
 
 const dynamicState = {
@@ -94,7 +89,6 @@ const stepList = Array.from(document.querySelectorAll("#stepList .step"));
 const summaryBlock = document.getElementById("summary");
 const exportBtn = document.getElementById("btnExport");
 const statusPill = document.getElementById("status");
-const resetBtn = document.getElementById("btnReset");
 const thinkingIndicator = document.getElementById("thinkingIndicator");
 const intelStatus = document.getElementById("intelStatus");
 const intelCards = document.getElementById("intelCards");
@@ -102,13 +96,6 @@ const intelError = document.getElementById("intelError");
 const imageStrip = document.getElementById("imageStrip");
 const refreshIntelBtn = document.getElementById("btnRefreshIntel");
 const liveScrapeList = document.getElementById("liveScrapeList");
-const conciergeForm = document.getElementById("conciergeForm");
-const conciergeNote = document.getElementById("conciergeNote");
-const feedbackForm = document.getElementById("feedbackForm");
-const feedbackStatus = document.getElementById("feedbackStatus");
-const btnCallMe = document.getElementById("btnCallMe");
-const btnConcierge = document.getElementById("btnConcierge");
-const serviceHealth = document.getElementById("serviceHealth");
 
 function getScrapedSnippet(destination, stage) {
   const key = (destination || "").trim().toLowerCase();
@@ -217,7 +204,6 @@ function restoreState() {
     state.concept = parsed.concept || null;
     state.choices = parsed.choices || {};
     state.summary = parsed.summary || null;
-    state.concierge = parsed.concierge || state.concierge;
     const form = document.getElementById("discoveryForm");
     if (form && parsed.discovery) {
       Object.entries(parsed.discovery).forEach(([k, v]) => {
@@ -226,12 +212,6 @@ function restoreState() {
       if (parsed.summary) {
         buildSummary();
       }
-    }
-    if (conciergeForm && parsed.concierge) {
-      Object.entries(parsed.concierge).forEach(([k, v]) => {
-        if (conciergeForm.elements[k]) conciergeForm.elements[k].value = v;
-      });
-      applyConciergeProfile("Profil restauré");
     }
   } catch (e) {
     console.warn("State restore failed", e);
@@ -256,12 +236,8 @@ function clearUI(skipPersist = false) {
   state.concept = null;
   state.choices = {};
   state.summary = null;
-  state.concierge = { priority: "signature", pace: "balanced", service: "hybrid" };
-  applyConciergeProfile("Réinitialisation");
   if (!skipPersist) persistState();
 }
-
-resetBtn.addEventListener("click", clearUI);
 
 function addMessage({ title, agent, body, options = [], question }) {
   stopThinking("L’IA attend votre validation.");
@@ -315,29 +291,6 @@ function showIntelError(message, tone = "error") {
   intelError.className = `alert ${tone === "success" ? "success" : tone === "error" ? "error" : ""}`;
 }
 
-function applyConciergeProfile(reason = "") {
-  const { priority, pace, service } = state.concierge;
-  const destination = state.discovery?.destination || "votre destination";
-  if (conciergeNote) {
-    const pacing = pace === "soft" ? "2 temps forts/jour" : pace === "dense" ? "4 temps forts/jour" : "3 temps forts/jour";
-    const serviceCopy = service === "dedicated" ? "Butler dédié + accueil VIP" : service === "hybrid" ? "Humain si besoin" : "100% digital sécurisé";
-    conciergeNote.textContent = reason
-      ? `${reason} : ${priority}, ${pacing}, ${serviceCopy}.`
-      : `${destination} prêt : ${priority}, ${pacing}, ${serviceCopy}.`;
-  }
-  persistState();
-}
-
-function updateTrustMetrics() {
-  const uptime = (99.9 + Math.random() * 0.09).toFixed(2);
-  const latency = 180 + Math.round(Math.random() * 120);
-  if (serviceHealth) {
-    const label = serviceHealth.querySelector(".health-text");
-    if (label) label.textContent = `Stable · ${uptime}% · <${latency}ms · Chiffré`;
-  }
-  const copy = document.getElementById("uptimeCopy");
-  if (copy) copy.textContent = `Monitoring ${uptime}% · ${latency}ms.`;
-}
 
 function attachScrapeToOptions(options, stage) {
   const destination = state.discovery?.destination;
@@ -835,19 +788,6 @@ exportBtn.addEventListener("click", () => {
   });
 });
 
-function handleConciergeSubmit(event) {
-  event.preventDefault();
-  const prefs = Object.fromEntries(new FormData(event.target).entries());
-  state.concierge = prefs;
-  applyConciergeProfile("Brief concierge reçu");
-}
-
-function handleFeedbackSubmit(event) {
-  event.preventDefault();
-  const data = Object.fromEntries(new FormData(event.target).entries());
-  if (feedbackStatus) feedbackStatus.textContent = data.score === "satisfait" ? "Merci pour votre validation." : "Merci, nous allons améliorer.";
-}
-
 function onDiscoverySubmit(event) {
   event.preventDefault();
   const data = Object.fromEntries(new FormData(event.target).entries());
@@ -872,7 +812,6 @@ function onDiscoverySubmit(event) {
   }
   runIntel(data.destination);
   refreshIntelBtn.disabled = false;
-  applyConciergeProfile("Destination détectée");
 
   addMessage({
     title: "Phase découverte",
@@ -889,14 +828,6 @@ document.getElementById("discoveryForm").addEventListener("submit", onDiscoveryS
 refreshIntelBtn.addEventListener("click", () => {
   if (state.discovery?.destination) runIntel(state.discovery.destination);
 });
-conciergeForm?.addEventListener("submit", handleConciergeSubmit);
-feedbackForm?.addEventListener("submit", handleFeedbackSubmit);
-btnCallMe?.addEventListener("click", () => applyConciergeProfile("Rappel concierge programmé"));
-btnConcierge?.addEventListener("click", () => applyConciergeProfile("Concierge en ligne"));
-
-updateTrustMetrics();
-setInterval(updateTrustMetrics, 8000);
-applyConciergeProfile();
 
 clearUI(true);
 restoreState();

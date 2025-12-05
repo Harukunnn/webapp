@@ -49,9 +49,6 @@ body {
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
-.service-health { display: inline-flex; align-items: center; gap: 0.4rem; justify-content: center; font-size: 0.9rem; color: var(--muted); }
-.service-health .health-text { color: var(--text); font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
-.dot { width: 0.55rem; height: 0.55rem; border-radius: 999px; background: var(--accent); box-shadow: 0 0 0 8px rgba(209, 163, 80, 0.14); }
 .topbar-actions { display: none; }
 
 .hero {
@@ -87,17 +84,9 @@ h1, h2, h3 { margin: 0; }
 .panel:hover { border-color: rgba(209, 163, 80, 0.38); transform: translateY(-2px); }
 .panel-header { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.35rem; }
 .panel-header.solo { justify-content: space-between; align-items: baseline; }
-.statline { display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 0.9rem 1rem; }
-.statline h2 { letter-spacing: 0.08em; }
-.statline-actions { display: flex; align-items: center; gap: 0.65rem; }
-
 .duo { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; font-size: 0.98rem; }
 .duo.tight { font-size: 0.92rem; gap: 0.25rem; }
 
-.micro-form { display: grid; gap: 0.75rem; }
-.micro-form.trio { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); align-items: end; }
-.micro-form.trio.compact { gap: 0.5rem; }
-.micro-form.slim { max-width: 520px; }
 .field { display: grid; gap: 0.25rem; font-size: 0.95rem; }
 .field span { color: var(--muted); font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; }
 .field input,
@@ -212,8 +201,6 @@ h1, h2, h3 { margin: 0; }
 .alert.danger, .pill.danger { color: #ffbfbf; }
 .pill.danger { border-color: rgba(255, 145, 145, 0.4); background: rgba(255, 145, 145, 0.08); }
 .pill.info { border-color: rgba(99, 210, 198, 0.5); color: #b9fff3; }
-
-.footer { padding: 1rem; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
 
 .thinking-indicator {
   position: relative;

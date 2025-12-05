@@ -12,11 +12,6 @@
       <span class="logo" aria-hidden="true">✦</span>
       <strong>Atlas Noir</strong>
     </div>
-    <div class="service-health" id="serviceHealth" role="status">
-      <span class="dot online" aria-hidden="true"></span>
-      <span class="health-text">Stable</span>
-    </div>
-    <button type="button" id="btnConcierge" class="ghost icon" aria-label="Ouvrir le concierge">◎</button>
   </nav>
 
   <header class="hero">
@@ -34,56 +29,6 @@
     <div class="thinking-indicator" id="thinkingIndicator">
       <p class="label">Prêt.</p>
     </div>
-
-    <section class="panel statline" aria-labelledby="trust-title">
-      <div>
-        <p class="eyebrow">Statut</p>
-        <h2 id="trust-title">99.9 · &lt;260ms · Chiffré</h2>
-      </div>
-      <div class="statline-actions">
-        <p class="muted" id="uptimeCopy">Surveillance active.</p>
-        <button id="btnReset" class="ghost icon" aria-label="Réinitialiser">↺</button>
-      </div>
-    </section>
-
-    <section class="panel concierge" aria-labelledby="concierge-title">
-      <header class="panel-header solo">
-        <div>
-          <p class="eyebrow">Concierge</p>
-          <h2 id="concierge-title">Réglage</h2>
-        </div>
-        <p class="muted" id="conciergeNote">Prêt.</p>
-      </header>
-      <form id="conciergeForm" class="micro-form trio compact">
-        <label class="field">
-          <span>Priorité</span>
-          <select name="priority">
-            <option value="repos">Repos</option>
-            <option value="signature">Signature</option>
-            <option value="business">Business</option>
-          </select>
-        </label>
-        <label class="field">
-          <span>Tempo</span>
-          <select name="pace">
-            <option value="soft">Soft</option>
-            <option value="balanced" selected>Balanced</option>
-            <option value="dense">Dense</option>
-          </select>
-        </label>
-        <label class="field">
-          <span>Niveau</span>
-          <select name="service">
-            <option value="digital">Digital</option>
-            <option value="hybrid" selected>Hybride</option>
-            <option value="dedicated">Butler</option>
-          </select>
-        </label>
-        <div class="actions full solo">
-          <button type="submit" class="primary">Calibrer</button>
-        </div>
-      </form>
-    </section>
 
     <section class="panel" aria-labelledby="discovery-title">
       <header class="panel-header solo">
@@ -207,33 +152,7 @@
       </header>
       <div id="summary" class="summary" aria-live="polite"></div>
     </section>
-
-    <section class="panel feedback" aria-labelledby="feedback-title">
-      <header class="panel-header solo">
-        <div>
-          <p class="eyebrow">Boucle</p>
-          <h2 id="feedback-title">Feedback</h2>
-        </div>
-      </header>
-      <form id="feedbackForm" class="micro-form slim">
-        <label class="field">
-          <span>Impression</span>
-          <div class="nps" role="radiogroup" aria-label="Note de satisfaction">
-            <label><input type="radio" name="score" value="satisfait" checked /> ✔</label>
-            <label><input type="radio" name="score" value="ameliorer" /> ✕</label>
-          </div>
-        </label>
-        <div class="actions solo">
-          <button class="primary" type="submit">Envoyer</button>
-          <p class="muted" id="feedbackStatus" role="status"></p>
-        </div>
-      </form>
-    </section>
   </main>
-
-  <footer class="footer">
-    <p>Ultra‑Optimized.</p>
-  </footer>
 
   <script src="app.js"></script>
 </body>
