@@ -161,6 +161,7 @@ const state = {
   concept: null,
   choices: {},
   summary: null,
+  scrapeReady: null,
   scrapeCache: {},
 };
 
@@ -345,7 +346,14 @@ function getStageScrapePlan(stage) {
 
 function filterScrapeItems(destination, stage, discovery) {
   const key = slugify(destination || "");
-  const inventory = scrapeInventory[key]?.[stage] || [];
+  const inventory =
+    stage === "discovery"
+      ? [
+          ...(scrapeInventory[key]?.flights || []),
+          ...(scrapeInventory[key]?.lodging || []),
+          ...(scrapeInventory[key]?.activities || []),
+        ]
+      : scrapeInventory[key]?.[stage] || [];
   const validOnly = inventory.filter((item) => item.valid !== false);
   const priorSelections = Object.values(state.choices || {})
     .flatMap((c) => c?.scrapedItems || [])
@@ -371,15 +379,32 @@ function filterScrapeItems(destination, stage, discovery) {
   return base;
 }
 
-function sampleScrapedItems(destination, stage, discovery, desired = 8) {
+function scoreItemByDiscovery(item, stage, discovery) {
+  let score = 0;
+  const price = Number(item.price || 0);
+  if (discovery?.budget === "low" && price && price < 150) score += 2;
+  if (discovery?.budget === "high" && price && price > 200) score += 1;
+  if (stage === "flights" && discovery?.transport && item.mode === discovery.transport) score += 3;
+  if (stage === "lodging" && discovery?.sejour && item.sejour === discovery.sejour) score += 3;
+  if (stage === "activities" && discovery?.vibe && item.detail?.toLowerCase().includes(discovery.vibe)) score += 2;
+  if (state.choices?.activities && stage === "itinerary") score += 1;
+  if (item.link) score += 1;
+  return score;
+}
+
+function rankScrapeItems(pool, stage, discovery) {
+  return [...pool].sort((a, b) => scoreItemByDiscovery(b, stage, discovery) - scoreItemByDiscovery(a, stage, discovery));
+}
+
+function sampleScrapedItems(destination, stage, discovery, desired = 12) {
   const pool = filterScrapeItems(destination, stage, discovery);
-  const shuffled = [...pool].sort(() => 0.5 - Math.random());
-  const count = Math.max(5, Math.min(desired, 10, shuffled.length || desired));
-  const picked = shuffled.slice(0, count);
+  const ranked = rankScrapeItems(pool, stage, discovery);
+  const count = Math.max(6, Math.min(desired, 12, ranked.length || desired));
+  const picked = ranked.slice(0, count);
   const uniqueImages = new Set();
-  return picked.map((item, idx) => {
+  return picked.map((item) => {
     const img = uniqueImages.has(item.image)
-      ? shuffled.find((alt) => !uniqueImages.has(alt.image) && alt.image)
+      ? ranked.find((alt) => !uniqueImages.has(alt.image) && alt.image)
       : item;
     if (img?.image) uniqueImages.add(img.image);
     return { ...item, image: img?.image || item.image };
@@ -487,6 +512,7 @@ function restoreState() {
     state.concept = parsed.concept || null;
     state.choices = parsed.choices || {};
     state.summary = parsed.summary || null;
+    state.scrapeReady = parsed.scrapeReady || null;
     state.scrapeCache = parsed.scrapeCache || {};
     hydrateScrapeSources();
     const form = document.getElementById("discoveryForm");
@@ -521,6 +547,7 @@ function clearUI(skipPersist = false) {
   state.concept = null;
   state.choices = {};
   state.summary = null;
+  state.scrapeReady = null;
   hydrateScrapeSources();
   if (!skipPersist) persistState();
 }
@@ -581,7 +608,7 @@ function showIntelError(message, tone = "error") {
 
 function attachScrapeToOptions(options, stage) {
   const destination = state.discovery?.destination;
-  const scrapedSet = sampleScrapedItems(destination, stage, state.discovery, 9);
+  const scrapedSet = sampleScrapedItems(destination, stage, state.discovery, 12);
   const stagePlan = getStageScrapePlan(stage).join(" · ");
   if (scrapedSet?.length) {
     pushLiveScrape({
@@ -592,13 +619,13 @@ function attachScrapeToOptions(options, stage) {
   }
   const allocation = [...scrapedSet];
   const imagesUsed = new Set();
-  const perOption = Math.max(1, Math.floor(scrapedSet.length / options.length));
-  return options.map((opt) => {
+  const perOption = Math.max(3, Math.floor(scrapedSet.length / options.length));
+  return options.map((opt, idx) => {
     const subset = [];
     while (subset.length < perOption && allocation.length) {
       subset.push(allocation.shift());
     }
-    if (!subset.length) subset.push(...scrapedSet.slice(0, perOption));
+    if (!subset.length) subset.push(...scrapedSet.slice(idx * 2, idx * 2 + perOption));
     const mediaItem = subset.find((s) => s.image && !imagesUsed.has(s.image)) || subset[0] || scrapedSet[0];
     if (mediaItem?.image) imagesUsed.add(mediaItem.image);
     const scrapeBullets = subset.slice(0, 3).map((item) => {
@@ -606,15 +633,14 @@ function attachScrapeToOptions(options, stage) {
       const site = domainFromLink(item.link);
       return `${item.title} — ${price} (${site})`;
     });
-    const adaptiveLine = subset[1]
-      ? `Focus ${subset[0].title.toLowerCase()} + ${subset[1].title.toLowerCase()} selon vos préférences ${state.discovery?.vibe || "mix"}`
-      : subset[0]?.detail || "Curateur dédié.";
+    const baseBullets = Array.isArray(opt.bullets) ? opt.bullets : [];
+    const blended = [...scrapeBullets, ...baseBullets.slice(0, 2)];
     return {
       ...opt,
       media: mediaItem?.image,
       mediaAlt: mediaItem?.title,
       scrapedItems: subset,
-      bullets: [...scrapeBullets, adaptiveLine],
+      bullets: blended,
     };
   });
 }
@@ -679,6 +705,25 @@ function fetchIntel(destination) {
   });
 }
 
+function fetchInventory(destination) {
+  const key = slugify(destination.trim());
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const cachedInventory = state.scrapeCache[key]?.inventory;
+      if (cachedInventory) {
+        scrapeInventory[key] = cachedInventory;
+        return resolve(cachedInventory);
+      }
+      if (scrapeInventory[key]) {
+        upsertScrapeRecord(destination, { inventory: scrapeInventory[key] });
+        return resolve(scrapeInventory[key]);
+      }
+      const synthetic = createSyntheticScrape(destination);
+      resolve(synthetic.inventory);
+    }, 320);
+  });
+}
+
 async function runIntel(destination) {
   if (!destination) return;
   setIntelStatus("Recherche en cours…", "info");
@@ -692,6 +737,30 @@ async function runIntel(destination) {
     setIntelStatus("Échec de la recherche", "danger");
     refreshIntelBtn.disabled = false;
   }
+}
+
+async function ensureScrapeDataset(destination, stageLabel = "Scraping sécurisé…") {
+  const key = slugify(destination || "");
+  if (!key) return {};
+  if (state.scrapeReady === key && scrapeInventory[key]) {
+    return { intel: intelDataset[key], inventory: scrapeInventory[key] };
+  }
+  setStatus("Scraping", "info");
+  setThinking(stageLabel);
+  const delay = Math.floor(2500 + Math.random() * 2000);
+  const needsLoader = !dynamicState.loader;
+  if (needsLoader) showStepLoader(stageLabel, delay, "discovery");
+  await new Promise((resolve) => setTimeout(resolve, delay));
+  const [intel, inventory] = await Promise.all([
+    fetchIntel(destination),
+    fetchInventory(destination),
+  ]);
+  renderIntel(intel, destination);
+  state.scrapeReady = key;
+  if (needsLoader) clearStepLoader();
+  setIntelStatus("Sources scrappées prêtes", "success");
+  refreshIntelBtn.disabled = false;
+  return { intel, inventory };
 }
 
 function safetyBlocked(destination) {
@@ -749,6 +818,15 @@ function conceptOptions(discovery) {
         `Transport ${discovery.transport} + transfers filtrés`,
       ],
     },
+    {
+      id: "C",
+      title: `${destinationLabel} nocturne & design`,
+      bullets: [
+        "Quartiers vivants + rooftops",
+        "Bars/cafés signature scrappés",
+        "Logements proches des hubs sûrs",
+      ],
+    },
   ];
   return attachScrapeToOptions(options, "discovery").map((opt) => ({
       ...opt,
@@ -789,7 +867,8 @@ function startStepFlow(index) {
   const stageLabel = `Agent ${index + 1} réfléchit…`;
   setThinking(stageLabel);
   showStepLoader(stageLabel, delay, id);
-  setTimeout(() => {
+  setTimeout(async () => {
+    await ensureScrapeDataset(state.discovery?.destination, stageLabel);
     clearStepLoader();
     builder(index);
   }, delay);
@@ -1143,7 +1222,7 @@ if (validateBtn) {
   });
 }
 
-function onDiscoverySubmit(event) {
+async function onDiscoverySubmit(event) {
   event.preventDefault();
   const data = Object.fromEntries(new FormData(event.target).entries());
   const destinationLC = data.destination.trim().toLowerCase();
@@ -1154,12 +1233,10 @@ function onDiscoverySubmit(event) {
   }
   const warnings = validateDiscovery(data);
   state.discovery = data;
+  state.scrapeReady = null;
   setStatus("En cours", "info");
   conversation.innerHTML = "";
   setThinking("Agent 0 prépare 3 pistes cohérentes…");
-  const discoveryDelay = Math.floor(5000 + Math.random() * 5000);
-  showStepLoader("Scraping découverte sécurisé…", discoveryDelay, "discovery");
-  setTimeout(() => clearStepLoader(), discoveryDelay);
 
   if (warnings.length) {
     addMessage({
@@ -1168,8 +1245,8 @@ function onDiscoverySubmit(event) {
       body: warnings.join("<br>")
     });
   }
-  runIntel(data.destination);
-  if (refreshIntelBtn) refreshIntelBtn.disabled = false;
+
+  await ensureScrapeDataset(data.destination, "Scraping découverte sécurisé…");
 
   addMessage({
     title: "Phase découverte",
