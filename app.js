@@ -72,16 +72,93 @@ const scrapedContext = {
   },
 };
 
+const scrapeInventory = {
+  tokyo: {
+    flights: [
+      { title: "ANA nuit claire", detail: "HND → centre 22 min", price: 890, mode: "avion", valid: true, image: "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=600&q=80" },
+      { title: "JAL Premium Eco", detail: "1 bagage + siège large", price: 1240, mode: "avion", valid: true, image: "https://images.unsplash.com/photo-1504197906862-1c1f9e5e39e2?auto=format&fit=crop&w=600&q=80" },
+      { title: "Monorail HND", detail: "Monorail 20 min", price: 7, mode: "train", valid: true, image: "https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?auto=format&fit=crop&w=600&q=80" },
+      { title: "Narita Express", detail: "55 min Tokyo Station", price: 25, mode: "train", valid: true, image: "https://images.unsplash.com/photo-1526481280695-3c469c2f0f99?auto=format&fit=crop&w=600&q=80" },
+      { title: "Vol low-cost", detail: "Escale Séoul", price: 690, mode: "avion", valid: true, image: "https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=600&q=80" },
+    ],
+    lodging: [
+      { title: "Shibuya Stream 4★", detail: "220€ nuit", price: 220, sejour: "mix", valid: true, image: "https://images.unsplash.com/photo-1501117716987-c8e1ecb210af?auto=format&fit=crop&w=600&q=80" },
+      { title: "Park Hotel 4★ arty", detail: "210€ nuit", price: 210, sejour: "luxe", valid: true, image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80" },
+      { title: "Boutique Ginza", detail: "Sobre & central", price: 180, sejour: "sobre", valid: true, image: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=600&q=80" },
+      { title: "Ryokan discret", detail: "Tatamis + onsen", price: 240, sejour: "luxe", valid: true, image: "https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=600&q=80" },
+      { title: "Capsule premium", detail: "Option économique", price: 90, sejour: "eco", valid: true, image: "https://images.unsplash.com/photo-1578681143489-4662a462f8aa?auto=format&fit=crop&w=600&q=80" },
+    ],
+    activities: [
+      { title: "TeamLab Planets", detail: "Billet daté", price: 28, valid: true, image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80" },
+      { title: "Onsen Odaiba", detail: "No tattoo", price: 35, valid: true, image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80" },
+      { title: "Food tour Shinjuku", detail: "3h nocturne", price: 95, valid: true, image: "https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=600&q=80" },
+      { title: "Rooftop Ginza", detail: "Signature cocktail", price: 40, valid: true, image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80" },
+      { title: "Temple Asakusa", detail: "Lever du soleil", price: 0, valid: true, image: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=600&q=80" },
+    ],
+    itinerary: [
+      { title: "Jour 1", detail: "Arrivée + Shibuya", valid: true, image: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=600&q=80" },
+      { title: "Jour 2", detail: "Asakusa + Ginza", valid: true, image: "https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?auto=format&fit=crop&w=600&q=80" },
+      { title: "Jour 3", detail: "Odaiba + onsen", valid: true, image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80" },
+      { title: "Jour 4", detail: "TeamLab + Daikanyama", valid: true, image: "https://images.unsplash.com/photo-1503389152951-9f343605f61e?auto=format&fit=crop&w=600&q=80" },
+    ],
+  },
+  lisbonne: {
+    flights: [
+      { title: "Tap direct", detail: "Orly → LIS", price: 210, mode: "avion", valid: true, image: "https://images.unsplash.com/photo-1504198458649-3128b932f49b?auto=format&fit=crop&w=600&q=80" },
+      { title: "Low-cost", detail: "CDG via Madrid", price: 120, mode: "avion", valid: true, image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=600&q=80" },
+      { title: "Train Sud Express", detail: "Paris → Hendaye → Lisboa", price: 190, mode: "train", valid: true, image: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=600&q=80" },
+      { title: "Transfert metro", detail: "Ligne rouge 6-10 min", price: 2, mode: "train", valid: true, image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80" },
+    ],
+    lodging: [
+      { title: "Lumiares 4★", detail: "Bairro Alto", price: 190, sejour: "luxe", valid: true, image: "https://images.unsplash.com/photo-1501117716987-c8e1ecb210af?auto=format&fit=crop&w=600&q=80" },
+      { title: "Mama Shelter", detail: "Design + rooftop", price: 160, sejour: "mix", valid: true, image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80" },
+      { title: "Boutique Alfama", detail: "Sobre & fado", price: 150, sejour: "sobre", valid: true, image: "https://images.unsplash.com/photo-1470246973918-29a93221c455?auto=format&fit=crop&w=600&q=80" },
+      { title: "Eco hôtel LX", detail: "Label green", price: 130, sejour: "eco", valid: true, image: "https://images.unsplash.com/photo-1503389152951-9f343605f61e?auto=format&fit=crop&w=600&q=80" },
+    ],
+    activities: [
+      { title: "Tram 28", detail: "3€ billet", price: 3, valid: true, image: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=600&q=80" },
+      { title: "Belém tour", detail: "Torre + Pastéis", price: 15, valid: true, image: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=600&q=80" },
+      { title: "Fado Alfama", detail: "Soirée intimiste", price: 45, valid: true, image: "https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=600&q=80" },
+      { title: "Surf Cascais", detail: "Session matin", price: 60, valid: true, image: "https://images.unsplash.com/photo-1526481280695-3c469c2f0f99?auto=format&fit=crop&w=600&q=80" },
+    ],
+    itinerary: [
+      { title: "Jour 1", detail: "Baixa + Alfama", valid: true, image: "https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?auto=format&fit=crop&w=600&q=80" },
+      { title: "Jour 2", detail: "Belém + LX Factory", valid: true, image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80" },
+      { title: "Jour 3", detail: "Cascais/Sintra", valid: true, image: "https://images.unsplash.com/photo-1503389152951-9f343605f61e?auto=format&fit=crop&w=600&q=80" },
+    ],
+  },
+  montréal: {
+    flights: [
+      { title: "Air Canada direct", detail: "CDG → YUL", price: 780, mode: "avion", valid: true, image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=600&q=80" },
+      { title: "Air Transat", detail: "Bagage inclus", price: 650, mode: "avion", valid: true, image: "https://images.unsplash.com/photo-1504197906862-1c1f9e5e39e2?auto=format&fit=crop&w=600&q=80" },
+      { title: "Train aéroport 747", detail: "24/7 11$", price: 11, mode: "train", valid: true, image: "https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?auto=format&fit=crop&w=600&q=80" },
+      { title: "Taxi fixe", detail: "48,40$ CAD", price: 48, mode: "route", valid: true, image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80" },
+    ],
+    lodging: [
+      { title: "Humaniti 4★", detail: "Design & spa", price: 260, sejour: "luxe", valid: true, image: "https://images.unsplash.com/photo-1501117716987-c8e1ecb210af?auto=format&fit=crop&w=600&q=80" },
+      { title: "Monville 4★", detail: "Vue skyline", price: 210, sejour: "mix", valid: true, image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80" },
+      { title: "Eco Mile-End", detail: "Certification verte", price: 160, sejour: "eco", valid: true, image: "https://images.unsplash.com/photo-1503389152951-9f343605f61e?auto=format&fit=crop&w=600&q=80" },
+      { title: "Boutique Old Port", detail: "Boiseries", price: 190, sejour: "sobre", valid: true, image: "https://images.unsplash.com/photo-1470246973918-29a93221c455?auto=format&fit=crop&w=600&q=80" },
+    ],
+    activities: [
+      { title: "Musée Beaux-Arts", detail: "Lundi fermé", price: 24, valid: true, image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80" },
+      { title: "Mont Royal", detail: "Coucher soleil", price: 0, valid: true, image: "https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?auto=format&fit=crop&w=600&q=80" },
+      { title: "Food tour Mile-End", detail: "3h", price: 75, valid: true, image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80" },
+      { title: "Hockey Centre Bell", detail: "Billets soirée", price: 120, valid: true, image: "https://images.unsplash.com/photo-1526481280695-3c469c2f0f99?auto=format&fit=crop&w=600&q=80" },
+    ],
+    itinerary: [
+      { title: "Jour 1", detail: "Vieux-Port + marché", valid: true, image: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=600&q=80" },
+      { title: "Jour 2", detail: "Musées + Mile-End", valid: true, image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80" },
+      { title: "Jour 3", detail: "Mont Royal + Saint-Laurent", valid: true, image: "https://images.unsplash.com/photo-1503389152951-9f343605f61e?auto=format&fit=crop&w=600&q=80" },
+    ],
+  },
+};
+
 const state = {
   discovery: null,
   concept: null,
   choices: {},
-  summary: null,
-  concierge: {
-    priority: "signature",
-    pace: "balanced",
-    service: "hybrid",
-  }
+  summary: null
 };
 
 const dynamicState = {
@@ -93,9 +170,7 @@ const conversation = document.getElementById("conversation");
 const stepList = Array.from(document.querySelectorAll("#stepList .step"));
 const summaryBlock = document.getElementById("summary");
 const exportBtn = document.getElementById("btnExport");
-const downloadBtn = document.getElementById("btnDownload");
 const statusPill = document.getElementById("status");
-const resetBtn = document.getElementById("btnReset");
 const thinkingIndicator = document.getElementById("thinkingIndicator");
 const intelStatus = document.getElementById("intelStatus");
 const intelCards = document.getElementById("intelCards");
@@ -103,28 +178,13 @@ const intelError = document.getElementById("intelError");
 const imageStrip = document.getElementById("imageStrip");
 const refreshIntelBtn = document.getElementById("btnRefreshIntel");
 const liveScrapeList = document.getElementById("liveScrapeList");
-const conciergeForm = document.getElementById("conciergeForm");
-const conciergeNote = document.getElementById("conciergeNote");
-const quickActions = document.getElementById("quickActions");
-const feedbackForm = document.getElementById("feedbackForm");
-const feedbackStatus = document.getElementById("feedbackStatus");
-const npsBadge = document.getElementById("npsBadge");
-const btnCallMe = document.getElementById("btnCallMe");
-const btnShareSummary = document.getElementById("btnShareSummary");
-const btnConcierge = document.getElementById("btnConcierge");
-const btnUrgent = document.getElementById("btnUrgent");
-const uptimeStat = document.getElementById("uptimeStat");
-const latencyStat = document.getElementById("latencyStat");
-const privacyStat = document.getElementById("privacyStat");
-const slaBadge = document.getElementById("slaBadge");
-const trustCTA = document.getElementById("trustCTA");
 
 function getScrapedSnippet(destination, stage) {
   const key = (destination || "").trim().toLowerCase();
   const record = scrapedContext[key];
   if (!record) {
     return {
-      text: "Aucune donnée temps réel trouvée, utilisation de repères sûrs (centres-villes, hôtels 4★ bien notés).",
+      text: "Pas de source dédiée. On reste sur les hubs sûrs et les hôtels 4★.",
       source: "Sources ouvertes",
     };
   }
@@ -141,6 +201,49 @@ function getScrapedSnippet(destination, stage) {
     text: mapping[stage] || record.activities,
     source: record.sources?.join(" · ") || "Sources ouvertes",
   };
+}
+
+function getStageScrapePlan(stage) {
+  const plans = {
+    discovery: ["vols fiables", "prix hôtels", "climat", "contrastes vibe", "accès premium"],
+    profile: ["corridors sécurisés", "plafonds budget", "alertes vibe", "options transport", "sources vérifiées"],
+    flights: ["routes directes", "escales courtes", "temps porte-à-porte", "classes confort", "prix dynamiques"],
+    lodging: ["quartiers sûrs", "tarifs nuit", "labels luxe", "options éco", "politique annulation"],
+    activities: ["pics d’affluence", "expériences premium", "options gratuites", "restrictions locales", "horaires fiables"],
+    itinerary: ["rythme quotidien", "transports intra-ville", "plages horaires", "liens météo", "sécurité zones"],
+    budget: ["total vols", "moyenne nuit", "transports locaux", "activités clés", "marge sécurité"],
+  };
+  return plans[stage] || ["sources ouvertes"];
+}
+
+function filterScrapeItems(destination, stage, discovery) {
+  const key = (destination || "").trim().toLowerCase();
+  const inventory = scrapeInventory[key]?.[stage] || [];
+  const validOnly = inventory.filter((item) => item.valid !== false);
+  const matchesTransport = discovery?.transport && discovery.transport !== "flex"
+    ? validOnly.filter((item) => !item.mode || item.mode === discovery.transport || item.mode === "train")
+    : validOnly;
+  const matchesSejour = discovery?.sejour && discovery.sejour !== "mix"
+    ? matchesTransport.filter((item) => !item.sejour || item.sejour === discovery.sejour)
+    : matchesTransport;
+  const base = matchesSejour.length ? matchesSejour : validOnly;
+  if (!base.length) {
+    return getStageScrapePlan(stage).map((p, idx) => ({
+      title: `${stage} ${idx + 1}`,
+      detail: `${p} vérifié`,
+      price: null,
+      valid: true,
+      image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=600&q=80"
+    }));
+  }
+  return base;
+}
+
+function sampleScrapedItems(destination, stage, discovery, desired = 8) {
+  const pool = filterScrapeItems(destination, stage, discovery);
+  const shuffled = [...pool].sort(() => 0.5 - Math.random());
+  const count = Math.max(5, Math.min(desired, 10, shuffled.length || desired));
+  return shuffled.slice(0, count);
 }
 
 function pushLiveScrape({ title, text, source }) {
@@ -160,7 +263,7 @@ function setStatus(text, tone = "neutral") {
 function setIntelStatus(text, tone = "neutral") {
   if (!intelStatus) return;
   intelStatus.textContent = text;
-  intelStatus.className = `badge ${tone === "danger" ? "danger" : tone === "success" ? "success" : "badge-soft"}`;
+  intelStatus.className = `muted ${tone}`;
 }
 
 function setThinking(text) {
@@ -170,14 +273,16 @@ function setThinking(text) {
   thinkingIndicator.classList.add("active");
 }
 
-function showStepLoader(text, durationMs) {
+function showStepLoader(text, durationMs, stage) {
   if (dynamicState.loader) dynamicState.loader.remove();
   const loader = document.createElement("article");
   loader.className = "loader-card";
+  const plan = getStageScrapePlan(stage || "discovery");
   loader.innerHTML = `
     <div class="loader-head">${text}</div>
     <div class="loader-bar" role="progressbar" aria-label="Simulation en cours"><span></span></div>
-    <p class="muted">L’agentic vérifie les sources en direct…</p>
+    <p class="muted">Scraping sécurisé (5–10s) : ${plan.slice(0, 3).join(" · ")}</p>
+    <ul class="scrape-plan">${plan.map((item) => `<li>${item}</li>`).join("")}</ul>
   `;
   conversation.appendChild(loader);
   conversation.scrollTo({ top: conversation.scrollHeight, behavior: "smooth" });
@@ -226,7 +331,6 @@ function restoreState() {
     state.concept = parsed.concept || null;
     state.choices = parsed.choices || {};
     state.summary = parsed.summary || null;
-    state.concierge = parsed.concierge || state.concierge;
     const form = document.getElementById("discoveryForm");
     if (form && parsed.discovery) {
       Object.entries(parsed.discovery).forEach(([k, v]) => {
@@ -236,26 +340,19 @@ function restoreState() {
         buildSummary();
       }
     }
-    if (conciergeForm && parsed.concierge) {
-      Object.entries(parsed.concierge).forEach(([k, v]) => {
-        if (conciergeForm.elements[k]) conciergeForm.elements[k].value = v;
-      });
-      applyConciergeProfile("Profil restauré");
-    }
   } catch (e) {
     console.warn("State restore failed", e);
   }
 }
 
 function clearUI(skipPersist = false) {
-  conversation.innerHTML = '<p class="muted">Démarrez le flux pour que l’IA multi‑rôle simule chaque étape comme dans le prompt original. Chaque étape propose 2 à 3 options maximum et attend votre validation.</p>';
+  conversation.innerHTML = '<p class="muted">Flux prêt. Deux options ultra-courtes.</p>';
   summaryBlock.innerHTML = "";
   exportBtn.disabled = true;
-  downloadBtn.disabled = true;
   intelCards.innerHTML = "";
   imageStrip.innerHTML = "";
   showIntelError("");
-  setIntelStatus("Recherche non lancée");
+  setIntelStatus("En pause");
   refreshIntelBtn.disabled = true;
   stepList.forEach((s) => s.classList.remove("done", "active"));
   stepList[0].classList.add("active");
@@ -266,12 +363,8 @@ function clearUI(skipPersist = false) {
   state.concept = null;
   state.choices = {};
   state.summary = null;
-  state.concierge = { priority: "signature", pace: "balanced", service: "hybrid" };
-  applyConciergeProfile("Réinitialisation");
   if (!skipPersist) persistState();
 }
-
-resetBtn.addEventListener("click", clearUI);
 
 function addMessage({ title, agent, body, options = [], question }) {
   stopThinking("L’IA attend votre validation.");
@@ -301,7 +394,8 @@ function addMessage({ title, agent, body, options = [], question }) {
       btn.type = "button";
       btn.className = "option";
       btn.setAttribute("data-id", opt.id);
-      btn.innerHTML = `<strong>${opt.id}. ${opt.title}</strong>${opt.bullets ? `<ul>${opt.bullets.map((b) => `<li>${b}</li>`).join("")}</ul>` : ""}`;
+      const media = opt.media ? `<figure class="option-media"><img src="${opt.media}" alt="${opt.title}" loading="lazy" /></figure>` : "";
+      btn.innerHTML = `${media}<div class="option-copy"><strong>${opt.id}. ${opt.title}</strong>${opt.bullets ? `<ul>${opt.bullets.map((b) => `<li>${b}</li>`).join("")}</ul>` : ""}</div>`;
       btn.addEventListener("click", () => opt.onSelect(opt));
       grid.appendChild(btn);
     });
@@ -325,51 +419,34 @@ function showIntelError(message, tone = "error") {
   intelError.className = `alert ${tone === "success" ? "success" : tone === "error" ? "error" : ""}`;
 }
 
-function applyConciergeProfile(reason = "") {
-  if (!quickActions) return;
-  const { priority, pace, service } = state.concierge;
-  const destination = state.discovery?.destination || "votre destination";
-  const actions = [
-    `Dossier premium pour ${destination} (${priority})`,
-    pace === "soft" ? "Planning 2 temps forts/jour" : pace === "dense" ? "Planning 4 temps forts/jour" : "Planning équilibré 3 temps forts",
-    service === "dedicated" ? "Butler dédié + accueil VIP" : service === "hybrid" ? "Check-in express + ligne prioritaire" : "Parcours 100% digital sécurisé",
-  ];
-  quickActions.innerHTML = actions
-    .map((a) => `<button type=\"button\" class=\"chip ghost\">${a}</button>`)
-    .join("");
-  if (conciergeNote) {
-    conciergeNote.textContent = reason ? `${reason} : expérience calibrée.` : "Concierge prêt à ajuster en direct.";
-  }
-  persistState();
-}
-
-function updateTrustMetrics() {
-  const uptime = (99.9 + Math.random() * 0.09).toFixed(2);
-  const latency = 180 + Math.round(Math.random() * 120);
-  const sla = "SLA 99.9%";
-  if (uptimeStat) uptimeStat.querySelector("strong").textContent = `${uptime}%`;
-  if (latencyStat) latencyStat.querySelector("strong").textContent = `< ${latency}ms`;
-  if (privacyStat) privacyStat.querySelector("strong").textContent = "Chiffrées & RGPD";
-  if (slaBadge) slaBadge.textContent = sla;
-  if (trustCTA) trustCTA.textContent = "Preuves live activées";
-  const copy = document.getElementById("uptimeCopy");
-  if (copy) copy.textContent = `Monitoring actif, uptime ${uptime}% / latence ${latency}ms.`;
-}
 
 function attachScrapeToOptions(options, stage) {
   const destination = state.discovery?.destination;
-  const snippet = getScrapedSnippet(destination, stage);
-  if (snippet?.text) {
+  const scrapedSet = sampleScrapedItems(destination, stage, state.discovery, 9);
+  const stagePlan = getStageScrapePlan(stage).join(" · ");
+  if (scrapedSet?.length) {
     pushLiveScrape({
       title: `Scraping ${stage}`,
-      text: snippet.text,
-      source: snippet.source,
+      text: `${scrapedSet.length} éléments validés`,
+      source: `${stagePlan} — sources conformes seulement`,
     });
   }
-  return options.map((opt) => ({
-    ...opt,
-    bullets: [...(opt.bullets || []), `Scraping: ${snippet.text}`],
-  }));
+  const chunkSize = Math.ceil(scrapedSet.length / options.length) || 1;
+  return options.map((opt, idx) => {
+    const start = idx * chunkSize;
+    const subset = scrapedSet.slice(start, start + chunkSize);
+    const picked = subset.length ? subset : scrapedSet.slice(0, chunkSize);
+    const media = picked[0]?.image;
+    const scrapeBullets = picked.slice(0, 3).map((item) => {
+      const price = item.price ? `${item.price}${stage === "flights" ? "€" : ""}` : "";
+      return `${item.title}${price ? ` — ${price}` : ""}`;
+    });
+    return {
+      ...opt,
+      media,
+      bullets: [...(opt.bullets || []), ...scrapeBullets, `Validation: ${picked.length} sources filtrées`],
+    };
+  });
 }
 
 function renderIntel(intel, destination) {
@@ -399,7 +476,7 @@ function renderIntel(intel, destination) {
 
 function fallbackIntel(destination) {
   return {
-    summary: `Pas de fiche détaillée trouvée pour ${destination}. Voici des conseils génériques (centres-villes sûrs, hôtels 4★ bien notés, activités culture + 1 premium).`,
+    summary: `Pas de fiche ${destination}. On reste sur centres sûrs, 4★, culture + 1 premium.`,
     hotels: ["Chaîne 4★ centrale", "Boutique locale bien notée", "Option appart-hôtel sécurisé"],
     highlights: ["Visite guidée du centre", "Food tour", "Panorama ou musée emblématique"],
     images: [
@@ -467,24 +544,23 @@ function validateDiscovery(data) {
 }
 
 function conceptOptions(discovery) {
-  const vibeLabel = discovery.vibe === "city" ? "City break" : discovery.vibe.charAt(0).toUpperCase() + discovery.vibe.slice(1);
+  const vibeLabel = discovery.vibe
+    ? discovery.vibe === "city"
+      ? "City break"
+      : discovery.vibe.charAt(0).toUpperCase() + discovery.vibe.slice(1)
+    : "Mix";
   const options = [
     {
       id: "A",
-      title: "Escapade tropicale / plage",
-      bullets: ["Repos + 1 expérience signature", "Durée flexible", "Mix budget + luxe léger"],
+      title: "Immersion urbaine culturelle",
+      bullets: ["Musées & rooftops", "Déplacements simples", `Vibe ${vibeLabel}`],
     },
     {
       id: "B",
-      title: "Immersion urbaine culturelle",
-      bullets: ["Musées, food tours, rooftops", "Déplacements simples", "Rythme équilibré"],
+      title: "Nature ou littoral reposant",
+      bullets: ["Rythme léger", "1 signature", "Transports simplifiés"],
     },
-    {
-      id: "C",
-      title: "Nature & aventure modérée",
-      bullets: ["Randos douces + paysages", "1 activité premium guidée", "Hébergement cosy"],
-    },
-    ];
+  ];
   return attachScrapeToOptions(options, "discovery").map((opt) => ({
       ...opt,
       onSelect: (o) => {
@@ -523,7 +599,7 @@ function startStepFlow(index) {
   const delay = Math.floor(5000 + Math.random() * 5000);
   const stageLabel = `Agent ${index + 1} réfléchit…`;
   setThinking(stageLabel);
-  showStepLoader(stageLabel, delay);
+  showStepLoader(stageLabel, delay, id);
   setTimeout(() => {
     clearStepLoader();
     builder(index);
@@ -537,6 +613,7 @@ const builders = {
       `${formatBudgetLabel(discovery.budget)} pour ${discovery.duration} jours`,
       `Départ ${discovery.origin} → ${discovery.destination}`,
       `Vibe: ${discovery.vibe}, Flex: ${discovery.flex}`,
+      `Transport: ${discovery.transport || "flex"}, Séjour: ${discovery.sejour || "mix"}`,
       `Voyageurs: ${discovery.travelers}`,
       discovery.notes ? `Note: ${discovery.notes}` : ""
     ].filter(Boolean);
@@ -805,7 +882,6 @@ const builders = {
 
 function buildSummary() {
   exportBtn.disabled = false;
-  downloadBtn.disabled = false;
   const blocks = [];
   const { discovery, concept, choices } = state;
 
@@ -814,7 +890,7 @@ function buildSummary() {
     items: [
       `${formatBudgetLabel(discovery.budget)} — ${discovery.duration} jours`,
       `Départ ${discovery.origin} → ${discovery.destination}`,
-      `Vibe ${discovery.vibe}, flexibilité ${discovery.flex}`,
+      `Vibe ${discovery.vibe}, flexibilité ${discovery.flex}, transport ${discovery.transport}, séjour ${discovery.sejour}`,
       `Voyageurs: ${discovery.travelers}`,
       concept ? `Concept: ${concept.title}` : ""
     ].filter(Boolean)
@@ -843,7 +919,6 @@ function buildSummary() {
   state.summary = blocks;
   persistState();
 }
-
 exportBtn.addEventListener("click", () => {
   if (!state.summary) return;
   const text = state.summary
@@ -854,35 +929,6 @@ exportBtn.addEventListener("click", () => {
     setTimeout(() => (exportBtn.textContent = "Copier le texte"), 2000);
   });
 });
-
-downloadBtn.addEventListener("click", () => {
-  if (!state.summary) return;
-  const markdown = state.summary
-    .map((b) => `## ${b.title}\n${b.items.map((i) => `- ${i}`).join("\n")}`)
-    .join("\n\n");
-  const blob = new Blob([markdown], { type: "text/markdown" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "itineraire-agentique.md";
-  a.click();
-  URL.revokeObjectURL(url);
-});
-
-function handleConciergeSubmit(event) {
-  event.preventDefault();
-  const prefs = Object.fromEntries(new FormData(event.target).entries());
-  state.concierge = prefs;
-  applyConciergeProfile("Brief concierge reçu");
-}
-
-function handleFeedbackSubmit(event) {
-  event.preventDefault();
-  const data = Object.fromEntries(new FormData(event.target).entries());
-  if (feedbackStatus) feedbackStatus.textContent = `Merci, note ${data.score}/10 envoyée.`;
-  if (npsBadge) npsBadge.textContent = `NPS live ${data.score}`;
-  trustCTA.textContent = "Feedback remonté";
-}
 
 function onDiscoverySubmit(event) {
   event.preventDefault();
@@ -898,6 +944,9 @@ function onDiscoverySubmit(event) {
   setStatus("En cours", "info");
   conversation.innerHTML = "";
   setThinking("Agent 0 prépare 3 pistes cohérentes…");
+  const discoveryDelay = Math.floor(5000 + Math.random() * 5000);
+  showStepLoader("Scraping découverte sécurisé…", discoveryDelay, "discovery");
+  setTimeout(() => clearStepLoader(), discoveryDelay);
 
   if (warnings.length) {
     addMessage({
@@ -908,7 +957,6 @@ function onDiscoverySubmit(event) {
   }
   runIntel(data.destination);
   refreshIntelBtn.disabled = false;
-  applyConciergeProfile("Destination détectée");
 
   addMessage({
     title: "Phase découverte",
@@ -925,22 +973,6 @@ document.getElementById("discoveryForm").addEventListener("submit", onDiscoveryS
 refreshIntelBtn.addEventListener("click", () => {
   if (state.discovery?.destination) runIntel(state.discovery.destination);
 });
-conciergeForm?.addEventListener("submit", handleConciergeSubmit);
-feedbackForm?.addEventListener("submit", handleFeedbackSubmit);
-btnCallMe?.addEventListener("click", () => applyConciergeProfile("Rappel concierge programmé"));
-btnShareSummary?.addEventListener("click", () => {
-  applyConciergeProfile("Dossier partagé");
-  if (summaryBlock.innerText) navigator.clipboard.writeText(summaryBlock.innerText);
-});
-btnConcierge?.addEventListener("click", () => applyConciergeProfile("Concierge en ligne"));
-btnUrgent?.addEventListener("click", () => {
-  trustCTA.textContent = "Escalade prioritaire";
-  applyConciergeProfile("Escalade 24/7");
-});
-
-updateTrustMetrics();
-setInterval(updateTrustMetrics, 8000);
-applyConciergeProfile();
 
 clearUI(true);
 restoreState();
