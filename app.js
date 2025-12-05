@@ -170,6 +170,7 @@ const conversation = document.getElementById("conversation");
 const stepList = Array.from(document.querySelectorAll("#stepList .step"));
 const summaryBlock = document.getElementById("summary");
 const exportBtn = document.getElementById("btnExport");
+const validateBtn = document.getElementById("btnValidate");
 const statusPill = document.getElementById("status");
 const thinkingIndicator = document.getElementById("thinkingIndicator");
 const intelStatus = document.getElementById("intelStatus");
@@ -220,9 +221,14 @@ function filterScrapeItems(destination, stage, discovery) {
   const key = (destination || "").trim().toLowerCase();
   const inventory = scrapeInventory[key]?.[stage] || [];
   const validOnly = inventory.filter((item) => item.valid !== false);
+  const priorSelections = Object.values(state.choices || {})
+    .flatMap((c) => c?.scrapedItems || [])
+    .map((i) => i.title);
+  const deduped = validOnly.filter((item) => !priorSelections.includes(item.title));
+  const basePool = deduped.length >= 3 ? deduped : validOnly;
   const matchesTransport = discovery?.transport && discovery.transport !== "flex"
-    ? validOnly.filter((item) => !item.mode || item.mode === discovery.transport || item.mode === "train")
-    : validOnly;
+    ? basePool.filter((item) => !item.mode || item.mode === discovery.transport || item.mode === "train")
+    : basePool;
   const matchesSejour = discovery?.sejour && discovery.sejour !== "mix"
     ? matchesTransport.filter((item) => !item.sejour || item.sejour === discovery.sejour)
     : matchesTransport;
@@ -243,7 +249,15 @@ function sampleScrapedItems(destination, stage, discovery, desired = 8) {
   const pool = filterScrapeItems(destination, stage, discovery);
   const shuffled = [...pool].sort(() => 0.5 - Math.random());
   const count = Math.max(5, Math.min(desired, 10, shuffled.length || desired));
-  return shuffled.slice(0, count);
+  const picked = shuffled.slice(0, count);
+  const uniqueImages = new Set();
+  return picked.map((item, idx) => {
+    const img = uniqueImages.has(item.image)
+      ? shuffled.find((alt) => !uniqueImages.has(alt.image) && alt.image)
+      : item;
+    if (img?.image) uniqueImages.add(img.image);
+    return { ...item, image: img?.image || item.image };
+  });
 }
 
 function domainFromLink(link) {
@@ -447,23 +461,31 @@ function attachScrapeToOptions(options, stage) {
       source: `${stagePlan} — sources conformes seulement`,
     });
   }
-  const chunkSize = Math.ceil(scrapedSet.length / options.length) || 1;
-  return options.map((opt, idx) => {
-    const start = idx * chunkSize;
-    const subset = scrapedSet.slice(start, start + chunkSize);
-    const picked = subset.length ? subset : scrapedSet.slice(0, chunkSize);
-    const media = picked[0]?.image;
-    const scrapeBullets = picked.slice(0, 3).map((item) => {
+  const allocation = [...scrapedSet];
+  const imagesUsed = new Set();
+  const perOption = Math.max(1, Math.floor(scrapedSet.length / options.length));
+  return options.map((opt) => {
+    const subset = [];
+    while (subset.length < perOption && allocation.length) {
+      subset.push(allocation.shift());
+    }
+    if (!subset.length) subset.push(...scrapedSet.slice(0, perOption));
+    const mediaItem = subset.find((s) => s.image && !imagesUsed.has(s.image)) || subset[0] || scrapedSet[0];
+    if (mediaItem?.image) imagesUsed.add(mediaItem.image);
+    const scrapeBullets = subset.slice(0, 3).map((item) => {
       const price = formatPriceTag(item, stage);
       const site = domainFromLink(item.link);
       return `${item.title} — ${price} (${site})`;
     });
+    const adaptiveLine = subset[1]
+      ? `Focus ${subset[0].title.toLowerCase()} + ${subset[1].title.toLowerCase()} selon vos préférences ${state.discovery?.vibe || "mix"}`
+      : subset[0]?.detail || "Curateur dédié.";
     return {
       ...opt,
-      media,
-      mediaAlt: picked[0]?.title,
-      scrapedItems: picked,
-      bullets: [...(opt.bullets || []), ...scrapeBullets, `Validation: ${picked.length} sources filtrées`],
+      media: mediaItem?.image,
+      mediaAlt: mediaItem?.title,
+      scrapedItems: subset,
+      bullets: [...scrapeBullets, adaptiveLine],
     };
   });
 }
@@ -910,19 +932,23 @@ const builders = {
 
 function buildSummary() {
   exportBtn.disabled = false;
+  if (validateBtn) validateBtn.disabled = false;
   const blocks = [];
   const { discovery, concept, choices } = state;
 
   const formatScrapeLines = (choice, stage) => {
     if (!choice?.scrapedItems?.length) return [choice?.title || "—"];
-    const top = choice.scrapedItems.slice(0, 3).map((item) => {
+    const seen = new Set();
+    const lines = choice.scrapedItems.slice(0, 3).map((item) => {
       const price = formatPriceTag(item, stage);
       const site = domainFromLink(item.link);
-      return `${item.title} — ${price} (${site})`;
+      const img = item.image && !seen.has(item.image) ? `<img src="${item.image}" alt="${item.title}" loading="lazy" />` : "";
+      if (item.image) seen.add(item.image);
+      const link = item.link ? `<a href="${item.link}" target="_blank" rel="noreferrer">${site}</a>` : site;
+      return `${img}<strong>${item.title}</strong> — ${price} via ${link}`;
     });
-    const img = choice.mediaAlt ? `Visuel: ${choice.mediaAlt}` : null;
-    const linkLine = choice.scrapedItems[0]?.link ? `Site direct: ${choice.scrapedItems[0].link}` : null;
-    return [choice.title, ...(img ? [img] : []), ...(linkLine ? [linkLine] : []), ...top];
+    const headline = `${choice.id || "Option"} · ${choice.title}`;
+    return [headline, ...lines];
   };
 
   blocks.push({
@@ -942,11 +968,6 @@ function buildSummary() {
   blocks.push({ title: "5. Itinéraire", items: choices.itinerary?.bullets || ["Itinéraire standard"] });
   blocks.push({ title: "6. Package choisi", items: formatScrapeLines(choices.package, "budget") });
   blocks.push({ title: "7. Conformité sécurité", items: ["Pas de destinations interdites", "Aucune activité illégale"] });
-
-  const scrape = getScrapedSnippet(discovery.destination, "budget");
-  if (scrape?.text) {
-    blocks.push({ title: "8. Données scrappées injectées", items: [scrape.text, `Sources: ${scrape.source}`] });
-  }
 
   summaryBlock.innerHTML = blocks
     .map(
@@ -969,6 +990,19 @@ exportBtn.addEventListener("click", () => {
     setTimeout(() => (exportBtn.textContent = "Copier le texte"), 2000);
   });
 });
+
+if (validateBtn) {
+  validateBtn.addEventListener("click", () => {
+    if (!state.summary) return;
+    validateBtn.textContent = "Validé";
+    validateBtn.classList.add("confirmed");
+    addMessage({
+      title: "Validation finale",
+      agent: "Chef d’orchestre",
+      body: "Parcours verrouillé. Les sélections scrappées restent synchronisées pour export et réservation.",
+    });
+  });
+}
 
 function onDiscoverySubmit(event) {
   event.preventDefault();
