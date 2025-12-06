@@ -1,12 +1,12 @@
 :root {
   --bg: #05060c;
-  --panel: rgba(9, 10, 15, 0.9);
-  --panel-soft: rgba(12, 14, 20, 0.68);
-  --accent: #d1a350;
-  --accent-soft: rgba(209, 163, 80, 0.2);
-  --text: #f6f7fb;
-  --muted: #9aa0b3;
-  --border: rgba(255, 255, 255, 0.06);
+  --panel: rgba(12, 14, 20, 0.95);
+  --panel-soft: rgba(18, 22, 33, 0.85);
+  --accent: #f1c77d;
+  --accent-soft: rgba(241, 199, 125, 0.2);
+  --text: #fdfdfd;
+  --muted: #c3c8d7;
+  --border: rgba(255, 255, 255, 0.18);
   font-family: "Manrope", "Inter", system-ui, -apple-system, sans-serif;
 }
 
@@ -20,6 +20,7 @@ body {
   color: var(--text);
   min-height: 100vh;
   letter-spacing: 0.01em;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -87,8 +88,8 @@ h1, h2, h3 { margin: 0; }
 .duo { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; font-size: 0.98rem; }
 .duo.tight { font-size: 0.92rem; gap: 0.25rem; }
 
-.field { display: grid; gap: 0.25rem; font-size: 0.95rem; }
-.field span { color: var(--muted); font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; }
+.field { display: grid; gap: 0.25rem; font-size: 1rem; }
+.field span { color: var(--muted); font-size: 0.82rem; letter-spacing: 0.04em; text-transform: uppercase; }
 .field input,
 .field select,
 .field textarea {
@@ -127,7 +128,7 @@ h1, h2, h3 { margin: 0; }
   text-transform: uppercase;
 }
 .primary {
-  background: linear-gradient(120deg, rgba(209, 163, 80, 0.9), rgba(209, 163, 80, 0.62));
+  background: linear-gradient(120deg, rgba(241, 199, 125, 0.95), rgba(209, 163, 80, 0.8));
   color: #05060d;
   border: 1px solid rgba(209, 163, 80, 0.78);
   box-shadow: 0 12px 28px rgba(209, 163, 80, 0.32);
@@ -240,9 +241,33 @@ button.confirmed { background: linear-gradient(120deg, #0f0f0f, #1c1c1c); color:
   100% { transform: translateY(-3px); opacity: 1; }
 }
 
+.summary .block h4 { color: var(--text); }
+.summary .block ul { padding-left: 1rem; }
+.panel-header .actions { align-items: center; }
+
+.floating-summary-actions {
+  position: sticky;
+  bottom: 0.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.4rem 0.2rem;
+  background: linear-gradient(180deg, transparent 0%, rgba(5, 6, 12, 0.85) 55%);
+}
+
 @media (max-width: 900px) {
   .workflow, .workflow.minimal { grid-template-columns: 1fr; }
   .topbar { flex-direction: column; align-items: flex-start; text-align: left; }
   .hero { flex-direction: column; align-items: flex-start; }
   .hero-meta { width: 100%; }
+}
+
+@media (max-width: 720px) {
+  body { font-size: 1rem; }
+  .grid { grid-template-columns: 1fr; }
+  .option { grid-template-columns: 1fr; align-items: flex-start; }
+  .image-strip { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+  .panel { padding: 0.95rem; }
+  .layout { padding: 0.9rem; }
+  .topbar, .hero { padding: 1rem; }
 }

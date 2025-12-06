@@ -41,11 +41,11 @@
       <form id="discoveryForm" class="grid compact ultra">
         <label class="field">
           <span>Départ</span>
-          <input name="origin" type="text" placeholder="Paris" required />
+          <input name="origin" type="text" placeholder="Paris" value="Paris" required />
         </label>
         <label class="field">
           <span>Destination</span>
-          <input name="destination" type="text" placeholder="Tokyo" required />
+          <input name="destination" type="text" placeholder="Tokyo" value="Tokyo" required />
         </label>
         <label class="field">
           <span>Budget</span>
@@ -129,14 +129,16 @@
         </div>
       </header>
       <div class="workflow minimal">
-        <ol id="stepList" class="steps inline">
-          <li class="step active">Profil</li>
-          <li class="step">Vols</li>
-          <li class="step">Séjour</li>
-          <li class="step">Activités</li>
-          <li class="step">Itinéraire</li>
-          <li class="step">Budget</li>
-        </ol>
+        <nav aria-label="Progression des étapes">
+          <ol id="stepList" class="steps inline" role="list">
+            <li class="step active" aria-current="step">Profil</li>
+            <li class="step">Vols</li>
+            <li class="step">Séjour</li>
+            <li class="step">Activités</li>
+            <li class="step">Itinéraire</li>
+            <li class="step">Budget</li>
+          </ol>
+        </nav>
         <div class="content" id="conversation" aria-live="polite">
           <p class="muted">Flux réduit, 2 options premium.</p>
         </div>
@@ -172,7 +174,7 @@
           <p class="eyebrow">Sortie</p>
           <h2 id="summary-title">Résumé</h2>
         </div>
-        <div class="actions tight">
+        <div class="actions tight floating-summary-actions">
           <button id="btnValidate" class="primary" disabled>Valider</button>
           <button id="btnExport" class="ghost" disabled>Copier</button>
         </div>
