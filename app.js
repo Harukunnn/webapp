@@ -170,6 +170,51 @@ const dynamicState = {
   loaderInterval: null,
 };
 
+const safeStorage = {
+  get(key) {
+    try {
+      const raw = sessionStorage.getItem(key);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      console.warn("Lecture storage sécurisée impossible", e);
+      return null;
+    }
+  },
+  set(key, value) {
+    try {
+      sessionStorage.setItem(key, JSON.stringify(value));
+    } catch (e) {
+      console.warn("Écriture storage sécurisée impossible", e);
+    }
+  },
+  remove(key) {
+    try {
+      sessionStorage.removeItem(key);
+    } catch (e) {
+      console.warn("Nettoyage storage sécurisé impossible", e);
+    }
+  }
+};
+
+function escapeHTML(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function sanitizeField(value) {
+  if (!value) return "";
+  const trimmed = String(value).trim();
+  return trimmed.replace(/<[^>]*>/g, "");
+}
+
+function containsUnsafeMarkup(value) {
+  return /<[^>]+>/.test(String(value || ""));
+}
+
 const conversation = document.getElementById("conversation");
 const stepList = Array.from(document.querySelectorAll("#stepList .step"));
 const summaryBlock = document.getElementById("summary");
@@ -194,8 +239,8 @@ function slugify(text) {
 
 function loadScrapeCache() {
   try {
-    const cached = localStorage.getItem(scrapeStoreKey);
-    state.scrapeCache = cached ? JSON.parse(cached) : {};
+    const cached = safeStorage.get(scrapeStoreKey);
+    state.scrapeCache = cached || {};
   } catch (e) {
     state.scrapeCache = {};
   }
@@ -203,7 +248,7 @@ function loadScrapeCache() {
 
 function saveScrapeCache() {
   try {
-    localStorage.setItem(scrapeStoreKey, JSON.stringify(state.scrapeCache));
+    safeStorage.set(scrapeStoreKey, state.scrapeCache);
   } catch (e) {
     console.warn("Scrape cache save failed", e);
   }
@@ -430,7 +475,13 @@ function formatPriceTag(item, stage) {
 function pushLiveScrape({ title, text, source }) {
   if (!liveScrapeList) return;
   const item = document.createElement("li");
-  item.innerHTML = `<strong>${title}</strong><p>${text}</p><small>${source}</small>`;
+  const strong = document.createElement("strong");
+  strong.textContent = title;
+  const p = document.createElement("p");
+  p.textContent = text;
+  const small = document.createElement("small");
+  small.textContent = source;
+  item.append(strong, p, small);
   liveScrapeList.prepend(item);
   const items = liveScrapeList.querySelectorAll("li");
   if (items.length > 6) items[items.length - 1].remove();
@@ -500,14 +551,14 @@ function stopThinking(message = "En attente d’une requête.") {
 
 function persistState() {
   const safeState = { ...state };
-  localStorage.setItem("agenticState", JSON.stringify(safeState));
+  safeStorage.set("agenticState", safeState);
 }
 
 function restoreState() {
-  const saved = localStorage.getItem("agenticState");
+  const saved = safeStorage.get("agenticState");
   if (!saved) return;
   try {
-    const parsed = JSON.parse(saved);
+    const parsed = saved;
     state.discovery = parsed.discovery || null;
     state.concept = parsed.concept || null;
     state.choices = parsed.choices || {};
@@ -557,18 +608,18 @@ function addMessage({ title, agent, body, options = [], question }) {
   const card = document.createElement("article");
   card.className = "message";
   const heading = document.createElement("h3");
-  heading.textContent = title;
+  heading.textContent = sanitizeField(title);
   card.appendChild(heading);
 
   const meta = document.createElement("div");
   meta.className = "meta";
-  meta.textContent = agent;
+  meta.textContent = sanitizeField(agent);
   card.appendChild(meta);
 
   if (body) {
     const p = document.createElement("p");
     p.className = "muted";
-    p.innerHTML = body;
+    p.textContent = sanitizeField(body);
     card.appendChild(p);
   }
 
@@ -580,8 +631,31 @@ function addMessage({ title, agent, body, options = [], question }) {
       btn.type = "button";
       btn.className = "option";
       btn.setAttribute("data-id", opt.id);
-      const media = opt.media ? `<figure class="option-media"><img src="${opt.media}" alt="${opt.title}" loading="lazy" /></figure>` : "";
-      btn.innerHTML = `${media}<div class="option-copy"><strong>${opt.id}. ${opt.title}</strong>${opt.bullets ? `<ul>${opt.bullets.map((b) => `<li>${b}</li>`).join("")}</ul>` : ""}</div>`;
+      if (opt.media) {
+        const fig = document.createElement("figure");
+        fig.className = "option-media";
+        const img = document.createElement("img");
+        img.src = opt.media;
+        img.alt = sanitizeField(opt.mediaAlt || opt.title);
+        img.loading = "lazy";
+        fig.appendChild(img);
+        btn.appendChild(fig);
+      }
+      const copy = document.createElement("div");
+      copy.className = "option-copy";
+      const strong = document.createElement("strong");
+      strong.textContent = `${opt.id}. ${sanitizeField(opt.title)}`;
+      copy.appendChild(strong);
+      if (opt.bullets?.length) {
+        const list = document.createElement("ul");
+        opt.bullets.forEach((b) => {
+          const li = document.createElement("li");
+          li.textContent = sanitizeField(b);
+          list.appendChild(li);
+        });
+        copy.appendChild(list);
+      }
+      btn.appendChild(copy);
       btn.addEventListener("click", () => opt.onSelect(opt));
       grid.appendChild(btn);
     });
@@ -653,17 +727,34 @@ function renderIntel(intel, destination) {
     { title: "Moments conseillés", content: intel.highlights?.join(" · ") || "—" },
   ];
 
-  intelCards.innerHTML = cards
-    .map(
-      (c) => `<article class="intel-card"><div class="tag">📌 ${destination}</div><strong>${c.title}</strong><p class="muted">${c.content}</p></article>`
-    )
-    .join("");
+  intelCards.innerHTML = "";
+  cards.forEach((c) => {
+    const article = document.createElement("article");
+    article.className = "intel-card";
+    const tag = document.createElement("div");
+    tag.className = "tag";
+    tag.textContent = `📌 ${sanitizeField(destination)}`;
+    const strong = document.createElement("strong");
+    strong.textContent = c.title;
+    const p = document.createElement("p");
+    p.className = "muted";
+    p.textContent = sanitizeField(c.content);
+    article.append(tag, strong, p);
+    intelCards.appendChild(article);
+  });
 
-  imageStrip.innerHTML = intel.images
-    .map(
-      (img) => `<figure><img src="${img.src}" alt="${img.alt}" loading="lazy" /><figcaption>${img.alt}</figcaption></figure>`
-    )
-    .join("");
+  imageStrip.innerHTML = "";
+  (intel.images || []).forEach((img) => {
+    const figure = document.createElement("figure");
+    const image = document.createElement("img");
+    image.src = img.src;
+    image.alt = sanitizeField(img.alt || destination);
+    image.loading = "lazy";
+    const caption = document.createElement("figcaption");
+    caption.textContent = sanitizeField(img.alt || destination);
+    figure.append(image, caption);
+    imageStrip.appendChild(figure);
+  });
 
   setIntelStatus("Infos + images prêtes", "success");
   if (refreshIntelBtn) refreshIntelBtn.disabled = false;
@@ -765,6 +856,8 @@ async function ensureScrapeDataset(destination, stageLabel = "Scraping sécuris�
 
 function safetyBlocked(destination) {
   const alt = ["Lisbonne (culture & océan)", "Montréal (ville sûre)", "Séoul (high-tech)"];
+  clearUI(true);
+  safeStorage.remove("agenticState");
   addMessage({
     title: "Blocage sécurité",
     agent: "Filtre légal",
@@ -798,7 +891,7 @@ function conceptOptions(discovery) {
       ? "City break"
       : discovery.vibe.charAt(0).toUpperCase() + discovery.vibe.slice(1)
     : "Mix";
-  const destinationLabel = discovery.destination || "la destination";
+  const destinationLabel = sanitizeField(discovery.destination || "la destination");
   const options = [
     {
       id: "A",
@@ -850,8 +943,12 @@ function updateStepList(activeIndex) {
     node.classList.remove("active");
     if (idx < activeIndex) node.classList.add("done");
     else node.classList.remove("done");
+    node.removeAttribute("aria-current");
   });
-  if (stepList[activeIndex]) stepList[activeIndex].classList.add("active");
+  if (stepList[activeIndex]) {
+    stepList[activeIndex].classList.add("active");
+    stepList[activeIndex].setAttribute("aria-current", "step");
+  }
 }
 
 function startStepFlow(index) {
@@ -1156,16 +1253,12 @@ function buildSummary() {
 
   const formatScrapeLines = (choice, stage) => {
     if (!choice?.scrapedItems?.length) return [choice?.title || "—"];
-    const seen = new Set();
     const lines = choice.scrapedItems.slice(0, 3).map((item) => {
       const price = formatPriceTag(item, stage);
       const site = domainFromLink(item.link);
-      const img = item.image && !seen.has(item.image) ? `<img src="${item.image}" alt="${item.title}" loading="lazy" />` : "";
-      if (item.image) seen.add(item.image);
-      const link = item.link ? `<a href="${item.link}" target="_blank" rel="noreferrer">${site}</a>` : site;
-      return `${img}<strong>${item.title}</strong> — ${price} via ${link}`;
+      return `${item.title} — ${price} via ${site}`;
     });
-    const headline = `${choice.id || "Option"} · ${choice.title}`;
+    const headline = `${choice.id || "Option"} · ${sanitizeField(choice.title)}`;
     return [headline, ...lines];
   };
 
@@ -1173,10 +1266,10 @@ function buildSummary() {
     title: "1. Profil client",
     items: [
       `${formatBudgetLabel(discovery.budget)} — ${discovery.duration} jours`,
-      `Départ ${discovery.origin} → ${discovery.destination}`,
-      `Vibe ${discovery.vibe}, flexibilité ${discovery.flex}, transport ${discovery.transport}, séjour ${discovery.sejour}`,
-      `Voyageurs: ${discovery.travelers}`,
-      concept ? `Concept: ${concept.title}` : ""
+      `Départ ${sanitizeField(discovery.origin)} → ${sanitizeField(discovery.destination)}`,
+      `Vibe ${sanitizeField(discovery.vibe)}, flexibilité ${sanitizeField(discovery.flex)}, transport ${sanitizeField(discovery.transport)}, séjour ${sanitizeField(discovery.sejour)}`,
+      `Voyageurs: ${sanitizeField(discovery.travelers)}`,
+      concept ? `Concept: ${sanitizeField(concept.title)}` : ""
     ].filter(Boolean)
   });
 
@@ -1187,13 +1280,22 @@ function buildSummary() {
   blocks.push({ title: "6. Package choisi", items: formatScrapeLines(choices.package, "budget") });
   blocks.push({ title: "7. Conformité sécurité", items: ["Pas de destinations interdites", "Aucune activité illégale"] });
 
-  summaryBlock.innerHTML = blocks
-    .map(
-      (b) => `<div class="block"><h4>${b.title}</h4><ul>${b.items
-        .map((i) => `<li>${i}</li>`)
-        .join("")}</ul></div>`
-    )
-    .join("");
+  summaryBlock.innerHTML = "";
+  blocks.forEach((b) => {
+    const container = document.createElement("div");
+    container.className = "block";
+    const h4 = document.createElement("h4");
+    h4.textContent = b.title;
+    container.appendChild(h4);
+    const list = document.createElement("ul");
+    b.items.forEach((i) => {
+      const li = document.createElement("li");
+      li.textContent = sanitizeField(i);
+      list.appendChild(li);
+    });
+    container.appendChild(list);
+    summaryBlock.appendChild(container);
+  });
 
   state.summary = blocks;
   persistState();
@@ -1224,7 +1326,14 @@ if (validateBtn) {
 
 async function onDiscoverySubmit(event) {
   event.preventDefault();
-  const data = Object.fromEntries(new FormData(event.target).entries());
+  const formEntries = Object.fromEntries(new FormData(event.target).entries());
+  if (containsUnsafeMarkup(formEntries.destination) || containsUnsafeMarkup(formEntries.origin)) {
+    showIntelError("Entrée invalide : les balises HTML sont bloquées.");
+    return;
+  }
+  const data = Object.fromEntries(
+    Object.entries(formEntries).map(([k, v]) => [k, sanitizeField(v)])
+  );
   const destinationLC = data.destination.trim().toLowerCase();
   if (bannedDestinations.some((d) => destinationLC.includes(d))) {
     safetyBlocked(data.destination);
@@ -1242,7 +1351,7 @@ async function onDiscoverySubmit(event) {
     addMessage({
       title: "Alerte cohérence",
       agent: "Vérifications préalables",
-      body: warnings.join("<br>")
+      body: warnings.join("\n")
     });
   }
 
