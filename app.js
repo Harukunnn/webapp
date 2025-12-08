@@ -14,60 +14,60 @@ const bannedDestinations = [
 
 const intelDataset = {
   tokyo: {
-    summary: "Quartiers sûrs (Shinjuku, Shibuya, Ginza), transport facile par métro/Pasmo.",
-    hotels: ["Shibuya Stream Excel Tokyu (4★)", "Mitsui Garden Ginza (4★)", "Park Hotel Tokyo (4★ artistique)"],
-    highlights: ["Food tours à Shinjuku", "Jardins Hama-rikyu", "Onsen urbain à Odaiba"],
+    summary: "Safe districts (Shinjuku, Shibuya, Ginza), easy subway/PASMO transport.",
+    hotels: ["Shibuya Stream Excel Tokyu (4★)", "Mitsui Garden Ginza (4★)", "Park Hotel Tokyo (art-driven 4★)"],
+    highlights: ["Food tours in Shinjuku", "Hama-rikyu gardens", "Urban onsen in Odaiba"],
     images: [
-      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80", alt: "Shibuya de nuit" },
-      { src: "https://images.unsplash.com/photo-1549692520-acc6669e2f0c?auto=format&fit=crop&w=800&q=80", alt: "Temple au lever du soleil" },
-      { src: "https://images.unsplash.com/photo-1526481280695-3c469c2f0f99?auto=format&fit=crop&w=800&q=80", alt: "Métro japonais" }
+      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80", alt: "Shibuya at night" },
+      { src: "https://images.unsplash.com/photo-1549692520-acc6669e2f0c?auto=format&fit=crop&w=800&q=80", alt: "Temple at sunrise" },
+      { src: "https://images.unsplash.com/photo-1526481280695-3c469c2f0f99?auto=format&fit=crop&w=800&q=80", alt: "Japanese subway" }
     ]
   },
   lisbonne: {
-    summary: "Ville côtière sûre, bon rapport qualité/prix, mobilité simple (tram 28, métro).",
+    summary: "Safe coastal city, strong value, easy mobility (Tram 28, metro).",
     hotels: ["The Lumiares (4★ Bairro Alto)", "Mama Shelter Lisboa (4★)", "NH Collection Liberdade (4★)"],
-    highlights: ["Miradouros, fado authentique", "Excursion à Belém", "Journée à Cascais/Sintra"],
+    highlights: ["Miradouros, authentic fado", "Belém excursion", "Day trip to Cascais/Sintra"],
     images: [
-      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80&sat=-30&hue=-10", alt: "Tram jaune de Lisbonne" },
-      { src: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=800&q=80", alt: "Toits de Lisbonne" },
-      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80&sat=-20", alt: "Rue pavée en pente" }
+      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80&sat=-30&hue=-10", alt: "Lisbon yellow tram" },
+      { src: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=800&q=80", alt: "Lisbon rooftops" },
+      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80&sat=-20", alt: "Steep cobblestone street" }
     ]
   },
-  montréal: {
-    summary: "Destination très sûre, bilingue, scène food et musées riches.",
-    hotels: ["Humaniti Hotel Montréal (4★)", "Hotel Monville (4★)", "Le Germain (4★ boutique)"],
-    highlights: ["Vieux-Port & marché Jean-Talon", "Musée des Beaux-Arts", "Mont Royal au coucher du soleil"],
+  montreal: {
+    summary: "Very safe destination, bilingual, strong food and museum scene.",
+    hotels: ["Humaniti Hotel Montréal (4★)", "Hotel Monville (4★)", "Le Germain (boutique 4★)"],
+    highlights: ["Old Port & Jean-Talon market", "Fine Arts Museum", "Mount Royal at sunset"],
     images: [
-      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80&sat=-40", alt: "Skyline de Montréal" },
-      { src: "https://images.unsplash.com/photo-1503389152951-9f343605f61e?auto=format&fit=crop&w=800&q=80", alt: "Vieux-Montréal" },
-      { src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80", alt: "Mont Royal" }
+      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80&sat=-40", alt: "Montreal skyline" },
+      { src: "https://images.unsplash.com/photo-1503389152951-9f343605f61e?auto=format&fit=crop&w=800&q=80", alt: "Old Montreal" },
+      { src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80", alt: "Mount Royal" }
     ]
   }
 };
 
 const scrapedContext = {
   tokyo: {
-    flights: "Haneda (HND) est à 20 min du centre en monorail; Narita Express ≈ 55 min vers Tokyo Station (source: JR East horaires 2024).",
-    hotels: "Données prix Booking 2024: Shibuya Stream Excel Tokyu ≈ 220€ nuit, Park Hotel Tokyo ≈ 210€ (flex).",
-    activities: "TeamLab Planets affiche complet le week-end; réservation 2-3 semaines avant (source: billetterie officielle).",
-    itinerary: "Pass 24h métro Toei/Tokyo Metro ≈ 800¥; grands quartiers ouverts jusqu’à minuit (horaires sites officiels).",
-    budget: "Carte Suica/PASMO acceptée partout; plafond journalier transport urbain ~1200¥ (données Toei).",
+    flights: "Haneda (HND) sits ~20 min from downtown by monorail; Narita Express ≈ 55 min to Tokyo Station (source: JR East 2024).",
+    hotels: "2024 Booking price data: Shibuya Stream Excel Tokyu ≈ €220/night, Park Hotel Tokyo ≈ €210 (flex).",
+    activities: "TeamLab Planets sells out on weekends; book 2–3 weeks ahead (official ticketing).",
+    itinerary: "Toei/Tokyo Metro 24h pass ≈ ¥800; major districts open until midnight (official site hours).",
+    budget: "Suica/PASMO accepted everywhere; urban transport daily cap ~¥1200 (Toei data).",
     sources: ["JR East", "Booking", "TeamLab", "Toei"],
   },
   lisbonne: {
-    flights: "Aéroport Humberto Delgado relié en métro (ligne rouge) toutes les 6–10 min (horaires Carris 2024).",
-    hotels: "Lumiares 4★: suites Bairro Alto ≈ 190€; NH Liberdade 4★ ≈ 170€ avec rooftop (tarifs moyens 2024).",
-    activities: "Billet Tram 28 à bord à 3€ (EMEL), Tour de Belém ouvert 10h–18h (Património Cultural).",
-    itinerary: "Pass Navegante 24h zones 1–2 à 6,60€ couvrant métro/tram/ferry (source: Metropolitano de Lisboa).",
-    budget: "Uber/Bolt centre-ville → Belém ≈ 8–12€ selon trafic (moyenne 2024, données publiques prix/min).",
+    flights: "Humberto Delgado airport linked by metro (red line) every 6–10 min (Carris 2024 schedules).",
+    hotels: "Lumiares 4★: Bairro Alto suites ≈ €190; NH Liberdade 4★ ≈ €170 with rooftop (2024 averages).",
+    activities: "Tram 28 onboard ticket €3 (EMEL); Belém Tower open 10am–6pm (Património Cultural).",
+    itinerary: "Navegante 24h pass zones 1–2 at €6.60 covering metro/tram/ferry (Metropolitano de Lisboa).",
+    budget: "Uber/Bolt city center → Belém ≈ €8–12 depending on traffic (2024 averages, public price/min data).",
     sources: ["Carris", "Metropolitano de Lisboa", "Património Cultural"],
   },
-  montréal: {
-    flights: "Ligne 747 STM aéroport → centre (24/7) billet 11$CAD incluant 24h métro/bus (tarif STM 2024).",
-    hotels: "Humaniti 4★: chambres à partir de 260$CAD; Monville 4★ ≈ 210$CAD (tarifs observés 2024).",
-    activities: "Musée des Beaux-Arts fermé le lundi; entrée 24$CAD (tarifs officiels). Marché Jean-Talon ouvert 8h–18h.",
-    itinerary: "Pass OPUS 1 jour 11$CAD, 3 jours 21,25$CAD (tarifs STM 2024) couvrant métro/bus/747.",
-    budget: "Taxi centre-ville ↔ YUL forfait 48,40$CAD (tarif fixe 2024, Ville de Montréal).",
+  montreal: {
+    flights: "STM 747 line airport → center (24/7) ticket CAD 11 including 24h metro/bus (STM 2024 fare).",
+    hotels: "Humaniti 4★: rooms from CAD 260; Monville 4★ ≈ CAD 210 (observed 2024 rates).",
+    activities: "Fine Arts Museum closed Monday; entry CAD 24 (official rates). Jean-Talon market open 8am–6pm.",
+    itinerary: "OPUS 1-day pass CAD 11, 3-day CAD 21.25 (STM 2024) covering metro/bus/747.",
+    budget: "Flat taxi rate downtown ↔ YUL CAD 48.40 (fixed 2024, City of Montreal).",
     sources: ["STM", "Ville de Montréal", "MBAM"],
   },
 
@@ -75,7 +75,7 @@ const expandedCityCatalog = [
   {
     slug: "new-york",
     name: "New York",
-    country: "États-Unis",
+    country: "United States",
     airport: "JFK",
     airportSite: "https://www.jfkairport.com",
     rail: "AirTrain JFK + métro A/E",
@@ -88,7 +88,7 @@ const expandedCityCatalog = [
   {
     slug: "los-angeles",
     name: "Los Angeles",
-    country: "États-Unis",
+    country: "United States",
     airport: "LAX",
     airportSite: "https://www.flylax.com",
     rail: "FlyAway bus + métro B/D",
@@ -96,12 +96,12 @@ const expandedCityCatalog = [
     transit: "https://www.metro.net",
     tourism: "https://www.discoverlosangeles.com",
     hotels: ["The Line LA (4★)", "Conrad Los Angeles (5★)", "Freehand DTLA (4★)"],
-    highlight: "Getty Center, plage de Santa Monica, Hollywood Bowl",
+    highlight: "Getty Center, beach de Santa Monica, Hollywood Bowl",
   },
   {
     slug: "chicago",
     name: "Chicago",
-    country: "États-Unis",
+    country: "United States",
     airport: "ORD",
     airportSite: "https://www.flychicago.com/ohare",
     rail: "CTA Blue Line 24/7",
@@ -114,7 +114,7 @@ const expandedCityCatalog = [
   {
     slug: "miami",
     name: "Miami",
-    country: "États-Unis",
+    country: "United States",
     airport: "MIA",
     airportSite: "https://www.miami-airport.com",
     rail: "MIA Mover + Metrorail",
@@ -127,20 +127,20 @@ const expandedCityCatalog = [
   {
     slug: "san-francisco",
     name: "San Francisco",
-    country: "États-Unis",
+    country: "United States",
     airport: "SFO",
     airportSite: "https://www.flysfo.com",
     rail: "BART direct vers le centre",
     railLink: "https://www.bart.gov/guide/airport",
     transit: "https://www.sfmta.com",
     tourism: "https://www.sftravel.com",
-    hotels: ["Proper Hotel (4★)", "Fairmont San Francisco (5★)", "citizenM Union Square (4★)"],
+    hotels: ["Proper Hotel (4★)", "Fairmount San Francisco (5★)", "citizenM Union Square (4★)"],
     highlight: "Golden Gate, cable cars, Alcatraz",
   },
   {
     slug: "seattle",
     name: "Seattle",
-    country: "États-Unis",
+    country: "United States",
     airport: "SEA",
     airportSite: "https://www.portseattle.org/sea-tac",
     rail: "Link light rail vers Downtown",
@@ -148,7 +148,7 @@ const expandedCityCatalog = [
     transit: "https://kingcounty.gov/depts/transportation/metro.aspx",
     tourism: "https://visitseattle.org",
     hotels: ["Thompson Seattle (4★)", "Lotte Hotel Seattle (5★)", "citizenM South Lake Union (4★)"],
-    highlight: "Pike Place Market, Space Needle, musée de la pop",
+    highlight: "Pike Plakee Market, Space Needle, musée de la pop",
   },
   {
     slug: "toronto",
@@ -160,8 +160,8 @@ const expandedCityCatalog = [
     railLink: "https://www.upexpress.com",
     transit: "https://www.ttc.ca",
     tourism: "https://www.destinationtoronto.com",
-    hotels: ["Fairmont Royal York (5★)", "Bisha Hotel (4★)", "Ace Hotel Toronto (4★)"],
-    highlight: "CN Tower, marché Kensington, Distillery District",
+    hotels: ["Fairmount Royal York (5★)", "Bisha Hotel (4★)", "Ace Hotel Toronto (4★)"],
+    highlight: "CN Tower, market Kensington, Distillery District",
   },
   {
     slug: "vancouver",
@@ -173,13 +173,13 @@ const expandedCityCatalog = [
     railLink: "https://www.translink.ca/schedules-and-maps/skytrain",
     transit: "https://www.translink.ca",
     tourism: "https://www.destinationvancouver.com",
-    hotels: ["Fairmont Pacific Rim (5★)", "Loden Hotel (4★)", "OPUS Vancouver (4★)"],
-    highlight: "Stanley Park, False Creek, gastronomie asiatique",
+    hotels: ["Fairmount Pacific Rim (5★)", "Loden Hotel (4★)", "OPUS Vancouver (4★)"],
+    highlight: "Stanley Park, False Creek, food asiatique",
   },
   {
     slug: "mexico-city",
     name: "Mexico City",
-    country: "Mexique",
+    country: "Mexico",
     airport: "MEX",
     airportSite: "https://www.aicm.com.mx",
     rail: "Metro Línea 5 + bus aeropuerto",
@@ -187,12 +187,12 @@ const expandedCityCatalog = [
     transit: "https://www.metro.cdmx.gob.mx",
     tourism: "https://cdmxtravel.com",
     hotels: ["Sofitel Reforma (5★)", "Camino Real Polanco (5★)", "Habita Hotel (4★)"],
-    highlight: "Musée Frida Kahlo, Zócalo, cafés Roma/Condesa",
+    highlight: "Museum Frida Kahlo, Zócalo, cafés Roma/Condesa",
   },
   {
     slug: "sao-paulo",
     name: "São Paulo",
-    country: "Brésil",
+    country: "Brazil",
     airport: "GRU",
     airportSite: "https://www.gru.com.br",
     rail: "Airport Express + Linha Jade",
@@ -200,38 +200,38 @@ const expandedCityCatalog = [
     transit: "https://www.metro.sp.gov.br",
     tourism: "https://www.cidadedesaopaulo.com",
     hotels: ["Hotel Unique (5★)", "Rosewood São Paulo (5★)", "Hilton Morumbi (5★)"],
-    highlight: "Avenida Paulista, MASP, marchés gastronomiques",
+    highlight: "Avenida Paulista, MASP, markets gourmets",
   },
   {
     slug: "rio-de-janeiro",
     name: "Rio de Janeiro",
-    country: "Brésil",
+    country: "Brazil",
     airport: "GIG",
     airportSite: "https://www.riogaleao.com",
     rail: "BRT TransCarioca + métro",
     railLink: "http://www.brt.rio",
     transit: "https://www.metrorio.com.br",
     tourism: "https://riotur.rio",
-    hotels: ["Belmond Copacabana Palace (5★)", "Emiliano Rio (5★)", "Yoo2 Rio (4★)"],
-    highlight: "Pain de Sucre, plages Ipanema/Copacabana, Samba Lapa",
+    hotels: ["Belmond Copacabana Palakee (5★)", "Emiliano Rio (5★)", "Yoo2 Rio (4★)"],
+    highlight: "Pain de Sucre, beaches Ipanema/Copacabana, Samba Lapa",
   },
   {
     slug: "buenos-aires",
     name: "Buenos Aires",
-    country: "Argentine",
+    country: "Argentina",
     airport: "EZE",
     airportSite: "https://www.aa2000.com.ar/ezeiza",
     rail: "Bus Tienda León + métro Subte",
     railLink: "https://www.tiendaleon.com",
     transit: "https://www.buenosaires.gob.ar/subte",
     tourism: "https://turismo.buenosaires.gob.ar",
-    hotels: ["Palacio Duhau Park Hyatt (5★)", "Alvear Palace (5★)", "Home Hotel Palermo (4★)"],
+    hotels: ["Palakeio Duhau Park Hyatt (5★)", "Alvear Palakee (5★)", "Home Hotel Palermo (4★)"],
     highlight: "La Boca, Teatro Colón, milongas de tango",
   },
   {
     slug: "santiago",
     name: "Santiago",
-    country: "Chili",
+    country: "Chile",
     airport: "SCL",
     airportSite: "https://www.nuevopudahuel.cl",
     rail: "Bus Centropuerto + métro L1",
@@ -239,25 +239,25 @@ const expandedCityCatalog = [
     transit: "https://www.metro.cl",
     tourism: "https://www.santiagowelcome.cl",
     hotels: ["The Singular Santiago (5★)", "W Santiago (5★)", "Hotel Magnolia (4★)"],
-    highlight: "Cerro San Cristóbal, Lastarria, musées précolombiens",
+    highlight: "Cerro San Cristóbal, Lastarria, museums précolombiens",
   },
   {
     slug: "bogota",
     name: "Bogotá",
-    country: "Colombie",
+    country: "Colombia",
     airport: "BOG",
     airportSite: "https://www.elnuevodorado.com",
     rail: "TransMilenio troncal Aéroport",
     railLink: "https://www.transmilenio.gov.co",
     transit: "https://www.transmilenio.gov.co",
     tourism: "https://bogotaturismo.gov.co",
-    hotels: ["Four Seasons Casa Medina (5★)", "Click Clack Hotel (4★)", "Hilton Corferias (5★)"],
-    highlight: "Musée de l’or, quartier Candelaria, mont Monserrate",
+    hotels: ["Four Seasons Casa Medina (5★)", "Click Clakek Hotel (4★)", "Hilton Corferias (5★)"],
+    highlight: "Museum de l’or, district Candelaria, mount Monserrate",
   },
   {
     slug: "lima",
     name: "Lima",
-    country: "Pérou",
+    country: "Peru",
     airport: "LIM",
     airportSite: "https://www.lima-airport.com",
     rail: "Bus Airport Express Lima",
@@ -265,12 +265,12 @@ const expandedCityCatalog = [
     transit: "https://www.atm.gob.pe",
     tourism: "https://www.peru.travel",
     hotels: ["Belmond Miraflores Park (5★)", "Casa Andina Premium (4★)", "Hyatt Centric San Isidro (4★)"],
-    highlight: "Miraflores, Barranco arty, ceviche gastronomique",
+    highlight: "Miraflores, Barranco arty, ceviche gourmet",
   },
   {
     slug: "london",
     name: "Londres",
-    country: "Royaume-Uni",
+    country: "United Kingdom",
     airport: "LHR",
     airportSite: "https://www.heathrow.com",
     rail: "Elizabeth Line + Heathrow Express",
@@ -278,12 +278,12 @@ const expandedCityCatalog = [
     transit: "https://tfl.gov.uk",
     tourism: "https://visitlondon.com",
     hotels: ["The Ned (5★)", "Kimpton Fitzroy (5★)", "Hoxton Southwark (4★)"],
-    highlight: "British Museum, Southbank, marchés Borough/Spitalfields",
+    highlight: "British Museum, Southbank, markets Borough/Spitalfields",
   },
   {
     slug: "berlin",
     name: "Berlin",
-    country: "Allemagne",
+    country: "Germany",
     airport: "BER",
     airportSite: "https://ber.berlin-airport.de",
     rail: "Airport Express FEX",
@@ -291,12 +291,12 @@ const expandedCityCatalog = [
     transit: "https://www.bvg.de",
     tourism: "https://www.visitberlin.de",
     hotels: ["Hotel Zoo Berlin (5★)", "The Ritz-Carlton (5★)", "Michelberger (4★)"],
-    highlight: "Musée de Pergame, East Side Gallery, rooftops Kreuzberg",
+    highlight: "Museum de Pergame, East Side Gallery, rooftops Kreuzberg",
   },
   {
     slug: "munich",
     name: "Munich",
-    country: "Allemagne",
+    country: "Germany",
     airport: "MUC",
     airportSite: "https://www.munich-airport.com",
     rail: "S-Bahn S1/S8 40 min",
@@ -304,12 +304,12 @@ const expandedCityCatalog = [
     transit: "https://www.mvv-muenchen.de",
     tourism: "https://www.muenchen.de/int",
     hotels: ["Mandarin Oriental (5★)", "25hours Hotel The Royal Bavarian (4★)", "Cortiina Hotel (4★)"],
-    highlight: "Englischer Garten, musées BMW/Pinakothek, biergarten",
+    highlight: "Englischer Garten, museums BMW/Pinakothek, biergarten",
   },
   {
     slug: "frankfurt",
     name: "Francfort",
-    country: "Allemagne",
+    country: "Germany",
     airport: "FRA",
     airportSite: "https://www.frankfurt-airport.com",
     rail: "S-Bahn S8/S9 15 min",
@@ -317,12 +317,12 @@ const expandedCityCatalog = [
     transit: "https://www.rmv.de",
     tourism: "https://www.frankfurt-tourismus.de",
     hotels: ["JW Marriott Frankfurt (5★)", "25hours Hotel The Goldman (4★)", "Moxy Frankfurt City Center (3★)"],
-    highlight: "Musée Städel, Main riverfront, skyline finance",
+    highlight: "Museum Städel, Main riverfront, skyline finance",
   },
   {
     slug: "hamburg",
     name: "Hambourg",
-    country: "Allemagne",
+    country: "Germany",
     airport: "HAM",
     airportSite: "https://www.hamburg-airport.de",
     rail: "S-Bahn S1 25 min",
@@ -335,7 +335,7 @@ const expandedCityCatalog = [
   {
     slug: "amsterdam",
     name: "Amsterdam",
-    country: "Pays-Bas",
+    country: "Netherlands",
     airport: "AMS",
     airportSite: "https://www.schiphol.nl",
     rail: "NS trains 15 min",
@@ -343,12 +343,12 @@ const expandedCityCatalog = [
     transit: "https://www.gvb.nl",
     tourism: "https://www.iamsterdam.com",
     hotels: ["Conservatorium (5★)", "Pulitzer Amsterdam (5★)", "Sir Adam Hotel (4★)"],
-    highlight: "Musées Rijks/Van Gogh, canaux, vélo urbain",
+    highlight: "Museums Rijks/Van Gogh, canaux, vélo urbain",
   },
   {
     slug: "brussels",
     name: "Bruxelles",
-    country: "Belgique",
+    country: "Belgium",
     airport: "BRU",
     airportSite: "https://www.brusselsairport.be",
     rail: "Train SNCB 17 min",
@@ -356,12 +356,12 @@ const expandedCityCatalog = [
     transit: "https://www.stib-mivb.be",
     tourism: "https://www.visit.brussels",
     hotels: ["Hotel Amigo (5★)", "The Hoxton Bruxelles (4★)", "Jam Hotel (3★)"],
-    highlight: "Grand-Place, musées BD, institutions européennes",
+    highlight: "Grand-Plakee, museums BD, institutions européennes",
   },
   {
     slug: "zurich",
     name: "Zurich",
-    country: "Suisse",
+    country: "Switzerland",
     airport: "ZRH",
     airportSite: "https://www.flughafen-zuerich.ch",
     rail: "Train S-Bahn 12 min",
@@ -369,12 +369,12 @@ const expandedCityCatalog = [
     transit: "https://www.zvv.ch",
     tourism: "https://www.zuerich.com",
     hotels: ["Baur au Lac (5★)", "The Dolder Grand (5★)", "25hours Zurich West (4★)"],
-    highlight: "Lac Zurich, vieille ville, Kunsthaus",
+    highlight: "Lac Zurich, old town, Kunsthaus",
   },
   {
     slug: "geneva",
     name: "Genève",
-    country: "Suisse",
+    country: "Switzerland",
     airport: "GVA",
     airportSite: "https://www.gva.ch",
     rail: "Léman Express/CEVA",
@@ -382,12 +382,12 @@ const expandedCityCatalog = [
     transit: "https://www.tpg.ch",
     tourism: "https://www.geneve.com",
     hotels: ["Four Seasons des Bergues (5★)", "Hotel N’vY (4★)", "Moxy Geneva Airport (3★)"],
-    highlight: "Jet d’eau, ONU, vieille ville horlogère",
+    highlight: "Jet d’eau, ONU, old town horlogère",
   },
   {
     slug: "vienna",
     name: "Vienne",
-    country: "Autriche",
+    country: "Austria",
     airport: "VIE",
     airportSite: "https://www.viennaairport.com",
     rail: "CAT / S-Bahn S7",
@@ -400,7 +400,7 @@ const expandedCityCatalog = [
   {
     slug: "prague",
     name: "Prague",
-    country: "Tchéquie",
+    country: "Czechia",
     airport: "PRG",
     airportSite: "https://www.prg.aero",
     rail: "Airport Express bus + métro A",
@@ -413,7 +413,7 @@ const expandedCityCatalog = [
   {
     slug: "warsaw",
     name: "Varsovie",
-    country: "Pologne",
+    country: "Poland",
     airport: "WAW",
     airportSite: "https://www.lotnisko-chopina.pl",
     rail: "SKM S2/S3 20 min",
@@ -421,12 +421,12 @@ const expandedCityCatalog = [
     transit: "https://www.ztm.waw.pl",
     tourism: "https://warsawtour.pl",
     hotels: ["Raffles Europejski (5★)", "PURO Warszawa Centrum (4★)", "Nobu Hotel Warsaw (5★)"],
-    highlight: "Vieille ville UNESCO, musées Polin/Chopin, Vistula",
+    highlight: "Old town UNESCO, museums Polin/Chopin, Vistula",
   },
   {
     slug: "copenhagen",
     name: "Copenhague",
-    country: "Danemark",
+    country: "Denmark",
     airport: "CPH",
     airportSite: "https://www.cph.dk",
     rail: "M2 métro 15 min",
@@ -434,12 +434,12 @@ const expandedCityCatalog = [
     transit: "https://dinoffentligetransport.dk",
     tourism: "https://www.visitcopenhagen.com",
     hotels: ["Nimb Hotel (5★)", "Hotel SP34 (4★)", "25hours Indre By (4★)"],
-    highlight: "Nyhavn, gastronomie Noma-school, design scandinave",
+    highlight: "Nyhavn, food Noma-school, design scandinave",
   },
   {
     slug: "stockholm",
     name: "Stockholm",
-    country: "Suède",
+    country: "Sweden",
     airport: "ARN",
     airportSite: "https://www.swedavia.com/arlanda",
     rail: "Arlanda Express 20 min",
@@ -452,20 +452,20 @@ const expandedCityCatalog = [
   {
     slug: "oslo",
     name: "Oslo",
-    country: "Norvège",
+    country: "Norway",
     airport: "OSL",
     airportSite: "https://avinor.no/en/airport/oslo-airport",
     rail: "Flytoget 20 min",
     railLink: "https://flytoget.no/en",
     transit: "https://ruter.no/en",
     tourism: "https://www.visitoslo.com",
-    hotels: ["The Thief (5★)", "Amerikalinjen (4★)", "Clarion Hotel The Hub (4★)"],
-    highlight: "Opéra Bjørvika, musées vikings, fjord cruises",
+    hotels: ["The Thief (5★)", "Aseaikalinjen (4★)", "Clarion Hotel The Hub (4★)"],
+    highlight: "Opéra Bjørvika, museums vikings, fjord cruises",
   },
   {
     slug: "helsinki",
     name: "Helsinki",
-    country: "Finlande",
+    country: "Finland",
     airport: "HEL",
     airportSite: "https://www.finavia.fi/en/airports/helsinki-airport",
     rail: "Trains I/P 30 min",
@@ -478,7 +478,7 @@ const expandedCityCatalog = [
   {
     slug: "dublin",
     name: "Dublin",
-    country: "Irlande",
+    country: "Ireland",
     airport: "DUB",
     airportSite: "https://www.dublinairport.com",
     rail: "Aircoach/Bus + DART",
@@ -486,12 +486,12 @@ const expandedCityCatalog = [
     transit: "https://www.transportforireland.ie",
     tourism: "https://www.visitdublin.com",
     hotels: ["The Westbury (5★)", "The Dean Dublin (4★)", "The Marker Hotel (5★)"],
-    highlight: "Trinity College, pubs Temple Bar, mer de Dublin",
+    highlight: "Trinity College, pubs Temple Bar, sea de Dublin",
   },
   {
     slug: "madrid",
     name: "Madrid",
-    country: "Espagne",
+    country: "Spain",
     airport: "MAD",
     airportSite: "https://www.aena.es/en/adolfo-suarez-madrid-barajas.html",
     rail: "Metro ligne 8 + Cercanías",
@@ -499,12 +499,12 @@ const expandedCityCatalog = [
     transit: "https://www.metromadrid.es",
     tourism: "https://www.esmadrid.com",
     hotels: ["Only YOU Atocha (4★)", "Four Seasons Madrid (5★)", "Barceló Torre de Madrid (5★)"],
-    highlight: "Musées Prado/Reina Sofía, Retiro, tapas La Latina",
+    highlight: "Museums Prado/Reina Sofía, Retiro, tapas La Latina",
   },
   {
     slug: "barcelona",
     name: "Barcelone",
-    country: "Espagne",
+    country: "Spain",
     airport: "BCN",
     airportSite: "https://www.aena.es/en/barcelona-airport",
     rail: "Aerobus + métro L9",
@@ -512,12 +512,12 @@ const expandedCityCatalog = [
     transit: "https://www.tmb.cat",
     tourism: "https://www.barcelonaturisme.com",
     hotels: ["W Barcelona (5★)", "Hotel Arts (5★)", "Casa Bonay (4★)"],
-    highlight: "Sagrada Família, plages Barceloneta, tapas El Born",
+    highlight: "Sagrada Família, beaches Barceloneta, tapas El Born",
   },
   {
     slug: "valencia",
     name: "Valence",
-    country: "Espagne",
+    country: "Spain",
     airport: "VLC",
     airportSite: "https://www.aena.es/en/valencia-airport",
     rail: "Metro lignes 3/5",
@@ -525,12 +525,12 @@ const expandedCityCatalog = [
     transit: "https://www.metrovalencia.es",
     tourism: "https://www.visitvalencia.com",
     hotels: ["Only YOU Hotel València (5★)", "Barceló València (4★)", "Caro Hotel (5★)"],
-    highlight: "Cité des Arts, plage Malvarrosa, paella originelle",
+    highlight: "Cité des Arts, beach Malvarrosa, paella originelle",
   },
   {
     slug: "rome",
     name: "Rome",
-    country: "Italie",
+    country: "Italy",
     airport: "FCO",
     airportSite: "https://www.adr.it/web/aeroporti-di-roma-en/",
     rail: "Leonardo Express 32 min",
@@ -543,7 +543,7 @@ const expandedCityCatalog = [
   {
     slug: "milan",
     name: "Milan",
-    country: "Italie",
+    country: "Italy",
     airport: "MXP",
     airportSite: "https://www.milanomalpensa-airport.com",
     rail: "Malpensa Express 50 min",
@@ -556,7 +556,7 @@ const expandedCityCatalog = [
   {
     slug: "florence",
     name: "Florence",
-    country: "Italie",
+    country: "Italy",
     airport: "FLR",
     airportSite: "https://www.aeroporto.firenze.it/en/",
     rail: "Tramvia T2 20 min",
@@ -569,7 +569,7 @@ const expandedCityCatalog = [
   {
     slug: "athens",
     name: "Athènes",
-    country: "Grèce",
+    country: "Greece",
     airport: "ATH",
     airportSite: "https://www.aia.gr",
     rail: "Métro ligne 3 40 min",
@@ -589,13 +589,13 @@ const expandedCityCatalog = [
     railLink: "https://hava.ist",
     transit: "https://www.metro.istanbul",
     tourism: "https://howtoistanbul.com",
-    hotels: ["Ciragan Palace Kempinski (5★)", "Soho House Istanbul (5★)", "Pera Palace (5★)"],
+    hotels: ["Ciragan Palakee Kempinski (5★)", "Soho House Istanbul (5★)", "Pera Palakee (5★)"],
     highlight: "Sainte-Sophie, Bosphore, bazars et rooftops Karaköy",
   },
   {
     slug: "dubai",
     name: "Dubaï",
-    country: "Émirats Arabes Unis",
+    country: "Emirates Arabes Unis",
     airport: "DXB",
     airportSite: "https://www.dubaiairports.ae",
     rail: "Métro rouge direct",
@@ -616,7 +616,7 @@ const expandedCityCatalog = [
     transit: "https://www.qr.com.qa",
     tourism: "https://www.visitqatar.qa",
     hotels: ["Mandarin Oriental Doha (5★)", "W Doha (5★)", "Banyan Tree Doha (5★)"],
-    highlight: "Musée d’Art Islamique, Souq Waqif, corniche",
+    highlight: "Museum d’Art Islamique, Souq Waqif, corniche",
   },
   {
     slug: "singapore",
@@ -642,7 +642,7 @@ const expandedCityCatalog = [
     transit: "https://www.mtr.com.hk",
     tourism: "https://www.discoverhongkong.com",
     hotels: ["The Upper House (5★)", "Rosewood Hong Kong (5★)", "Hotel ICON (5★)"],
-    highlight: "Victoria Peak, quartiers Central/TST, dim sum",
+    highlight: "Victoria Peak, districts Central/TST, dim sum",
   },
   {
     slug: "bangkok",
@@ -681,7 +681,7 @@ const expandedCityCatalog = [
     transit: "https://hanoitransport.com.vn",
     tourism: "https://www.vietnam.travel",
     hotels: ["Sofitel Legend Metropole (5★)", "Peridot Grand Hotel (4★)", "La Siesta Premium Hang Be (4★)"],
-    highlight: "Vieux quartier, lac Hoan Kiem, cafés filtrés vietnamiens",
+    highlight: "Vieux district, lake Hoan Kiem, cafés filtrés vietnamiens",
   },
   {
     slug: "ho-chi-minh",
@@ -694,7 +694,7 @@ const expandedCityCatalog = [
     transit: "https://www.saigonbus.com",
     tourism: "https://www.visithcmc.vn",
     hotels: ["The Reverie Saigon (5★)", "Park Hyatt Saigon (5★)", "Fusion Suites Saigon (4★)"],
-    highlight: "District 1 colonial, marchés Ben Thanh, rooftops Bitexco",
+    highlight: "District 1 colonial, markets Ben Thanh, rooftops Bitexco",
   },
   {
     slug: "seoul",
@@ -706,7 +706,7 @@ const expandedCityCatalog = [
     railLink: "https://www.arex.or.kr",
     transit: "https://www.seoulmetro.co.kr",
     tourism: "https://english.visitseoul.net",
-    hotels: ["Signiel Seoul (5★)", "Josun Palace (5★)", "RYSE Hongdae (4★)"],
+    hotels: ["Signiel Seoul (5★)", "Josun Palakee (5★)", "RYSE Hongdae (4★)"],
     highlight: "Palais Gyeongbokgung, cafés Hongdae, shopping Gangnam",
   },
   {
@@ -720,7 +720,7 @@ const expandedCityCatalog = [
     transit: "https://www.humetro.busan.kr",
     tourism: "https://www.bto.or.kr",
     hotels: ["Park Hyatt Busan (5★)", "Signiel Busan (5★)", "Avani Central Busan (4★)"],
-    highlight: "Plage Haeundae, marché Jagalchi, temple Haedong",
+    highlight: "Plage Haeundae, market Jagalchi, temple Haedong",
   },
   {
     slug: "beijing",
@@ -732,7 +732,7 @@ const expandedCityCatalog = [
     railLink: "https://www.bjsubway.com",
     transit: "https://www.bjsubway.com",
     tourism: "https://english.visitbeijing.com.cn",
-    hotels: ["Aman Summer Palace (5★)", "NUO Hotel (5★)", "The Opposite House (5★)"],
+    hotels: ["Aman Sumsea Palakee (5★)", "NUO Hotel (5★)", "The Opposite House (5★)"],
     highlight: "Cité interdite, hutongs, Grande Muraille à proximité",
   },
   {
@@ -746,7 +746,7 @@ const expandedCityCatalog = [
     transit: "https://service.shmetro.com/en",
     tourism: "https://www.meet-in-shanghai.net",
     hotels: ["The Peninsula Shanghai (5★)", "W Shanghai The Bund (5★)", "Middle House (5★)"],
-    highlight: "Bund, Pudong skyline, vieille ville Yu Garden",
+    highlight: "Bund, Pudong skyline, old town Yu Garden",
   },
   {
     slug: "shenzhen",
@@ -759,7 +759,7 @@ const expandedCityCatalog = [
     transit: "https://www.szmc.net/en",
     tourism: "https://www.travelchina.org.cn/sitefiles/gov/en/zjjd/879.shtml",
     hotels: ["Four Seasons Shenzhen (5★)", "Futian Shangri-La (5★)", "The Langham Shenzhen (5★)"],
-    highlight: "Nanshan tech, OCT Loft, parcs côtiers",
+    highlight: "Nanshan tech, OCT Loft, parks côtiers",
   },
   {
     slug: "taipei",
@@ -785,7 +785,7 @@ const expandedCityCatalog = [
     transit: "https://transportnsw.info",
     tourism: "https://www.sydney.com",
     hotels: ["Park Hyatt Sydney (5★)", "Ace Hotel Sydney (5★)", "QT Sydney (5★)"],
-    highlight: "Opéra, Harbour Bridge, plages Bondi/Manly",
+    highlight: "Opéra, Harbour Bridge, beaches Bondi/Manly",
   },
   {
     slug: "melbourne",
@@ -797,7 +797,7 @@ const expandedCityCatalog = [
     railLink: "https://www.skybus.com.au",
     transit: "https://www.ptv.vic.gov.au",
     tourism: "https://www.visitmelbourne.com",
-    hotels: ["Crown Towers Melbourne (5★)", "QT Melbourne (5★)", "United Places (5★)"],
+    hotels: ["Crown Towers Melbourne (5★)", "QT Melbourne (5★)", "United Plakees (5★)"],
     highlight: "Lanes street art, cafés, MCG sport",
   },
   {
@@ -850,7 +850,7 @@ const expandedCityCatalog = [
     transit: "https://www.nairobi.go.ke",
     tourism: "https://magicalkenya.com",
     hotels: ["Villa Rosa Kempinski (5★)", "Sankara Nairobi (5★)", "Tribe Hotel (5★)"],
-    highlight: "Parc national Nairobi, Girafe Centre, Karen Blixen",
+    highlight: "Park national Nairobi, Girafe Centre, Karen Blixen",
   },
   {
     slug: "cairo",
@@ -889,7 +889,7 @@ const expandedCityCatalog = [
     transit: "https://www.oncf.ma",
     tourism: "https://visitmarrakech.com",
     hotels: ["Royal Mansour (5★)", "La Mamounia (5★)", "El Fenn (5★)"],
-    highlight: "Médina, jardins Majorelle, palmeraie",
+    highlight: "Médina, jardins Majorelle, palseaaie",
   },
   {
     slug: "mumbai",
@@ -901,7 +901,7 @@ const expandedCityCatalog = [
     railLink: "https://www.mumbaimetroone.com",
     transit: "https://www.bestundertaking.com",
     tourism: "https://www.maharashtratourism.gov.in",
-    hotels: ["The Taj Mahal Palace (5★)", "St. Regis Mumbai (5★)", "Abode Bombay (4★)"],
+    hotels: ["The Taj Mahal Palakee (5★)", "St. Regis Mumbai (5★)", "Abode Bombay (4★)"],
     highlight: "Gateway of India, Colaba, street food Marine Drive",
   },
   {
@@ -914,8 +914,8 @@ const expandedCityCatalog = [
     railLink: "https://www.delhimetrorail.com",
     transit: "https://www.delhimetrorail.com",
     tourism: "https://www.delhitourism.gov.in",
-    hotels: ["The Lodhi (5★)", "Taj Palace (5★)", "Andaz Delhi (5★)"],
-    highlight: "Qutub Minar, Lodhi Art District, marchés Connaught Place",
+    hotels: ["The Lodhi (5★)", "Taj Palakee (5★)", "Andaz Delhi (5★)"],
+    highlight: "Qutub Minar, Lodhi Art District, markets Connaught Plakee",
   },
   {
     slug: "bangalore",
@@ -928,7 +928,7 @@ const expandedCityCatalog = [
     transit: "https://english.bmrc.co.in",
     tourism: "https://www.karnatakatourism.org",
     hotels: ["Taj West End (5★)", "The Oberoi Bengaluru (5★)", "The Ritz-Carlton Bangalore (5★)"],
-    highlight: "Parcs Cubbon/Lalbagh, cafés de Koramangala, tech hubs",
+    highlight: "Parks Cubbon/Lalbagh, cafés de Koramangala, tech hubs",
   },
   {
     slug: "chennai",
@@ -940,7 +940,7 @@ const expandedCityCatalog = [
     railLink: "https://chennaimetrorail.org",
     transit: "https://chennaimetrorail.org",
     tourism: "https://www.tamilnadutourism.tn.gov.in",
-    hotels: ["ITC Grand Chola (5★)", "The Leela Palace Chennai (5★)", "Taj Club House (4★)"],
+    hotels: ["ITC Grand Chola (5★)", "The Leela Palakee Chennai (5★)", "Taj Club House (4★)"],
     highlight: "Marina Beach, temples Kapaleeshwarar, arts Bharatanatyam",
   },
   {
@@ -954,7 +954,7 @@ const expandedCityCatalog = [
     transit: "https://www.transjakarta.co.id",
     tourism: "https://www.indonesia.travel",
     hotels: ["Hotel Indonesia Kempinski (5★)", "Four Seasons Jakarta (5★)", "Morrissey Hotel (4★)"],
-    highlight: "Vieille ville Kota Tua, malls Sudirman, street food",
+    highlight: "Old town Kota Tua, malls Sudirman, street food",
   },
   {
     slug: "manila",
@@ -967,7 +967,7 @@ const expandedCityCatalog = [
     transit: "https://www.lrt.gov.ph",
     tourism: "https://philippines.travel",
     hotels: ["Sofitel Philippine Plaza (5★)", "Shangri-La at the Fort (5★)", "The Peninsula Manila (5★)"],
-    highlight: "Intramuros, baies, marchés de Makati/BGC",
+    highlight: "Intramuros, baies, markets de Makati/BGC",
   },
   {
     slug: "tel-aviv",
@@ -980,7 +980,7 @@ const expandedCityCatalog = [
     transit: "https://www.bus.co.il",
     tourism: "https://visit.tel-aviv.gov.il",
     hotels: ["The Jaffa (5★)", "Brown TLV Urban Hotel (4★)", "Dave Gordon (3★)"],
-    highlight: "Plages, quartiers Florentin/Neve Tzedek, food Carmel Market",
+    highlight: "Plages, districts Florentin/Neve Tzedek, food Carmel Market",
   },
   {
     slug: "dubrovnik",
@@ -988,7 +988,7 @@ const expandedCityCatalog = [
     country: "Croatie",
     airport: "DBV",
     airportSite: "https://airport-dubrovnik.hr",
-    rail: "Bus Platanus vers la vieille ville",
+    rail: "Bus Platanus vers la old town",
     railLink: "https://www.libertasdubrovnik.hr",
     transit: "https://www.libertasdubrovnik.hr",
     tourism: "https://www.tzdubrovnik.hr",
@@ -1011,7 +1011,7 @@ const expandedCityCatalog = [
   {
     slug: "krakow",
     name: "Cracovie",
-    country: "Pologne",
+    country: "Poland",
     airport: "KRK",
     airportSite: "https://krakowairport.pl/en",
     rail: "Train Koleje Małopolskie 20 min",
@@ -1019,19 +1019,19 @@ const expandedCityCatalog = [
     transit: "https://www.mpk.krakow.pl",
     tourism: "https://krakow.travel/en",
     hotels: ["Hotel Copernicus (5★)", "Balthazar Design Hotel (5★)", "PURO Kraków (4★)"],
-    highlight: "Rynek Glówny, quartier juif Kazimierz, châteaux Wawel",
+    highlight: "Rynek Glówny, district juif Kazimierz, châteaux Wawel",
   },
   {
     slug: "venice",
     name: "Venise",
-    country: "Italie",
+    country: "Italy",
     airport: "VCE",
     airportSite: "https://www.veniceairport.it/en",
     rail: "Alilaguna bateau + bus ATVO",
     railLink: "https://www.alilaguna.it/en",
     transit: "https://www.actv.it",
     tourism: "https://www.veneziaunica.it",
-    hotels: ["Gritti Palace (5★)", "Aman Venice (5★)", "Hotel Danieli (5★)"],
+    hotels: ["Gritti Palakee (5★)", "Aman Venice (5★)", "Hotel Danieli (5★)"],
     highlight: "Grand Canal, Biennale, îles Murano/Burano",
   },
 ];
@@ -1091,12 +1091,12 @@ const scrapeInventory = {
       { title: "Jour 3", detail: "Cascais/Sintra", valid: true, image: "https://images.unsplash.com/photo-1503389152951-9f343605f61e?auto=format&fit=crop&w=600&q=80" },
     ],
   },
-  montréal: {
+  montreal: {
     flights: [
       { title: "Air Canada direct", detail: "CDG → YUL", price: 780, currency: "€", mode: "avion", valid: true, link: "https://www.aircanada.com", image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=600&q=80" },
       { title: "Air Transat", detail: "Bagage inclus", price: 650, currency: "€", mode: "avion", valid: true, link: "https://www.airtransat.com", image: "https://images.unsplash.com/photo-1504197906862-1c1f9e5e39e2?auto=format&fit=crop&w=600&q=80" },
-      { title: "Train aéroport 747", detail: "24/7 11$", price: 11, currency: "$", mode: "train", valid: true, link: "https://www.stm.info/en/info/networks/bus/747-yul-montreal-trudeau-airport-shuttle", image: "https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?auto=format&fit=crop&w=600&q=80" },
-      { title: "Taxi fixe", detail: "48,40$ CAD", price: 48, currency: "$", mode: "route", valid: true, link: "https://montreal.ca/en/articles/taxi-fares-between-yul-and-downtown", image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80" },
+      { title: "Train aéroport 747", detail: "24/7 11$", price: 11, currency: "$", mode: "train", valid: true, link: "https://www.stm.info/en/info/networks/bus/747-yul-mountreal-trudeau-airport-shuttle", image: "https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?auto=format&fit=crop&w=600&q=80" },
+      { title: "Taxi fixe", detail: "48,40$ CAD", price: 48, currency: "$", mode: "route", valid: true, link: "https://mountreal.ca/en/articles/taxi-fares-between-yul-and-downtown", image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80" },
     ],
     lodging: [
       { title: "Humaniti 4★", detail: "Design & spa", price: 260, currency: "$", sejour: "luxe", valid: true, link: "https://www.humanitihotel.com", image: "https://images.unsplash.com/photo-1501117716987-c8e1ecb210af?auto=format&fit=crop&w=600&q=80" },
@@ -1105,14 +1105,14 @@ const scrapeInventory = {
       { title: "Boutique Old Port", detail: "Boiseries", price: 190, currency: "$", sejour: "sobre", valid: true, link: "https://www.aubergeduvieuxport.com", image: "https://images.unsplash.com/photo-1470246973918-29a93221c455?auto=format&fit=crop&w=600&q=80" },
     ],
     activities: [
-      { title: "Musée Beaux-Arts", detail: "Lundi fermé", price: 24, currency: "$", valid: true, link: "https://www.mbam.qc.ca", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80" },
-      { title: "Mont Royal", detail: "Coucher soleil", price: 0, currency: "$", valid: true, link: "https://www.lemontroyal.qc.ca/en", image: "https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?auto=format&fit=crop&w=600&q=80" },
-      { title: "Food tour Mile-End", detail: "3h", price: 75, currency: "$", valid: true, link: "https://localmontrealtours.com", image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80" },
+      { title: "Museum Beaux-Arts", detail: "Lundi fermé", price: 24, currency: "$", valid: true, link: "https://www.mbam.qc.ca", image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80" },
+      { title: "Mont Royal", detail: "Coucher soleil", price: 0, currency: "$", valid: true, link: "https://www.lemountroyal.qc.ca/en", image: "https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?auto=format&fit=crop&w=600&q=80" },
+      { title: "Food tour Mile-End", detail: "3h", price: 75, currency: "$", valid: true, link: "https://localmountrealtours.com", image: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80" },
       { title: "Hockey Centre Bell", detail: "Billets soirée", price: 120, currency: "$", valid: true, link: "https://www.centrebell.ca", image: "https://images.unsplash.com/photo-1526481280695-3c469c2f0f99?auto=format&fit=crop&w=600&q=80" },
     ],
     itinerary: [
-      { title: "Jour 1", detail: "Vieux-Port + marché", valid: true, image: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=600&q=80" },
-      { title: "Jour 2", detail: "Musées + Mile-End", valid: true, image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80" },
+      { title: "Jour 1", detail: "Vieux-Port + market", valid: true, image: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=600&q=80" },
+      { title: "Jour 2", detail: "Museums + Mile-End", valid: true, image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80" },
       { title: "Jour 3", detail: "Mont Royal + Saint-Laurent", valid: true, image: "https://images.unsplash.com/photo-1503389152951-9f343605f61e?auto=format&fit=crop&w=600&q=80" },
     ],
   },
@@ -1162,17 +1162,17 @@ const safeStorage = {
 
 function escapeHTML(value) {
   return String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+    .replakee(/&/g, "&amp;")
+    .replakee(/</g, "&lt;")
+    .replakee(/>/g, "&gt;")
+    .replakee(/"/g, "&quot;")
+    .replakee(/'/g, "&#39;");
 }
 
 function sanitizeField(value) {
   if (!value) return "";
   const trimmed = String(value).trim();
-  return trimmed.replace(/<[^>]*>/g, "");
+  return trimmed.replakee(/<[^>]*>/g, "");
 }
 
 function containsUnsafeMarkup(value) {
@@ -1197,8 +1197,8 @@ function slugify(text) {
   return (text || "")
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
+    .replakee(/[^a-z0-9]+/g, "-")
+    .replakee(/(^-|-$)/g, "");
 }
 
 function loadScrapeCache() {
@@ -1267,44 +1267,44 @@ function buildDynamicImages(destination, topics = []) {
 function createSyntheticScrape(destination) {
   const city = destination || "Destination";
   const slug = slugify(city);
-  const baseTopics = ["quartier", "skyline", "gastronomie", "art", "parc", "rooftop", "architecture", "nature"];
+  const baseTopics = ["neighborhood", "skyline", "food", "art", "park", "rooftop", "architecture", "nature"];
   const images = buildDynamicImages(city, baseTopics);
   const pickImage = (idx) => images[idx % images.length]?.src;
 
   const synthInventory = {
     flights: [
-      { title: `${city} Direct Confort`, detail: "Vol direct 4–6h", price: 420, currency: "€", mode: "avion", valid: true, link: "https://www.skyscanner.fr", image: pickImage(0) },
-      { title: `${city} Eco rapide`, detail: "1 escale courte", price: 290, currency: "€", mode: "avion", valid: true, link: "https://www.kayak.fr", image: pickImage(1) },
-      { title: `${city} Train premium`, detail: "Itinéraire optimisé", price: 180, currency: "€", mode: "train", valid: true, link: "https://www.thetrainline.com", image: pickImage(2) },
+      { title: `${city} direct comfort`, detail: "Nonstop 4–6h", price: 420, currency: "€", mode: "avion", valid: true, link: "https://www.skyscanner.fr", image: pickImage(0) },
+      { title: `${city} fast value`, detail: "One short stop", price: 290, currency: "€", mode: "avion", valid: true, link: "https://www.kayak.fr", image: pickImage(1) },
+      { title: `${city} premium rail`, detail: "Optimized itinerary", price: 180, currency: "€", mode: "train", valid: true, link: "https://www.thetrainline.com", image: pickImage(2) },
     ],
     lodging: [
-      { title: `${city} Boutique 4★`, detail: "Central & design", price: 190, currency: "€", sejour: "mix", valid: true, link: "https://www.booking.com", image: pickImage(3) },
-      { title: `${city} Hôtel 5★ vue`, detail: "Service club", price: 320, currency: "€", sejour: "luxe", valid: true, link: "https://www.tablethotels.com", image: pickImage(4) },
-      { title: `${city} Éco-smart`, detail: "Label vert", price: 140, currency: "€", sejour: "eco", valid: true, link: "https://www.ecobnb.com", image: pickImage(5) },
+      { title: `${city} boutique 4★`, detail: "Central & design", price: 190, currency: "€", sejour: "mix", valid: true, link: "https://www.booking.com", image: pickImage(3) },
+      { title: `${city} 5★ view`, detail: "Club-level service", price: 320, currency: "€", sejour: "luxe", valid: true, link: "https://www.tablethotels.com", image: pickImage(4) },
+      { title: `${city} eco-smart`, detail: "Green label", price: 140, currency: "€", sejour: "eco", valid: true, link: "https://www.ecobnb.com", image: pickImage(5) },
     ],
     activities: [
-      { title: `Food tour ${city}`, detail: "3h guidé", price: 75, currency: "€", valid: true, link: "https://www.viator.com", image: pickImage(6) },
-      { title: `Musée clé ${city}`, detail: "Billet daté", price: 24, currency: "€", valid: true, link: "https://www.getyourguide.fr", image: pickImage(7) },
-      { title: `Quartier ${city} by night`, detail: "Balade encadrée", price: 0, currency: "€", valid: true, link: "https://www.atlas-noir.app", image: pickImage(8) },
+      { title: `Food tour ${city}`, detail: "Guided 3h", price: 75, currency: "€", valid: true, link: "https://www.viator.com", image: pickImage(6) },
+      { title: `Signature museum ${city}`, detail: "Timed ticket", price: 24, currency: "€", valid: true, link: "https://www.getyourguide.fr", image: pickImage(7) },
+      { title: `${city} neighborhood by night`, detail: "Curated walk", price: 0, currency: "€", valid: true, link: "https://www.atlas-noir.app", image: pickImage(8) },
     ],
     itinerary: [
-      { title: "Jour 1", detail: "Centre + panoramas", valid: true, image: pickImage(5) },
-      { title: "Jour 2", detail: "Musées + food tour", valid: true, image: pickImage(6) },
-      { title: "Jour 3", detail: "Parcs + rooftops", valid: true, image: pickImage(7) },
+      { title: "Day 1", detail: "City center + views", valid: true, image: pickImage(5) },
+      { title: "Day 2", detail: "Museums + food tour", valid: true, image: pickImage(6) },
+      { title: "Day 3", detail: "Parks + rooftops", valid: true, image: pickImage(7) },
     ],
   };
 
   const intel = {
-    summary: `${city} : zones centrales sécurisées, mobilité simple, contrastes culture/food.`,
+    summary: `${city}: safe central areas, simple mobility, strong culture/food mix.`,
     hotels: [
-      `${city} Boutique 4★ — quartier central`,
-      `${city} 5★ vue — service club`,
-      `${city} éco-smart — label vert`,
+      `${city} boutique 4★ — central district`,
+      `${city} 5★ view — club service`,
+      `${city} eco-smart — green label`,
     ],
     highlights: [
-      `Food tour ${city} nuit`,
-      `Musée emblématique ${city}`,
-      `Parc ou rooftop ${city} pour le coucher de soleil`,
+      `${city} night food tour`,
+      `${city} flagship museum`,
+      `${city} park or rooftop for sunset`,
     ],
     images,
     fallback: true,
@@ -1317,44 +1317,44 @@ function createSyntheticScrape(destination) {
 }
 
 function hydrateExpandedCatalog() {
-  const baseTopics = ["skyline", "quartiers", "gastronomie", "culture", "parc", "rooftop", "architecture", "mer"];
+  const baseTopics = ["skyline", "neighborhoods", "food", "culture", "park", "rooftop", "architecture", "sea"];
   expandedCityCatalog.forEach((city) => {
     const images = buildDynamicImages(city.name, baseTopics);
     intelDataset[city.slug] = {
-      summary: `${city.name} (${city.country}) : hubs centraux sûrs et reliés à ${city.airport}.`,
+      summary: `${city.name} (${city.country}): safe central hubs connected to ${city.airport}.`,
       hotels: city.hotels,
-      highlights: [city.highlight, `Liaison aéroport : ${city.rail}`, `Office du tourisme : ${city.tourism}`],
+      highlights: [city.highlight, `Airport link: ${city.rail}`, `Tourism office: ${city.tourism}`],
       images,
     };
     scrapedContext[city.slug] = {
-      flights: `${city.airport} connecté au centre via ${city.rail} (horaires : ${city.railLink}).`,
-      hotels: `Repérage d’hôtels 4-5★ (${city.hotels[0]}, ${city.hotels[1]}) sur offices et OTA 2024.`,
-      activities: `${city.tourism} recense ${city.highlight} avec calendriers officiels.`,
-      itinerary: `Transports urbains fiables (${city.transit}) pour relier les quartiers majeurs en journée comme en soirée.`,
-      budget: `Liaisons aéroport ~20–35€ selon ville; pass transports souvent 8–20€/jour (sources locales).`,
+      flights: `${city.airport} connected to downtown via ${city.rail} (schedules: ${city.railLink}).`,
+      hotels: `4–5★ hotels mapped (${city.hotels[0]}, ${city.hotels[1]}) via tourism offices and 2024 OTA data.`,
+      activities: `${city.tourism} lists ${city.highlight} with official calendars.`,
+      itinerary: `Reliable urban transport (${city.transit}) to link key districts day and night.`,
+      budget: `Airport links ~€20–35 depending on city; transit passes often €8–20/day (local sources).`,
       sources: [city.tourism, city.airportSite, city.transit],
     };
     const image = images[0]?.src;
     scrapeInventory[city.slug] = {
       flights: [
-        { title: `${city.name} direct premium`, detail: `${city.airport} → centre via ${city.rail}`, price: 320, currency: "€", mode: "avion", valid: true, link: city.airportSite, image },
+        { title: `${city.name} direct premium`, detail: `${city.airport} → center via ${city.rail}`, price: 320, currency: "€", mode: "avion", valid: true, link: city.airportSite, image },
         { title: `${city.name} express rail`, detail: city.rail, price: 20, currency: "€", mode: "train", valid: true, link: city.railLink, image: images[1]?.src || image },
-        { title: `${city.name} multi-hub`, detail: "Comparateur fiable", price: 280, currency: "€", mode: "avion", valid: true, link: "https://www.skyscanner.com", image: images[2]?.src || image },
+        { title: `${city.name} multi-hub`, detail: "Trusted comparison", price: 280, currency: "€", mode: "avion", valid: true, link: "https://www.skyscanner.com", image: images[2]?.src || image },
       ],
       lodging: [
-        { title: city.hotels[0], detail: "Adresse iconique", price: 260, currency: "€", sejour: "luxe", valid: true, link: city.tourism, image: images[3]?.src || image },
-        { title: city.hotels[1], detail: "Vue centrale", price: 210, currency: "€", sejour: "mix", valid: true, link: city.tourism, image: images[4]?.src || image },
-        { title: city.hotels[2], detail: "Option design", price: 170, currency: "€", sejour: "sobre", valid: true, link: city.tourism, image: images[5]?.src || image },
+        { title: city.hotels[0], detail: "Iconic address", price: 260, currency: "€", sejour: "luxe", valid: true, link: city.tourism, image: images[3]?.src || image },
+        { title: city.hotels[1], detail: "Central view", price: 210, currency: "€", sejour: "mix", valid: true, link: city.tourism, image: images[4]?.src || image },
+        { title: city.hotels[2], detail: "Design-forward option", price: 170, currency: "€", sejour: "sobre", valid: true, link: city.tourism, image: images[5]?.src || image },
       ],
       activities: [
         { title: city.highlight.split(",")[0], detail: city.highlight, price: 35, currency: "€", valid: true, link: city.tourism, image: images[6]?.src || image },
-        { title: `${city.name} food tour`, detail: "3h guidées", price: 65, currency: "€", valid: true, link: city.tourism, image: images[7]?.src || image },
-        { title: `${city.name} panorama`, detail: "Spot coucher de soleil", price: 0, currency: "€", valid: true, link: city.transit, image: images[8]?.src || image },
+        { title: `${city.name} food tour`, detail: "Guided 3h", price: 65, currency: "€", valid: true, link: city.tourism, image: images[7]?.src || image },
+        { title: `${city.name} panorama`, detail: "Sunset-ready spot", price: 0, currency: "€", valid: true, link: city.transit, image: images[8]?.src || image },
       ],
       itinerary: [
-        { title: "Jour 1", detail: "Arrivée + centre-ville", valid: true, image },
-        { title: "Jour 2", detail: city.highlight, valid: true, image: images[1]?.src || image },
-        { title: "Jour 3", detail: "Culture + food market", valid: true, image: images[2]?.src || image },
+        { title: "Day 1", detail: "Arrival + downtown", valid: true, image },
+        { title: "Day 2", detail: city.highlight, valid: true, image: images[1]?.src || image },
+        { title: "Day 3", detail: "Culture + food market", valid: true, image: images[2]?.src || image },
       ],
     };
   });
@@ -1391,9 +1391,9 @@ function getStageScrapePlan(stage) {
     discovery: ["vols fiables", "prix hôtels", "climat", "contrastes vibe", "accès premium"],
     profile: ["corridors sécurisés", "plafonds budget", "alertes vibe", "options transport", "sources vérifiées"],
     flights: ["routes directes", "escales courtes", "temps porte-à-porte", "classes confort", "prix dynamiques"],
-    lodging: ["quartiers sûrs", "tarifs nuit", "labels luxe", "options éco", "politique annulation"],
+    lodging: ["districts sûrs", "tarifs nuit", "labels luxe", "options éco", "politique annulation"],
     activities: ["pics d’affluence", "expériences premium", "options gratuites", "restrictions locales", "horaires fiables"],
-    itinerary: ["rythme quotidien", "transports intra-ville", "plages horaires", "liens météo", "sécurité zones"],
+    itinerary: ["rythme quotidien", "transports intra-ville", "beaches horaires", "liens météo", "sécurité zones"],
     budget: ["total vols", "moyenne nuit", "transports locaux", "activités clés", "marge sécurité"],
   };
   return plans[stage] || ["sources ouvertes"];
@@ -1470,9 +1470,9 @@ function domainFromLink(link) {
   if (!link) return "source vérifiée";
   try {
     const url = new URL(link.startsWith("http") ? link : `https://${link}`);
-    return url.hostname.replace("www.", "");
+    return url.hostname.replakee("www.", "");
   } catch (e) {
-    return link.replace(/https?:\/\//, "").split("/")[0];
+    return link.replakee(/https?:\/\//, "").split("/")[0];
   }
 }
 
@@ -1905,7 +1905,7 @@ function conceptOptions(discovery) {
   const options = [
     {
       id: "A",
-      title: `Immersion ${destinationLabel} sur mesure`,
+      title: `Imseasion ${destinationLabel} sur mesure`,
       bullets: [
         `${vibeLabel} + adresses confidentielles`,
         `Transports ${discovery.transport} affinés`,
@@ -2089,7 +2089,7 @@ const builders = {
       {
         id: "B",
         title: "4★ abordable toute la durée",
-        bullets: ["Durée complète", "Zone pratique (métro/plage)", "Bon rapport qualité/prix"],
+        bullets: ["Durée complète", "Zone pratique (métro/beach)", "Bon rapport qualité/prix"],
       },
       {
         id: "C",
@@ -2120,7 +2120,7 @@ const builders = {
       {
         id: "A",
         title: "Culture + gratuit majoritaire",
-        bullets: ["Musées/temples extérieurs", "Balades guidées", "1 expérience premium unique"],
+        bullets: ["Museums/temples extérieurs", "Balades guidées", "1 expérience premium unique"],
       },
       {
         id: "B",
@@ -2130,7 +2130,7 @@ const builders = {
       {
         id: "C",
         title: "Moments premium concentrés",
-        bullets: ["Spa ou onsen privé", "Dîner gastronomique", "Guide privé 1 journée"],
+        bullets: ["Spa ou onsen privé", "Dîner gourmet", "Guide privé 1 journée"],
       },
     ], "activities").map((opt) => ({
       ...opt,
@@ -2181,7 +2181,7 @@ const builders = {
         title: "Alléger certaines journées",
         bullets: ["Moins d’activités", "Plus de temps libre", "Maintien sécurité"],
         onSelect: () => {
-          state.choices.itinerary = { id: "B", title: "Version light", bullets: outline.map((d) => d.replace(" ·", ",")) };
+          state.choices.itinerary = { id: "B", title: "Version light", bullets: outline.map((d) => d.replakee(" ·", ",")) };
           addMessage({ title: "Itinéraire ajusté (light)", agent: "Agent 5", body: "Synthèse budget en cours." });
           persistState();
           startStepFlow(idx + 1);
@@ -2246,11 +2246,11 @@ const builders = {
     );
 
     addMessage({
-      title: "Étape 6 — Budget & packages",
-      agent: "Agent 6 — Synthétiseur",
-      body: `<strong>Découpage estimé</strong><ul><li>Vols : ~${flights}€</li><li>Hôtels : ~${hotels}€</li><li>Activités : ~${activities}€</li><li>Transports locaux : ~${transport}€</li></ul>${feasibility}.`,
+      title: "Step 6 — Budget & packages",
+      agent: "Agent 6 — Synthesizer",
+      body: `<strong>Estimated split</strong><ul><li>Flights: ~${flights}€</li><li>Hotels: ~${hotels}€</li><li>Activities: ~${activities}€</li><li>Local transport: ~${transport}€</li></ul>${feasibility}.`,
       options,
-      question: "Préférez-vous le package Best Value (A) ou Luxury Upgrade (B) ?"
+      question: "Do you prefer the Best Value package (A) or the Luxury Upgrade (B)?"
     });
   }
 };
@@ -2273,22 +2273,22 @@ function buildSummary() {
   };
 
   blocks.push({
-    title: "1. Profil client",
+    title: "1. Client profile",
     items: [
-      `${formatBudgetLabel(discovery.budget)} — ${discovery.duration} jours`,
-      `Départ ${sanitizeField(discovery.origin)} → ${sanitizeField(discovery.destination)}`,
-      `Vibe ${sanitizeField(discovery.vibe)}, flexibilité ${sanitizeField(discovery.flex)}, transport ${sanitizeField(discovery.transport)}, séjour ${sanitizeField(discovery.sejour)}`,
-      `Voyageurs: ${sanitizeField(discovery.travelers)}`,
+      `${formatBudgetLabel(discovery.budget)} — ${discovery.duration} days`,
+      `Departing ${sanitizeField(discovery.origin)} → ${sanitizeField(discovery.destination)}`,
+      `Vibe ${sanitizeField(discovery.vibe)}, flexibility ${sanitizeField(discovery.flex)}, transport ${sanitizeField(discovery.transport)}, stay ${sanitizeField(discovery.sejour)}`,
+      `Travelers: ${sanitizeField(discovery.travelers)}`,
       concept ? `Concept: ${sanitizeField(concept.title)}` : ""
     ].filter(Boolean)
   });
 
-  blocks.push({ title: "2. Vols", items: formatScrapeLines(choices.flights, "flights") });
-  blocks.push({ title: "3. Hôtels", items: formatScrapeLines(choices.lodging, "lodging") });
-  blocks.push({ title: "4. Activités", items: formatScrapeLines(choices.activities, "activities") });
-  blocks.push({ title: "5. Itinéraire", items: choices.itinerary?.bullets || ["Itinéraire standard"] });
-  blocks.push({ title: "6. Package choisi", items: formatScrapeLines(choices.package, "budget") });
-  blocks.push({ title: "7. Conformité sécurité", items: ["Pas de destinations interdites", "Aucune activité illégale"] });
+  blocks.push({ title: "2. Flights", items: formatScrapeLines(choices.flights, "flights") });
+  blocks.push({ title: "3. Hotels", items: formatScrapeLines(choices.lodging, "lodging") });
+  blocks.push({ title: "4. Activities", items: formatScrapeLines(choices.activities, "activities") });
+  blocks.push({ title: "5. Itinerary", items: choices.itinerary?.bullets || ["Standard itinerary"] });
+  blocks.push({ title: "6. Selected package", items: formatScrapeLines(choices.package, "budget") });
+  blocks.push({ title: "7. Safety compliance", items: ["No banned destinations", "No illegal activities"] });
 
   summaryBlock.innerHTML = "";
   blocks.forEach((b) => {
@@ -2316,20 +2316,20 @@ exportBtn.addEventListener("click", () => {
     .map((b) => `${b.title}\n- ${b.items.join("\n- ")}`)
     .join("\n\n");
   navigator.clipboard.writeText(text).then(() => {
-    exportBtn.textContent = "Copié !";
-    setTimeout(() => (exportBtn.textContent = "Copier le texte"), 2000);
+    exportBtn.textContent = "Copied!";
+    setTimeout(() => (exportBtn.textContent = "Copy text"), 2000);
   });
 });
 
 if (validateBtn) {
   validateBtn.addEventListener("click", () => {
     if (!state.summary) return;
-    validateBtn.textContent = "Validé";
+    validateBtn.textContent = "Validated";
     validateBtn.classList.add("confirmed");
     addMessage({
-      title: "Validation finale",
-      agent: "Chef d’orchestre",
-      body: "Parcours verrouillé. Les sélections scrappées restent synchronisées pour export et réservation.",
+      title: "Final validation",
+      agent: "Conductor",
+      body: "Journey locked. Scraped selections stay synced for export and booking.",
     });
   });
 }
@@ -2338,7 +2338,7 @@ async function onDiscoverySubmit(event) {
   event.preventDefault();
   const formEntries = Object.fromEntries(new FormData(event.target).entries());
   if (containsUnsafeMarkup(formEntries.destination) || containsUnsafeMarkup(formEntries.origin)) {
-    showIntelError("Entrée invalide : les balises HTML sont bloquées.");
+    showIntelError("Invalid input: HTML tags are blocked.");
     return;
   }
   const data = Object.fromEntries(
@@ -2347,32 +2347,32 @@ async function onDiscoverySubmit(event) {
   const destinationLC = data.destination.trim().toLowerCase();
   if (bannedDestinations.some((d) => destinationLC.includes(d))) {
     safetyBlocked(data.destination);
-    stopThinking("Demande bloquée pour sécurité.");
+    stopThinking("Request blocked for safety.");
     return;
   }
   const warnings = validateDiscovery(data);
   state.discovery = data;
   state.scrapeReady = null;
-  setStatus("En cours", "info");
+  setStatus("In progress", "info");
   conversation.innerHTML = "";
-  setThinking("Agent 0 prépare 3 pistes cohérentes…");
+  setThinking("Agent 0 is preparing 3 consistent leads…");
 
   if (warnings.length) {
     addMessage({
-      title: "Alerte cohérence",
-      agent: "Vérifications préalables",
+      title: "Consistency alert",
+      agent: "Pre-checks",
       body: warnings.join("\n")
     });
   }
 
-  await ensureScrapeDataset(data.destination, "Scraping découverte sécurisé…");
+  await ensureScrapeDataset(data.destination, "Secure discovery scraping…");
 
   addMessage({
-    title: "Phase découverte",
+    title: "Discovery phase",
     agent: "Agent 0 — Scout",
-    body: `Vous voulez aller vers ${data.destination} depuis ${data.origin}, vibe ${data.vibe}. Budget: ${formatBudgetLabel(data.budget)}. Voici 3 concepts rapides :`,
+    body: `You want to go to ${data.destination} from ${data.origin}, vibe ${data.vibe}. Budget: ${formatBudgetLabel(data.budget)}. Here are 3 quick concepts:`,
     options: conceptOptions(data),
-    question: "Choisissez un concept (A/B/C) ou indiquez un autre axe."
+    question: "Pick a concept (A/B/C) or suggest another angle."
   });
 
   persistState();
@@ -2390,7 +2390,7 @@ hydrateScrapeSources();
 clearUI(true);
 restoreState();
 if (state.discovery?.destination) {
-  setStatus("Session restaurée", "info");
+  setStatus("Session restored", "info");
   if (refreshIntelBtn) refreshIntelBtn.disabled = false;
   runIntel(state.discovery.destination);
 }
