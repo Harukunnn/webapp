@@ -1,11 +1,11 @@
-# Orchestrateur Agentique Voyage
+# Agentic Travel Orchestrator
 
-Cette web‑app reconstruit de zéro le « Ultra-Optimized Mega Agentic Prompt » en le transformant en interface interactive. Elle simule un agent unique qui orchestre les 6 rôles de voyage (profil, vols, hôtels, activités, itinéraire, budget) avec contrôle de sécurité et validation étape par étape.
+This web app recreates the “Ultra-Optimized Mega Agentic Prompt” from scratch as an interactive interface. It simulates a single agent that orchestrates the six travel roles (profile, flights, hotels, activities, itinerary, budget) with safety controls and step-by-step validation.
 
-## Fonctionnement
-- Remplir le formulaire de découverte (départ, destination, budget, vibe, durée, flexibilité).
-- Le filtre de sécurité bloque toute destination interdite et propose des alternatives sûres.
-- Chaque agent virtuel propose 2–3 options A/B/C à sélectionner avant de passer à l’étape suivante.
-- Une fois le package choisi, un résumé structuré est généré avec possibilité d’exporter le texte.
+## How it works
+- Fill in the discovery form (departure, destination, budget, vibe, length of stay, flexibility).
+- The safety filter blocks any banned destination and suggests safe alternatives.
+- Each virtual agent proposes 2–3 A/B/C options to pick before moving to the next stage.
+- Once the package is chosen, a structured summary is generated with an option to export the text.
 
-Aucune donnée n’est envoyée : tout est simulé côté navigateur pour donner l’illusion d’une IA multi‑agents respectant strictement les règles du prompt d’origine.
+No data is sent anywhere: everything is simulated in the browser to give the illusion of a multi-agent AI that strictly follows the original prompt’s rules.
