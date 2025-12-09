@@ -87,6 +87,48 @@ const translations = {
     validateBody:
       "Parcours verrouillé. Les sélections scrappées restent synchronisées pour export et réservation.",
     statusSessionRestored: "Session restaurée",
+    aiAwaitingValidation: "L’IA attend votre validation.",
+    invalidHtml: "Entrée invalide : les balises HTML sont bloquées.",
+    securityBlocked: "Demande bloquée pour sécurité.",
+    statusInProgress: "En cours",
+    thinkingConceptPrep: "Agent 0 prépare 3 pistes cohérentes…",
+    coherenceAlertTitle: "Alerte cohérence",
+    coherenceAlertAgent: "Vérifications préalables",
+    scrapingStage: "Scraping sécurisé…",
+    statusScraping: "Scraping",
+    scrapeReady: "Sources scrappées prêtes",
+    blockedTitle: "Blocage sécurité",
+    blockedAgent: "Filtre légal",
+    blockedBody:
+      "La destination « {destination} » est interdite ou jugée dangereuse. Ce flux refuse de la planifier. Propositions sûres : {alternatives}.",
+    blockedStatus: "Bloqué",
+    intelSearchCancelled: "Recherche annulée",
+    intelBlockedMessage: "Destination bloquée : l’outil propose des alternatives sûres.",
+    budgetTight: "Budget serré",
+    budgetGenerous: "Budget généreux",
+    budgetBalanced: "Budget équilibré",
+    warningLongStay: "Durée > 21 jours : risque de budget insuffisant.",
+    warningShortStay: "Séjour très court : veillez à ne pas surcharger l’itinéraire.",
+    warningBudgetVibe: "Budget serré mais vibe premium : prévoir concessions.",
+    discoveryPhaseTitle: "Phase découverte",
+    discoveryAgent: "Agent 0 — Scout",
+    discoveryBody:
+      "Vous voulez aller vers {destination} depuis {origin}, vibe {vibe}. Budget: {budget}. Voici 3 concepts rapides :",
+    conceptQuestion: "Choisissez un concept (A/B/C) ou indiquez un autre axe.",
+    conceptTitleA: "Immersion {destination} sur mesure",
+    conceptTitleB: "Nature ou littoral reposant",
+    conceptTitleC: "{destination} nocturne & design",
+    conceptBulletA1: "{vibeLabel} + adresses confidentielles",
+    conceptBulletA2: "Transports {transport} affinés",
+    conceptBulletA3: "Séjour {stay} calibré",
+    conceptBulletB1: "Rythme léger & panoramas",
+    conceptBulletB2: "{duration}-jour(s) avec sorties ciblées",
+    conceptBulletB3: "Transport {transport} + transfers filtrés",
+    conceptBulletC1: "Quartiers vivants + rooftops",
+    conceptBulletC2: "Bars/cafés signature scrappés",
+    conceptBulletC3: "Logements proches des hubs sûrs",
+    conceptChosen: "Concept choisi : {title}",
+    proceedProfile: "Passage à l’étape 1 — Profil.",
   },
   en: {
     brand: "Atlas Noir",
@@ -162,6 +204,48 @@ const translations = {
     validateBody:
       "Path locked. Scraped selections stay synchronized for export and booking.",
     statusSessionRestored: "Session restored",
+    aiAwaitingValidation: "AI is waiting for your validation.",
+    invalidHtml: "Invalid input: HTML tags are blocked.",
+    securityBlocked: "Request blocked for safety.",
+    statusInProgress: "In progress",
+    thinkingConceptPrep: "Agent 0 is preparing 3 coherent paths…",
+    coherenceAlertTitle: "Coherence alert",
+    coherenceAlertAgent: "Pre-flight checks",
+    scrapingStage: "Secure scraping…",
+    statusScraping: "Scraping",
+    scrapeReady: "Scraped sources ready",
+    blockedTitle: "Security block",
+    blockedAgent: "Compliance filter",
+    blockedBody:
+      "Destination “{destination}” is forbidden or unsafe. This flow will not plan it. Safe alternatives: {alternatives}.",
+    blockedStatus: "Blocked",
+    intelSearchCancelled: "Search cancelled",
+    intelBlockedMessage: "Destination blocked: the tool suggests safe alternatives.",
+    budgetTight: "Lean budget",
+    budgetGenerous: "Generous budget",
+    budgetBalanced: "Balanced budget",
+    warningLongStay: "Stay > 21 days: risk of insufficient budget.",
+    warningShortStay: "Very short stay: keep the itinerary light.",
+    warningBudgetVibe: "Tight budget but premium vibe: expect trade-offs.",
+    discoveryPhaseTitle: "Discovery phase",
+    discoveryAgent: "Agent 0 — Scout",
+    discoveryBody:
+      "You want to travel to {destination} from {origin}, vibe {vibe}. Budget: {budget}. Here are 3 quick concepts:",
+    conceptQuestion: "Choose a concept (A/B/C) or suggest another angle.",
+    conceptTitleA: "Tailored {destination} immersion",
+    conceptTitleB: "Relaxing nature or coast",
+    conceptTitleC: "{destination} by night & design",
+    conceptBulletA1: "{vibeLabel} + insider spots",
+    conceptBulletA2: "Refined {transport} routes",
+    conceptBulletA3: "{stay} stay calibrated",
+    conceptBulletB1: "Light pace & panoramas",
+    conceptBulletB2: "{duration}-day(s) with focused outings",
+    conceptBulletB3: "{transport} + filtered transfers",
+    conceptBulletC1: "Lively districts + rooftops",
+    conceptBulletC2: "Signature bars/cafés",
+    conceptBulletC3: "Lodging near safe hubs",
+    conceptChosen: "Concept selected: {title}",
+    proceedProfile: "Moving to step 1 — Profile.",
   },
 };
 
@@ -386,6 +470,14 @@ let currentLang = "fr";
 
 function t(key) {
   return translations[currentLang]?.[key] || translations.fr[key] || key;
+}
+
+function formatTemplate(template, vars = {}) {
+  return template.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? "");
+}
+
+function tr(key, vars) {
+  return formatTemplate(t(key), vars);
 }
 
 function applyStaticTranslations() {
@@ -801,7 +893,7 @@ function clearUI(skipPersist = false) {
 }
 
 function addMessage({ title, agent, body, options = [], question }) {
-  stopThinking("L’IA attend votre validation.");
+  stopThinking(t("aiAwaitingValidation"));
   const card = document.createElement("article");
   card.className = "message";
   const heading = document.createElement("h3");
@@ -1027,13 +1119,13 @@ async function runIntel(destination) {
   }
 }
 
-async function ensureScrapeDataset(destination, stageLabel = "Scraping sécurisé…") {
+async function ensureScrapeDataset(destination, stageLabel = t("scrapingStage")) {
   const key = slugify(destination || "");
   if (!key) return {};
   if (state.scrapeReady === key && scrapeInventory[key]) {
     return { intel: intelDataset[key], inventory: scrapeInventory[key] };
   }
-  setStatus("Scraping", "info");
+  setStatus(t("statusScraping"), "info");
   setThinking(stageLabel);
   const delay = Math.floor(2500 + Math.random() * 2000);
   const needsLoader = !dynamicState.loader;
@@ -1046,7 +1138,7 @@ async function ensureScrapeDataset(destination, stageLabel = "Scraping sécuris�
   renderIntel(intel, destination);
   state.scrapeReady = key;
   if (needsLoader) clearStepLoader();
-  setIntelStatus("Sources scrappées prêtes", "success");
+  setIntelStatus(t("scrapeReady"), "success");
   refreshIntelBtn.disabled = false;
   return { intel, inventory };
 }
@@ -1056,28 +1148,28 @@ function safetyBlocked(destination) {
   clearUI(true);
   safeStorage.remove("agenticState");
   addMessage({
-    title: "Blocage sécurité",
-    agent: "Filtre légal",
-    body: `La destination « ${destination} » est interdite ou jugée dangereuse. Ce flux refuse de la planifier. Propositions sûres : ${alt.join(" · ")}.`
+    title: t("blockedTitle"),
+    agent: t("blockedAgent"),
+    body: tr("blockedBody", { destination, alternatives: alt.join(" · ") })
   });
-  setStatus("Bloqué", "danger");
-  setIntelStatus("Recherche annulée", "danger");
-  showIntelError("Destination bloquée : l’outil propose des alternatives sûres.");
+  setStatus(t("blockedStatus"), "danger");
+  setIntelStatus(t("intelSearchCancelled"), "danger");
+  showIntelError(t("intelBlockedMessage"));
 }
 
 function formatBudgetLabel(level) {
-  if (level === "low") return "Budget serré";
-  if (level === "high") return "Budget généreux";
-  return "Budget équilibré";
+  if (level === "low") return t("budgetTight");
+  if (level === "high") return t("budgetGenerous");
+  return t("budgetBalanced");
 }
 
 function validateDiscovery(data) {
   const warnings = [];
   const duration = Number(data.duration || 0);
-  if (duration > 21) warnings.push("Durée > 21 jours : risque de budget insuffisant.");
-  if (duration < 3) warnings.push("Séjour très court : veillez à ne pas surcharger l’itinéraire.");
+  if (duration > 21) warnings.push(t("warningLongStay"));
+  if (duration < 3) warnings.push(t("warningShortStay"));
   if (data.budget === "low" && ["romantic", "luxury", "premium"].some((v) => data.vibe?.includes(v))) {
-    warnings.push("Budget serré mais vibe premium : prévoir concessions.");
+    warnings.push(t("warningBudgetVibe"));
   }
   return warnings;
 }
@@ -1092,30 +1184,26 @@ function conceptOptions(discovery) {
   const options = [
     {
       id: "A",
-      title: `Immersion ${destinationLabel} sur mesure`,
+      title: tr("conceptTitleA", { destination: destinationLabel }),
       bullets: [
-        `${vibeLabel} + adresses confidentielles`,
-        `Transports ${discovery.transport} affinés`,
-        `Séjour ${discovery.sejour} calibré`,
+        tr("conceptBulletA1", { vibeLabel }),
+        tr("conceptBulletA2", { transport: discovery.transport }),
+        tr("conceptBulletA3", { stay: discovery.sejour }),
       ],
     },
     {
       id: "B",
-      title: "Nature ou littoral reposant",
+      title: t("conceptTitleB"),
       bullets: [
-        "Rythme léger & panoramas",
-        `${discovery.duration}-jour(s) avec sorties ciblées`,
-        `Transport ${discovery.transport} + transfers filtrés`,
+        t("conceptBulletB1"),
+        tr("conceptBulletB2", { duration: discovery.duration }),
+        tr("conceptBulletB3", { transport: discovery.transport }),
       ],
     },
     {
       id: "C",
-      title: `${destinationLabel} nocturne & design`,
-      bullets: [
-        "Quartiers vivants + rooftops",
-        "Bars/cafés signature scrappés",
-        "Logements proches des hubs sûrs",
-      ],
+      title: tr("conceptTitleC", { destination: destinationLabel }),
+      bullets: [t("conceptBulletC1"), t("conceptBulletC2"), t("conceptBulletC3")],
     },
   ];
   return attachScrapeToOptions(options, "discovery").map((opt) => ({
@@ -1123,9 +1211,9 @@ function conceptOptions(discovery) {
       onSelect: (o) => {
         state.concept = o;
         addMessage({
-          title: `Concept choisi : ${o.title}`,
+          title: tr("conceptChosen", { title: o.title }),
           agent: "Agent 0",
-          body: "Passage à l’étape 1 — Profil."
+          body: t("proceedProfile"),
         });
         persistState();
         startStepFlow(0);
@@ -1525,7 +1613,7 @@ async function onDiscoverySubmit(event) {
   event.preventDefault();
   const formEntries = Object.fromEntries(new FormData(event.target).entries());
   if (containsUnsafeMarkup(formEntries.destination) || containsUnsafeMarkup(formEntries.origin)) {
-    showIntelError("Entrée invalide : les balises HTML sont bloquées.");
+    showIntelError(t("invalidHtml"));
     return;
   }
   const data = Object.fromEntries(
@@ -1534,32 +1622,37 @@ async function onDiscoverySubmit(event) {
   const destinationLC = data.destination.trim().toLowerCase();
   if (bannedDestinations.some((d) => destinationLC.includes(d))) {
     safetyBlocked(data.destination);
-    stopThinking("Demande bloquée pour sécurité.");
+    stopThinking(t("securityBlocked"));
     return;
   }
   const warnings = validateDiscovery(data);
   state.discovery = data;
   state.scrapeReady = null;
-  setStatus("En cours", "info");
+  setStatus(t("statusInProgress"), "info");
   conversation.innerHTML = "";
-  setThinking("Agent 0 prépare 3 pistes cohérentes…");
+  setThinking(t("thinkingConceptPrep"));
 
   if (warnings.length) {
     addMessage({
-      title: "Alerte cohérence",
-      agent: "Vérifications préalables",
+      title: t("coherenceAlertTitle"),
+      agent: t("coherenceAlertAgent"),
       body: warnings.join("\n")
     });
   }
 
-  await ensureScrapeDataset(data.destination, "Scraping découverte sécurisé…");
+  await ensureScrapeDataset(data.destination, t("scrapingStage"));
 
   addMessage({
-    title: "Phase découverte",
-    agent: "Agent 0 — Scout",
-    body: `Vous voulez aller vers ${data.destination} depuis ${data.origin}, vibe ${data.vibe}. Budget: ${formatBudgetLabel(data.budget)}. Voici 3 concepts rapides :`,
+    title: t("discoveryPhaseTitle"),
+    agent: t("discoveryAgent"),
+    body: tr("discoveryBody", {
+      destination: data.destination,
+      origin: data.origin,
+      vibe: data.vibe,
+      budget: formatBudgetLabel(data.budget),
+    }),
     options: conceptOptions(data),
-    question: "Choisissez un concept (A/B/C) ou indiquez un autre axe."
+    question: t("conceptQuestion")
   });
 
   persistState();
