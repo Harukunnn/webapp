@@ -104,6 +104,13 @@ const translations = {
     blockedStatus: "Bloqué",
     intelSearchCancelled: "Recherche annulée",
     intelBlockedMessage: "Destination bloquée : l’outil propose des alternatives sûres.",
+    intelSummaryTitle: "Résumé sécurité & logistique",
+    intelHotelsTitle: "Hôtels probants",
+    intelMomentsTitle: "Moments conseillés",
+    intelFallbackMessage: "Résultats génériques faute de source dédiée.",
+    intelSearching: "Recherche en cours…",
+    intelError: "Erreur lors de la récupération des informations.",
+    intelSearchFailed: "Échec de la recherche",
     budgetTight: "Budget serré",
     budgetGenerous: "Budget généreux",
     budgetBalanced: "Budget équilibré",
@@ -221,6 +228,13 @@ const translations = {
     blockedStatus: "Blocked",
     intelSearchCancelled: "Search cancelled",
     intelBlockedMessage: "Destination blocked: the tool suggests safe alternatives.",
+    intelSummaryTitle: "Safety & logistics summary",
+    intelHotelsTitle: "Proven hotels",
+    intelMomentsTitle: "Suggested moments",
+    intelFallbackMessage: "Generic results while no dedicated source is available.",
+    intelSearching: "Searching…",
+    intelError: "Error while fetching information.",
+    intelSearchFailed: "Search failed",
     budgetTight: "Lean budget",
     budgetGenerous: "Generous budget",
     budgetBalanced: "Balanced budget",
@@ -251,35 +265,68 @@ const translations = {
 
 const intelDataset = {
   tokyo: {
-    summary: "Quartiers sûrs (Shinjuku, Shibuya, Ginza), transport facile par métro/Pasmo.",
-    hotels: ["Shibuya Stream Excel Tokyu (4★)", "Mitsui Garden Ginza (4★)", "Park Hotel Tokyo (4★ artistique)"],
-    highlights: ["Food tours à Shinjuku", "Jardins Hama-rikyu", "Onsen urbain à Odaiba"],
+    summary: {
+      fr: "Quartiers sûrs (Shinjuku, Shibuya, Ginza), transport facile par métro/Pasmo.",
+      en: "Safe districts (Shinjuku, Shibuya, Ginza) with easy subway/Pasmo mobility.",
+    },
+    hotels: [
+      { fr: "Shibuya Stream Excel Tokyu (4★)", en: "Shibuya Stream Excel Tokyu (4★)" },
+      { fr: "Mitsui Garden Ginza (4★)", en: "Mitsui Garden Ginza (4★)" },
+      { fr: "Park Hotel Tokyo (4★ artistique)", en: "Park Hotel Tokyo (4★ artsy)" },
+    ],
+    highlights: [
+      { fr: "Food tours à Shinjuku", en: "Food tours in Shinjuku" },
+      { fr: "Jardins Hama-rikyu", en: "Hama-rikyu Gardens" },
+      { fr: "Onsen urbain à Odaiba", en: "Urban onsen in Odaiba" },
+    ],
     images: [
-      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80", alt: "Shibuya de nuit" },
-      { src: "https://images.unsplash.com/photo-1549692520-acc6669e2f0c?auto=format&fit=crop&w=800&q=80", alt: "Temple au lever du soleil" },
-      { src: "https://images.unsplash.com/photo-1526481280695-3c469c2f0f99?auto=format&fit=crop&w=800&q=80", alt: "Métro japonais" }
-    ]
+      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80", alt: { fr: "Shibuya de nuit", en: "Shibuya at night" } },
+      { src: "https://images.unsplash.com/photo-1549692520-acc6669e2f0c?auto=format&fit=crop&w=800&q=80", alt: { fr: "Temple au lever du soleil", en: "Temple at sunrise" } },
+      { src: "https://images.unsplash.com/photo-1526481280695-3c469c2f0f99?auto=format&fit=crop&w=800&q=80", alt: { fr: "Métro japonais", en: "Japanese subway" } },
+    ],
   },
   lisbonne: {
-    summary: "Ville côtière sûre, bon rapport qualité/prix, mobilité simple (tram 28, métro).",
-    hotels: ["The Lumiares (4★ Bairro Alto)", "Mama Shelter Lisboa (4★)", "NH Collection Liberdade (4★)"],
-    highlights: ["Miradouros, fado authentique", "Excursion à Belém", "Journée à Cascais/Sintra"],
+    summary: {
+      fr: "Ville côtière sûre, bon rapport qualité/prix, mobilité simple (tram 28, métro).",
+      en: "Safe coastal city, good value, simple mobility (tram 28, metro).",
+    },
+    hotels: [
+      { fr: "The Lumiares (4★ Bairro Alto)", en: "The Lumiares (4★ Bairro Alto)" },
+      { fr: "Mama Shelter Lisboa (4★)", en: "Mama Shelter Lisboa (4★)" },
+      { fr: "NH Collection Liberdade (4★)", en: "NH Collection Liberdade (4★)" },
+    ],
+    highlights: [
+      { fr: "Miradouros, fado authentique", en: "Viewpoints, authentic fado" },
+      { fr: "Excursion à Belém", en: "Excursion to Belém" },
+      { fr: "Journée à Cascais/Sintra", en: "Day trip to Cascais/Sintra" },
+    ],
     images: [
-      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80&sat=-30&hue=-10", alt: "Tram jaune de Lisbonne" },
-      { src: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=800&q=80", alt: "Toits de Lisbonne" },
-      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80&sat=-20", alt: "Rue pavée en pente" }
-    ]
+      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80&sat=-30&hue=-10", alt: { fr: "Tram jaune de Lisbonne", en: "Lisbon yellow tram" } },
+      { src: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=800&q=80", alt: { fr: "Toits de Lisbonne", en: "Lisbon rooftops" } },
+      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80&sat=-20", alt: { fr: "Rue pavée en pente", en: "Steep cobbled street" } },
+    ],
   },
   montréal: {
-    summary: "Destination très sûre, bilingue, scène food et musées riches.",
-    hotels: ["Humaniti Hotel Montréal (4★)", "Hotel Monville (4★)", "Le Germain (4★ boutique)"],
-    highlights: ["Vieux-Port & marché Jean-Talon", "Musée des Beaux-Arts", "Mont Royal au coucher du soleil"],
+    summary: {
+      fr: "Destination très sûre, bilingue, scène food et musées riches.",
+      en: "Very safe, bilingual destination with rich food and museum scene.",
+    },
+    hotels: [
+      { fr: "Humaniti Hotel Montréal (4★)", en: "Humaniti Hotel Montréal (4★)" },
+      { fr: "Hotel Monville (4★)", en: "Hotel Monville (4★)" },
+      { fr: "Le Germain (4★ boutique)", en: "Le Germain (4★ boutique)" },
+    ],
+    highlights: [
+      { fr: "Vieux-Port & marché Jean-Talon", en: "Old Port & Jean-Talon market" },
+      { fr: "Musée des Beaux-Arts", en: "Fine Arts Museum" },
+      { fr: "Mont Royal au coucher du soleil", en: "Mount Royal at sunset" },
+    ],
     images: [
-      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80&sat=-40", alt: "Skyline de Montréal" },
-      { src: "https://images.unsplash.com/photo-1503389152951-9f343605f61e?auto=format&fit=crop&w=800&q=80", alt: "Vieux-Montréal" },
-      { src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80", alt: "Mont Royal" }
-    ]
-  }
+      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80&sat=-40", alt: { fr: "Skyline de Montréal", en: "Montréal skyline" } },
+      { src: "https://images.unsplash.com/photo-1503389152951-9f343605f61e?auto=format&fit=crop&w=800&q=80", alt: { fr: "Vieux-Montréal", en: "Old Montréal" } },
+      { src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80", alt: { fr: "Mont Royal", en: "Mount Royal" } },
+    ],
+  },
 };
 
 const scrapedContext = {
@@ -472,6 +519,30 @@ function t(key) {
   return translations[currentLang]?.[key] || translations.fr[key] || key;
 }
 
+function resolveCopy(value) {
+  if (value && typeof value === "object" && ("fr" in value || "en" in value)) {
+    return value[currentLang] || value.fr || value.en || "";
+  }
+  return value ?? "";
+}
+
+function localizeList(values = []) {
+  return values.map((entry) => resolveCopy(entry));
+}
+
+function localizeIntelPayload(intel = {}) {
+  return {
+    ...intel,
+    summary: resolveCopy(intel.summary),
+    hotels: localizeList(intel.hotels || []),
+    highlights: localizeList(intel.highlights || []),
+    images: (intel.images || []).map((img) => ({
+      ...img,
+      alt: resolveCopy(img.alt),
+    })),
+  };
+}
+
 function formatTemplate(template, vars = {}) {
   return template.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? "");
 }
@@ -500,6 +571,9 @@ function applyStaticTranslations() {
   const languagePicker = document.getElementById("languagePicker");
   if (languagePicker && languagePicker.value !== currentLang) {
     languagePicker.value = currentLang;
+  }
+  if (state.scrapeReady && intelDataset[state.scrapeReady]) {
+    renderIntel(intelDataset[state.scrapeReady], state.discovery?.destination || "");
   }
 }
 
@@ -1010,10 +1084,11 @@ function attachScrapeToOptions(options, stage) {
 
 function renderIntel(intel, destination) {
   if (!intelCards || !imageStrip) return;
+  const localizedIntel = localizeIntelPayload(intel);
   const cards = [
-    { title: "Résumé sécurité & logistique", content: intel.summary },
-    { title: "Hôtels probants", content: intel.hotels?.join(" · ") || "—" },
-    { title: "Moments conseillés", content: intel.highlights?.join(" · ") || "—" },
+    { title: t("intelSummaryTitle") || "Résumé sécurité & logistique", content: localizedIntel.summary },
+    { title: t("intelHotelsTitle") || "Hôtels probants", content: localizedIntel.hotels.join(" · ") || "—" },
+    { title: t("intelMomentsTitle") || "Moments conseillés", content: localizedIntel.highlights.join(" · ") || "—" },
   ];
 
   intelCards.innerHTML = "";
@@ -1033,32 +1108,46 @@ function renderIntel(intel, destination) {
   });
 
   imageStrip.innerHTML = "";
-  (intel.images || []).forEach((img) => {
+  (localizedIntel.images || []).forEach((img) => {
     const figure = document.createElement("figure");
     const image = document.createElement("img");
     image.src = img.src;
-    image.alt = sanitizeField(img.alt || destination);
+    image.alt = sanitizeField(resolveCopy(img.alt) || destination);
     image.loading = "lazy";
     const caption = document.createElement("figcaption");
-    caption.textContent = sanitizeField(img.alt || destination);
+    caption.textContent = sanitizeField(resolveCopy(img.alt) || destination);
     figure.append(image, caption);
     imageStrip.appendChild(figure);
   });
 
-  setIntelStatus("Infos + images prêtes", "success");
+  setIntelStatus(t("intelReady"), "success");
   if (refreshIntelBtn) refreshIntelBtn.disabled = false;
-  showIntelError(intel.fallback ? "Résultats génériques faute de source dédiée." : "", intel.fallback ? "error" : "success");
+  showIntelError(
+    intel.fallback ? t("intelFallbackMessage") : "",
+    intel.fallback ? "error" : "success"
+  );
 }
 
 function fallbackIntel(destination) {
   return {
-    summary: `Pas de fiche ${destination}. On reste sur centres sûrs, 4★, culture + 1 premium.`,
-    hotels: ["Chaîne 4★ centrale", "Boutique locale bien notée", "Option appart-hôtel sécurisé"],
-    highlights: ["Visite guidée du centre", "Food tour", "Panorama ou musée emblématique"],
+    summary: {
+      fr: `Pas de fiche ${destination}. On reste sur centres sûrs, 4★, culture + 1 premium.`,
+      en: `No dedicated sheet for ${destination}. Staying with safe centers, 4★, culture + 1 premium touch.`,
+    },
+    hotels: [
+      { fr: "Chaîne 4★ centrale", en: "Central 4★ chain" },
+      { fr: "Boutique locale bien notée", en: "Well-rated local boutique" },
+      { fr: "Option appart-hôtel sécurisé", en: "Secure aparthotel option" },
+    ],
+    highlights: [
+      { fr: "Visite guidée du centre", en: "Guided city-center visit" },
+      { fr: "Food tour", en: "Food tour" },
+      { fr: "Panorama ou musée emblématique", en: "Panorama or emblematic museum" },
+    ],
     images: [
-      { src: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=800&q=80", alt: "Centre-ville" },
-      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80", alt: "Quartier animé" },
-      { src: "https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?auto=format&fit=crop&w=800&q=80", alt: "Hôtel moderne" }
+      { src: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=800&q=80", alt: { fr: "Centre-ville", en: "Downtown" } },
+      { src: "https://images.unsplash.com/photo-1505761671935-60b3a7427bad?auto=format&fit=crop&w=800&q=80", alt: { fr: "Quartier animé", en: "Lively district" } },
+      { src: "https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?auto=format&fit=crop&w=800&q=80", alt: { fr: "Hôtel moderne", en: "Modern hotel" } },
     ],
     fallback: true
   };
@@ -1066,7 +1155,7 @@ function fallbackIntel(destination) {
 
 function fetchIntel(destination) {
   const key = slugify(destination.trim());
-  setIntelStatus("Recherche en cours…", "info");
+  setIntelStatus(t("intelSearching") || "Recherche en cours…", "info");
   showIntelError("");
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -1106,15 +1195,15 @@ function fetchInventory(destination) {
 
 async function runIntel(destination) {
   if (!destination) return;
-  setIntelStatus("Recherche en cours…", "info");
+  setIntelStatus(t("intelSearching") || "Recherche en cours…", "info");
   refreshIntelBtn.disabled = true;
   try {
     const intel = await fetchIntel(destination);
     renderIntel(intel, destination);
   } catch (e) {
     console.error(e);
-    showIntelError("Erreur lors de la récupération des informations.");
-    setIntelStatus("Échec de la recherche", "danger");
+    showIntelError(t("intelError") || "Erreur lors de la récupération des informations.");
+    setIntelStatus(t("intelSearchFailed") || "Échec de la recherche", "danger");
     refreshIntelBtn.disabled = false;
   }
 }
