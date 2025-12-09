@@ -12,6 +12,159 @@ const bannedDestinations = [
   "zone militaire"
 ];
 
+const translations = {
+  fr: {
+    brand: "Atlas Noir",
+    languageLabel: "Langue",
+    heroEyebrow: "Voyage privé",
+    heroTitle: "Atlas",
+    heroTagline: "Luxe silencieux. Signal pur.",
+    thinkingReady: "Prêt.",
+    sectionDiscovery: "Découverte",
+    briefTitle: "Brief",
+    fieldOrigin: "Départ",
+    fieldDestination: "Destination",
+    fieldBudget: "Budget",
+    fieldDuration: "Durée",
+    fieldTransport: "Transport préféré",
+    fieldStay: "Signature séjour",
+    advancedPrefs: "Préférences fines",
+    fieldVibe: "Vibe",
+    fieldFlex: "Flex",
+    fieldTravelers: "Voyageurs",
+    fieldConstraints: "Contraintes",
+    constraintsPlaceholder: "Court et précis",
+    budgetLow: "Bas",
+    budgetMid: "Moyen",
+    budgetHigh: "Haut",
+    transportFlex: "Auto / Train / Avion",
+    transportTrain: "Train",
+    transportPlane: "Avion",
+    transportRoad: "Route",
+    stayMix: "Mix premium",
+    stayLuxury: "Luxe marqué",
+    staySubtle: "Sobre & discret",
+    stayEco: "Éco-conscient",
+    vibeRelax: "Relax",
+    vibeAdventure: "Aventure",
+    vibeCity: "City",
+    vibeRomantic: "Romantique",
+    vibeFamily: "Famille",
+    vibeMix: "Mix",
+    flexFixed: "Dates fixes",
+    flexFlexible: "Dates flexibles",
+    flexOpen: "Destination ouverte",
+    travelSolo: "Solo",
+    travelCouple: "Couple",
+    travelFamily: "Famille",
+    travelFriends: "Amis",
+    travelBusiness: "Business",
+    launch: "Lancer",
+    sectionWorkflow: "Parcours",
+    workflowTitle: "Itinéraire",
+    stepProfile: "Profil",
+    stepFlights: "Vols",
+    stepLodging: "Séjour",
+    stepActivities: "Activités",
+    stepItinerary: "Itinéraire",
+    stepBudget: "Budget",
+    sectionIntel: "Scraping",
+    intelTitle: "Sources actives",
+    refresh: "Rafraîchir",
+    sectionSummary: "Sortie",
+    summaryTitle: "Résumé",
+    validate: "Valider",
+    copy: "Copier",
+    intelReady: "Prêt",
+    thinkingIdle: "En attente d’une requête.",
+    waitingStatus: "En attente",
+    readyFlow: "Flux prêt. Deux options premium.",
+    intelPaused: "En pause",
+    summaryCopied: "Copié !",
+    summaryCopy: "Copier le texte",
+    validated: "Validé",
+    validateMessage: "Validation finale",
+    validateBody:
+      "Parcours verrouillé. Les sélections scrappées restent synchronisées pour export et réservation.",
+    statusSessionRestored: "Session restaurée",
+  },
+  en: {
+    brand: "Atlas Noir",
+    languageLabel: "Language",
+    heroEyebrow: "Private travel",
+    heroTitle: "Atlas",
+    heroTagline: "Quiet luxury. Pure signal.",
+    thinkingReady: "Ready.",
+    sectionDiscovery: "Discovery",
+    briefTitle: "Brief",
+    fieldOrigin: "Departure",
+    fieldDestination: "Destination",
+    fieldBudget: "Budget",
+    fieldDuration: "Length",
+    fieldTransport: "Preferred transport",
+    fieldStay: "Stay signature",
+    advancedPrefs: "Fine preferences",
+    fieldVibe: "Vibe",
+    fieldFlex: "Flex",
+    fieldTravelers: "Travelers",
+    fieldConstraints: "Constraints",
+    constraintsPlaceholder: "Short and precise",
+    budgetLow: "Low",
+    budgetMid: "Medium",
+    budgetHigh: "High",
+    transportFlex: "Car / Train / Plane",
+    transportTrain: "Train",
+    transportPlane: "Plane",
+    transportRoad: "Road",
+    stayMix: "Premium mix",
+    stayLuxury: "High-end",
+    staySubtle: "Subtle & discreet",
+    stayEco: "Eco-conscious",
+    vibeRelax: "Relax",
+    vibeAdventure: "Adventure",
+    vibeCity: "City",
+    vibeRomantic: "Romantic",
+    vibeFamily: "Family",
+    vibeMix: "Mix",
+    flexFixed: "Fixed dates",
+    flexFlexible: "Flexible dates",
+    flexOpen: "Open destination",
+    travelSolo: "Solo",
+    travelCouple: "Couple",
+    travelFamily: "Family",
+    travelFriends: "Friends",
+    travelBusiness: "Business",
+    launch: "Launch",
+    sectionWorkflow: "Journey",
+    workflowTitle: "Itinerary",
+    stepProfile: "Profile",
+    stepFlights: "Flights",
+    stepLodging: "Stay",
+    stepActivities: "Activities",
+    stepItinerary: "Itinerary",
+    stepBudget: "Budget",
+    sectionIntel: "Scraping",
+    intelTitle: "Active sources",
+    refresh: "Refresh",
+    sectionSummary: "Output",
+    summaryTitle: "Summary",
+    validate: "Validate",
+    copy: "Copy",
+    intelReady: "Ready",
+    thinkingIdle: "Waiting for a request.",
+    waitingStatus: "Pending",
+    readyFlow: "Flow ready. Two premium options.",
+    intelPaused: "On hold",
+    summaryCopied: "Copied!",
+    summaryCopy: "Copy text",
+    validated: "Validated",
+    validateMessage: "Final validation",
+    validateBody:
+      "Path locked. Scraped selections stay synchronized for export and booking.",
+    statusSessionRestored: "Session restored",
+  },
+};
+
 const intelDataset = {
   tokyo: {
     summary: "Quartiers sûrs (Shinjuku, Shibuya, Ginza), transport facile par métro/Pasmo.",
@@ -228,6 +381,50 @@ const intelError = document.getElementById("intelError");
 const imageStrip = document.getElementById("imageStrip");
 const refreshIntelBtn = document.getElementById("btnRefreshIntel");
 const liveScrapeList = document.getElementById("liveScrapeList");
+
+let currentLang = "fr";
+
+function t(key) {
+  return translations[currentLang]?.[key] || translations.fr[key] || key;
+}
+
+function applyStaticTranslations() {
+  document.documentElement.lang = currentLang;
+  document.querySelectorAll("[data-i18n]").forEach((node) => {
+    const key = node.getAttribute("data-i18n");
+    if (key && translations[currentLang]?.[key]) {
+      node.textContent = t(key);
+    }
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => {
+    const key = node.getAttribute("data-i18n-placeholder");
+    if (key && translations[currentLang]?.[key]) {
+      node.setAttribute("placeholder", t(key));
+    }
+  });
+  if (intelStatus) {
+    intelStatus.textContent = t("intelReady");
+  }
+  const languagePicker = document.getElementById("languagePicker");
+  if (languagePicker && languagePicker.value !== currentLang) {
+    languagePicker.value = currentLang;
+  }
+}
+
+function setLanguage(lang) {
+  currentLang = translations[lang] ? lang : "fr";
+  safeStorage.set("appLang", currentLang);
+  applyStaticTranslations();
+  if (statusPill?.textContent === translations.fr.waitingStatus || statusPill?.textContent === translations.en.waitingStatus) {
+    setStatus(t("waitingStatus"));
+  }
+  if (intelStatus?.textContent === translations.fr.intelPaused || intelStatus?.textContent === translations.en.intelPaused) {
+    setIntelStatus(t("intelPaused"));
+  }
+  if (!state.summary) {
+    stopThinking(t("thinkingIdle"));
+  }
+}
 
 function slugify(text) {
   return (text || "")
@@ -542,7 +739,7 @@ function clearStepLoader() {
   dynamicState.loaderInterval = null;
 }
 
-function stopThinking(message = "En attente d’une requête.") {
+function stopThinking(message = t("thinkingIdle")) {
   if (!thinkingIndicator) return;
   thinkingIndicator.classList.remove("active");
   const label = thinkingIndicator.querySelector(".label");
@@ -581,17 +778,17 @@ function restoreState() {
 }
 
 function clearUI(skipPersist = false) {
-  conversation.innerHTML = '<p class="muted">Flux prêt. Deux options ultra-courtes.</p>';
+  conversation.innerHTML = `<p class="muted">${t("readyFlow")}</p>`;
   summaryBlock.innerHTML = "";
   exportBtn.disabled = true;
   intelCards.innerHTML = "";
   imageStrip.innerHTML = "";
   showIntelError("");
-  setIntelStatus("En pause");
+  setIntelStatus(t("intelPaused"));
   refreshIntelBtn.disabled = true;
   stepList.forEach((s) => s.classList.remove("done", "active"));
   stepList[0].classList.add("active");
-  setStatus("En attente");
+  setStatus(t("waitingStatus"));
   stopThinking();
   clearStepLoader();
   state.discovery = null;
@@ -1306,20 +1503,20 @@ exportBtn.addEventListener("click", () => {
     .map((b) => `${b.title}\n- ${b.items.join("\n- ")}`)
     .join("\n\n");
   navigator.clipboard.writeText(text).then(() => {
-    exportBtn.textContent = "Copié !";
-    setTimeout(() => (exportBtn.textContent = "Copier le texte"), 2000);
+    exportBtn.textContent = t("summaryCopied");
+    setTimeout(() => (exportBtn.textContent = t("summaryCopy")), 2000);
   });
 });
 
 if (validateBtn) {
   validateBtn.addEventListener("click", () => {
     if (!state.summary) return;
-    validateBtn.textContent = "Validé";
+    validateBtn.textContent = t("validated");
     validateBtn.classList.add("confirmed");
     addMessage({
-      title: "Validation finale",
+      title: t("validateMessage"),
       agent: "Chef d’orchestre",
-      body: "Parcours verrouillé. Les sélections scrappées restent synchronisées pour export et réservation.",
+      body: t("validateBody"),
     });
   });
 }
@@ -1375,12 +1572,21 @@ if (refreshIntelBtn) {
   });
 }
 
+const savedLang = safeStorage.get("appLang") || (navigator.language || "fr").slice(0, 2);
+setLanguage(savedLang);
+applyStaticTranslations();
+
+const languagePicker = document.getElementById("languagePicker");
+if (languagePicker) {
+  languagePicker.addEventListener("change", (event) => setLanguage(event.target.value));
+}
+
 loadScrapeCache();
 hydrateScrapeSources();
 clearUI(true);
 restoreState();
 if (state.discovery?.destination) {
-  setStatus("Session restaurée", "info");
+  setStatus(t("statusSessionRestored"), "info");
   if (refreshIntelBtn) refreshIntelBtn.disabled = false;
   runIntel(state.discovery.destination);
 }
