@@ -12,6 +12,230 @@ const bannedDestinations = [
   "zone militaire"
 ];
 
+const translations = {
+  fr: {
+    brand: "Atlas Noir",
+    languageLabel: "Langue",
+    heroEyebrow: "Voyage privé",
+    heroTitle: "Atlas",
+    heroTagline: "Luxe silencieux. Signal pur.",
+    thinkingReady: "Prêt.",
+    sectionDiscovery: "Découverte",
+    briefTitle: "Brief",
+    fieldOrigin: "Départ",
+    fieldDestination: "Destination",
+    fieldBudget: "Budget",
+    fieldDuration: "Durée",
+    fieldTransport: "Transport préféré",
+    fieldStay: "Signature séjour",
+    advancedPrefs: "Préférences fines",
+    fieldVibe: "Vibe",
+    fieldFlex: "Flex",
+    fieldTravelers: "Voyageurs",
+    fieldConstraints: "Contraintes",
+    constraintsPlaceholder: "Court et précis",
+    budgetLow: "Bas",
+    budgetMid: "Moyen",
+    budgetHigh: "Haut",
+    transportFlex: "Auto / Train / Avion",
+    transportTrain: "Train",
+    transportPlane: "Avion",
+    transportRoad: "Route",
+    stayMix: "Mix premium",
+    stayLuxury: "Luxe marqué",
+    staySubtle: "Sobre & discret",
+    stayEco: "Éco-conscient",
+    vibeRelax: "Relax",
+    vibeAdventure: "Aventure",
+    vibeCity: "City",
+    vibeRomantic: "Romantique",
+    vibeFamily: "Famille",
+    vibeMix: "Mix",
+    flexFixed: "Dates fixes",
+    flexFlexible: "Dates flexibles",
+    flexOpen: "Destination ouverte",
+    travelSolo: "Solo",
+    travelCouple: "Couple",
+    travelFamily: "Famille",
+    travelFriends: "Amis",
+    travelBusiness: "Business",
+    launch: "Lancer",
+    sectionWorkflow: "Parcours",
+    workflowTitle: "Itinéraire",
+    stepProfile: "Profil",
+    stepFlights: "Vols",
+    stepLodging: "Séjour",
+    stepActivities: "Activités",
+    stepItinerary: "Itinéraire",
+    stepBudget: "Budget",
+    sectionIntel: "Scraping",
+    intelTitle: "Sources actives",
+    refresh: "Rafraîchir",
+    sectionSummary: "Sortie",
+    summaryTitle: "Résumé",
+    validate: "Valider",
+    copy: "Copier",
+    intelReady: "Prêt",
+    thinkingIdle: "En attente d’une requête.",
+    waitingStatus: "En attente",
+    readyFlow: "Flux prêt. Deux options premium.",
+    liveScrape: "Flux de scraping",
+    intelPaused: "En pause",
+    summaryCopied: "Copié !",
+    summaryCopy: "Copier le texte",
+    validated: "Validé",
+    validateMessage: "Validation finale",
+    validateBody:
+      "Parcours verrouillé. Les sélections scrappées restent synchronisées pour export et réservation.",
+    statusSessionRestored: "Session restaurée",
+    statusBlocked: "Bloqué",
+    statusSearchCanceled: "Recherche annulée",
+    statusBlockedMessage:
+      "Destination bloquée : l’outil propose des alternatives sûres.",
+    intelReadyRich: "Infos + images prêtes",
+    intelGenericFallback: "Résultats génériques faute de source dédiée.",
+    intelError: "Erreur lors de la récupération des informations.",
+    scrapeLoaderLead: "Scraping sécurisé (5–10s)",
+    scrapeLoaderLabel: "Simulation en cours",
+    scrapeFallbackText: "Pas de source dédiée. On reste sur les hubs sûrs et les hôtels 4★.",
+    scrapeFallbackSource: "Sources ouvertes",
+    scrapePlanDiscovery: ["vols fiables", "prix hôtels", "climat", "contrastes vibe", "accès premium"],
+    scrapePlanProfile: ["corridors sécurisés", "plafonds budget", "alertes vibe", "options transport", "sources vérifiées"],
+    scrapePlanFlights: ["routes directes", "escales courtes", "temps porte-à-porte", "classes confort", "prix dynamiques"],
+    scrapePlanLodging: ["quartiers sûrs", "tarifs nuit", "labels luxe", "options éco", "politique annulation"],
+    scrapePlanActivities: [
+      "pics d’affluence",
+      "expériences premium",
+      "options gratuites",
+      "restrictions locales",
+      "horaires fiables",
+    ],
+    scrapePlanItinerary: ["rythme quotidien", "transports intra-ville", "plages horaires", "liens météo", "sécurité zones"],
+    scrapePlanBudget: ["total vols", "moyenne nuit", "transports locaux", "activités clés", "marge sécurité"],
+    scrapePlanFallback: "sources ouvertes",
+    scrapePlanVerified: "vérifié",
+    scrapePricePending: "tarif en cours",
+    scrapeSourceVerified: "source vérifiée",
+    statusInProgress: "En cours",
+    thinkingConcepts: "Agent 0 prépare 3 pistes cohérentes…",
+    precheckTitle: "Alerte cohérence",
+    precheckAgent: "Vérifications préalables",
+    conceptPhaseTitle: "Phase découverte",
+    conceptPhaseAgent: "Agent 0 — Scout",
+    conceptQuestion: "Choisissez un concept (A/B/C) ou indiquez un autre axe.",
+  },
+  en: {
+    brand: "Atlas Noir",
+    languageLabel: "Language",
+    heroEyebrow: "Private travel",
+    heroTitle: "Atlas",
+    heroTagline: "Quiet luxury. Pure signal.",
+    thinkingReady: "Ready.",
+    sectionDiscovery: "Discovery",
+    briefTitle: "Brief",
+    fieldOrigin: "Departure",
+    fieldDestination: "Destination",
+    fieldBudget: "Budget",
+    fieldDuration: "Length",
+    fieldTransport: "Preferred transport",
+    fieldStay: "Stay signature",
+    advancedPrefs: "Fine preferences",
+    fieldVibe: "Vibe",
+    fieldFlex: "Flex",
+    fieldTravelers: "Travelers",
+    fieldConstraints: "Constraints",
+    constraintsPlaceholder: "Short and precise",
+    budgetLow: "Low",
+    budgetMid: "Medium",
+    budgetHigh: "High",
+    transportFlex: "Car / Train / Plane",
+    transportTrain: "Train",
+    transportPlane: "Plane",
+    transportRoad: "Road",
+    stayMix: "Premium mix",
+    stayLuxury: "High-end",
+    staySubtle: "Subtle & discreet",
+    stayEco: "Eco-conscious",
+    vibeRelax: "Relax",
+    vibeAdventure: "Adventure",
+    vibeCity: "City",
+    vibeRomantic: "Romantic",
+    vibeFamily: "Family",
+    vibeMix: "Mix",
+    flexFixed: "Fixed dates",
+    flexFlexible: "Flexible dates",
+    flexOpen: "Open destination",
+    travelSolo: "Solo",
+    travelCouple: "Couple",
+    travelFamily: "Family",
+    travelFriends: "Friends",
+    travelBusiness: "Business",
+    launch: "Launch",
+    sectionWorkflow: "Journey",
+    workflowTitle: "Itinerary",
+    stepProfile: "Profile",
+    stepFlights: "Flights",
+    stepLodging: "Stay",
+    stepActivities: "Activities",
+    stepItinerary: "Itinerary",
+    stepBudget: "Budget",
+    sectionIntel: "Scraping",
+    intelTitle: "Active sources",
+    refresh: "Refresh",
+    sectionSummary: "Output",
+    summaryTitle: "Summary",
+    validate: "Validate",
+    copy: "Copy",
+    intelReady: "Ready",
+    thinkingIdle: "Waiting for a request.",
+    waitingStatus: "Pending",
+    readyFlow: "Flow ready. Two premium options.",
+    liveScrape: "Scraping feed",
+    intelPaused: "On hold",
+    summaryCopied: "Copied!",
+    summaryCopy: "Copy text",
+    validated: "Validated",
+    validateMessage: "Final validation",
+    validateBody:
+      "Path locked. Scraped selections stay synchronized for export and booking.",
+    statusSessionRestored: "Session restored",
+    statusBlocked: "Blocked",
+    statusSearchCanceled: "Search canceled",
+    statusBlockedMessage: "Destination blocked: safer alternatives proposed.",
+    intelReadyRich: "Insights + images ready",
+    intelGenericFallback: "Generic results due to missing dedicated source.",
+    intelError: "Error while fetching information.",
+    scrapeLoaderLead: "Secure scraping (5–10s)",
+    scrapeLoaderLabel: "Simulation in progress",
+    scrapeFallbackText: "No dedicated source. Staying on safe hubs and 4★ hotels.",
+    scrapeFallbackSource: "Open sources",
+    scrapePlanDiscovery: ["reliable flights", "hotel prices", "climate", "vibe contrasts", "premium access"],
+    scrapePlanProfile: ["secure corridors", "budget ceilings", "vibe alerts", "transport options", "verified sources"],
+    scrapePlanFlights: ["direct routes", "short layovers", "door-to-door time", "comfort classes", "dynamic pricing"],
+    scrapePlanLodging: ["safe districts", "nightly rates", "luxury labels", "eco options", "cancellation policy"],
+    scrapePlanActivities: [
+      "crowd peaks",
+      "premium experiences",
+      "free options",
+      "local restrictions",
+      "reliable hours",
+    ],
+    scrapePlanItinerary: ["daily pace", "in-city transport", "time windows", "weather links", "zone safety"],
+    scrapePlanBudget: ["flight total", "avg nightly", "local transport", "key activities", "safety buffer"],
+    scrapePlanFallback: "open sources",
+    scrapePlanVerified: "verified",
+    scrapePricePending: "pricing",
+    scrapeSourceVerified: "verified source",
+    statusInProgress: "In progress",
+    thinkingConcepts: "Agent 0 is preparing three aligned paths…",
+    precheckTitle: "Consistency alert",
+    precheckAgent: "Pre-flight checks",
+    conceptPhaseTitle: "Discovery phase",
+    conceptPhaseAgent: "Agent 0 — Scout",
+    conceptQuestion: "Choose a concept (A/B/C) or suggest another angle.",
+  },
+};
+
 const intelDataset = {
   tokyo: {
     summary: "Quartiers sûrs (Shinjuku, Shibuya, Ginza), transport facile par métro/Pasmo.",
@@ -229,6 +453,50 @@ const imageStrip = document.getElementById("imageStrip");
 const refreshIntelBtn = document.getElementById("btnRefreshIntel");
 const liveScrapeList = document.getElementById("liveScrapeList");
 
+let currentLang = "fr";
+
+function t(key) {
+  return translations[currentLang]?.[key] || translations.fr[key] || key;
+}
+
+function applyStaticTranslations() {
+  document.documentElement.lang = currentLang;
+  document.querySelectorAll("[data-i18n]").forEach((node) => {
+    const key = node.getAttribute("data-i18n");
+    if (key && translations[currentLang]?.[key]) {
+      node.textContent = t(key);
+    }
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => {
+    const key = node.getAttribute("data-i18n-placeholder");
+    if (key && translations[currentLang]?.[key]) {
+      node.setAttribute("placeholder", t(key));
+    }
+  });
+  if (intelStatus) {
+    intelStatus.textContent = t("intelReady");
+  }
+  const languagePicker = document.getElementById("languagePicker");
+  if (languagePicker && languagePicker.value !== currentLang) {
+    languagePicker.value = currentLang;
+  }
+}
+
+function setLanguage(lang) {
+  currentLang = translations[lang] ? lang : "fr";
+  safeStorage.set("appLang", currentLang);
+  applyStaticTranslations();
+  if (statusPill?.textContent === translations.fr.waitingStatus || statusPill?.textContent === translations.en.waitingStatus) {
+    setStatus(t("waitingStatus"));
+  }
+  if (intelStatus?.textContent === translations.fr.intelPaused || intelStatus?.textContent === translations.en.intelPaused) {
+    setIntelStatus(t("intelPaused"));
+  }
+  if (!state.summary) {
+    stopThinking(t("thinkingIdle"));
+  }
+}
+
 function slugify(text) {
   return (text || "")
     .trim()
@@ -357,8 +625,8 @@ function getScrapedSnippet(destination, stage) {
   const record = scrapedContext[key];
   if (!record) {
     return {
-      text: "Pas de source dédiée. On reste sur les hubs sûrs et les hôtels 4★.",
-      source: "Sources ouvertes",
+      text: t("scrapeFallbackText"),
+      source: t("scrapeFallbackSource"),
     };
   }
   const mapping = {
@@ -372,21 +640,21 @@ function getScrapedSnippet(destination, stage) {
   };
   return {
     text: mapping[stage] || record.activities,
-    source: record.sources?.join(" · ") || "Sources ouvertes",
+    source: record.sources?.join(" · ") || t("scrapeFallbackSource"),
   };
 }
 
 function getStageScrapePlan(stage) {
   const plans = {
-    discovery: ["vols fiables", "prix hôtels", "climat", "contrastes vibe", "accès premium"],
-    profile: ["corridors sécurisés", "plafonds budget", "alertes vibe", "options transport", "sources vérifiées"],
-    flights: ["routes directes", "escales courtes", "temps porte-à-porte", "classes confort", "prix dynamiques"],
-    lodging: ["quartiers sûrs", "tarifs nuit", "labels luxe", "options éco", "politique annulation"],
-    activities: ["pics d’affluence", "expériences premium", "options gratuites", "restrictions locales", "horaires fiables"],
-    itinerary: ["rythme quotidien", "transports intra-ville", "plages horaires", "liens météo", "sécurité zones"],
-    budget: ["total vols", "moyenne nuit", "transports locaux", "activités clés", "marge sécurité"],
+    discovery: t("scrapePlanDiscovery"),
+    profile: t("scrapePlanProfile"),
+    flights: t("scrapePlanFlights"),
+    lodging: t("scrapePlanLodging"),
+    activities: t("scrapePlanActivities"),
+    itinerary: t("scrapePlanItinerary"),
+    budget: t("scrapePlanBudget"),
   };
-  return plans[stage] || ["sources ouvertes"];
+  return plans[stage] || [t("scrapePlanFallback")];
 }
 
 function filterScrapeItems(destination, stage, discovery) {
@@ -415,7 +683,7 @@ function filterScrapeItems(destination, stage, discovery) {
   if (!base.length) {
     return getStageScrapePlan(stage).map((p, idx) => ({
       title: `${stage} ${idx + 1}`,
-      detail: `${p} vérifié`,
+      detail: `${p} ${t("scrapePlanVerified")}`,
       price: null,
       valid: true,
       image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=600&q=80"
@@ -457,7 +725,7 @@ function sampleScrapedItems(destination, stage, discovery, desired = 12) {
 }
 
 function domainFromLink(link) {
-  if (!link) return "source vérifiée";
+  if (!link) return t("scrapeSourceVerified");
   try {
     const url = new URL(link.startsWith("http") ? link : `https://${link}`);
     return url.hostname.replace("www.", "");
@@ -467,7 +735,7 @@ function domainFromLink(link) {
 }
 
 function formatPriceTag(item, stage) {
-  if (!item?.price && item?.price !== 0) return "tarif en cours";
+  if (!item?.price && item?.price !== 0) return t("scrapePricePending");
   const unit = item.currency || (stage === "flights" ? "€" : "€");
   return `${item.price}${unit}`;
 }
@@ -512,8 +780,8 @@ function showStepLoader(text, durationMs, stage) {
   const plan = getStageScrapePlan(stage || "discovery");
   loader.innerHTML = `
     <div class="loader-head">${text}</div>
-    <div class="loader-bar" role="progressbar" aria-label="Simulation en cours"><span></span></div>
-    <p class="muted">Scraping sécurisé (5–10s) : ${plan.slice(0, 3).join(" · ")}</p>
+    <div class="loader-bar" role="progressbar" aria-label="${t("scrapeLoaderLabel")}"><span></span></div>
+    <p class="muted">${t("scrapeLoaderLead")}: ${plan.slice(0, 3).join(" · ")}</p>
     <ul class="scrape-plan">${plan.map((item) => `<li>${item}</li>`).join("")}</ul>
   `;
   conversation.appendChild(loader);
@@ -542,7 +810,7 @@ function clearStepLoader() {
   dynamicState.loaderInterval = null;
 }
 
-function stopThinking(message = "En attente d’une requête.") {
+function stopThinking(message = t("thinkingIdle")) {
   if (!thinkingIndicator) return;
   thinkingIndicator.classList.remove("active");
   const label = thinkingIndicator.querySelector(".label");
@@ -581,17 +849,17 @@ function restoreState() {
 }
 
 function clearUI(skipPersist = false) {
-  conversation.innerHTML = '<p class="muted">Flux prêt. Deux options ultra-courtes.</p>';
+  conversation.innerHTML = `<p class="muted">${t("readyFlow")}</p>`;
   summaryBlock.innerHTML = "";
   exportBtn.disabled = true;
   intelCards.innerHTML = "";
   imageStrip.innerHTML = "";
   showIntelError("");
-  setIntelStatus("En pause");
+  setIntelStatus(t("intelPaused"));
   refreshIntelBtn.disabled = true;
   stepList.forEach((s) => s.classList.remove("done", "active"));
   stepList[0].classList.add("active");
-  setStatus("En attente");
+  setStatus(t("waitingStatus"));
   stopThinking();
   clearStepLoader();
   state.discovery = null;
@@ -756,9 +1024,9 @@ function renderIntel(intel, destination) {
     imageStrip.appendChild(figure);
   });
 
-  setIntelStatus("Infos + images prêtes", "success");
+  setIntelStatus(t("intelReadyRich"), "success");
   if (refreshIntelBtn) refreshIntelBtn.disabled = false;
-  showIntelError(intel.fallback ? "Résultats génériques faute de source dédiée." : "", intel.fallback ? "error" : "success");
+  showIntelError(intel.fallback ? t("intelGenericFallback") : "", intel.fallback ? "error" : "success");
 }
 
 function fallbackIntel(destination) {
@@ -777,7 +1045,7 @@ function fallbackIntel(destination) {
 
 function fetchIntel(destination) {
   const key = slugify(destination.trim());
-  setIntelStatus("Recherche en cours…", "info");
+  setIntelStatus(t("waitingStatus"), "info");
   showIntelError("");
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -1306,20 +1574,20 @@ exportBtn.addEventListener("click", () => {
     .map((b) => `${b.title}\n- ${b.items.join("\n- ")}`)
     .join("\n\n");
   navigator.clipboard.writeText(text).then(() => {
-    exportBtn.textContent = "Copié !";
-    setTimeout(() => (exportBtn.textContent = "Copier le texte"), 2000);
+    exportBtn.textContent = t("summaryCopied");
+    setTimeout(() => (exportBtn.textContent = t("summaryCopy")), 2000);
   });
 });
 
 if (validateBtn) {
   validateBtn.addEventListener("click", () => {
     if (!state.summary) return;
-    validateBtn.textContent = "Validé";
+    validateBtn.textContent = t("validated");
     validateBtn.classList.add("confirmed");
     addMessage({
-      title: "Validation finale",
+      title: t("validateMessage"),
       agent: "Chef d’orchestre",
-      body: "Parcours verrouillé. Les sélections scrappées restent synchronisées pour export et réservation.",
+      body: t("validateBody"),
     });
   });
 }
@@ -1343,26 +1611,26 @@ async function onDiscoverySubmit(event) {
   const warnings = validateDiscovery(data);
   state.discovery = data;
   state.scrapeReady = null;
-  setStatus("En cours", "info");
+  setStatus(t("statusInProgress"), "info");
   conversation.innerHTML = "";
-  setThinking("Agent 0 prépare 3 pistes cohérentes…");
+  setThinking(t("thinkingConcepts"));
 
   if (warnings.length) {
     addMessage({
-      title: "Alerte cohérence",
-      agent: "Vérifications préalables",
+      title: t("precheckTitle"),
+      agent: t("precheckAgent"),
       body: warnings.join("\n")
     });
   }
 
-  await ensureScrapeDataset(data.destination, "Scraping découverte sécurisé…");
+  await ensureScrapeDataset(data.destination, t("scrapeLoaderLead"));
 
   addMessage({
-    title: "Phase découverte",
-    agent: "Agent 0 — Scout",
+    title: t("conceptPhaseTitle"),
+    agent: t("conceptPhaseAgent"),
     body: `Vous voulez aller vers ${data.destination} depuis ${data.origin}, vibe ${data.vibe}. Budget: ${formatBudgetLabel(data.budget)}. Voici 3 concepts rapides :`,
     options: conceptOptions(data),
-    question: "Choisissez un concept (A/B/C) ou indiquez un autre axe."
+    question: t("conceptQuestion"),
   });
 
   persistState();
@@ -1375,12 +1643,21 @@ if (refreshIntelBtn) {
   });
 }
 
+const savedLang = safeStorage.get("appLang") || (navigator.language || "fr").slice(0, 2);
+setLanguage(savedLang);
+applyStaticTranslations();
+
+const languagePicker = document.getElementById("languagePicker");
+if (languagePicker) {
+  languagePicker.addEventListener("change", (event) => setLanguage(event.target.value));
+}
+
 loadScrapeCache();
 hydrateScrapeSources();
 clearUI(true);
 restoreState();
 if (state.discovery?.destination) {
-  setStatus("Session restaurée", "info");
+  setStatus(t("statusSessionRestored"), "info");
   if (refreshIntelBtn) refreshIntelBtn.disabled = false;
   runIntel(state.discovery.destination);
 }

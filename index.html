@@ -7,116 +7,125 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <nav class="topbar" aria-label="Barre de statut premium">
+  <nav class="topbar" aria-label="Premium status bar">
     <div class="topbar-brand">
       <span class="logo" aria-hidden="true">✦</span>
-      <strong>Atlas Noir</strong>
+      <strong data-i18n="brand">Atlas Noir</strong>
+    </div>
+    <div class="topbar-actions">
+      <label class="language-switch" for="languagePicker">
+        <span data-i18n="languageLabel">Langue</span>
+        <select id="languagePicker" aria-label="Choisir la langue">
+          <option value="fr">Français</option>
+          <option value="en">English</option>
+        </select>
+      </label>
     </div>
   </nav>
 
   <header class="hero">
     <div>
-      <p class="eyebrow">Voyage privé</p>
-      <h1>Atlas</h1>
-      <p class="lede">Luxe silencieux. Signal pur.</p>
+      <p class="eyebrow" data-i18n="heroEyebrow">Voyage privé</p>
+      <h1 data-i18n="heroTitle">Atlas</h1>
+      <p class="lede" data-i18n="heroTagline">Luxe silencieux. Signal pur.</p>
     </div>
     <div class="hero-meta" aria-live="polite">
-      <p class="muted" id="intelStatus">Prêt</p>
+      <p class="muted" id="intelStatus" data-i18n="intelReady">Prêt</p>
     </div>
   </header>
 
   <main class="layout">
     <div class="thinking-indicator" id="thinkingIndicator">
-      <p class="label">Prêt.</p>
+      <p class="label" data-i18n="thinkingReady">Prêt.</p>
     </div>
 
     <section class="panel" aria-labelledby="discovery-title">
       <header class="panel-header solo">
         <div>
-          <p class="eyebrow">Découverte</p>
-          <h2 id="discovery-title">Brief</h2>
+          <p class="eyebrow" data-i18n="sectionDiscovery">Découverte</p>
+          <h2 id="discovery-title" data-i18n="briefTitle">Brief</h2>
         </div>
-        <span class="pill" id="status">En attente</span>
+        <span class="pill" id="status" data-i18n="waitingStatus">En attente</span>
       </header>
       <form id="discoveryForm" class="grid compact ultra">
         <label class="field">
-          <span>Départ</span>
+          <span data-i18n="fieldOrigin">Départ</span>
           <input name="origin" type="text" placeholder="Paris" value="Paris" required />
         </label>
         <label class="field">
-          <span>Destination</span>
+          <span data-i18n="fieldDestination">Destination</span>
           <input name="destination" type="text" placeholder="Tokyo" value="Tokyo" required />
         </label>
         <label class="field">
-          <span>Budget</span>
+          <span data-i18n="fieldBudget">Budget</span>
           <select name="budget">
-            <option value="low">Bas</option>
-            <option value="mid" selected>Moyen</option>
-            <option value="high">Haut</option>
+            <option value="low" data-i18n="budgetLow">Bas</option>
+            <option value="mid" data-i18n="budgetMid" selected>Moyen</option>
+            <option value="high" data-i18n="budgetHigh">Haut</option>
           </select>
         </label>
         <label class="field">
-          <span>Durée</span>
+          <span data-i18n="fieldDuration">Durée</span>
           <input name="duration" type="number" min="2" max="21" value="7" />
         </label>
         <label class="field">
-          <span>Transport préféré</span>
+          <span data-i18n="fieldTransport">Transport préféré</span>
           <select name="transport">
-            <option value="flex" selected>Auto / Train / Avion</option>
-            <option value="train">Train</option>
-            <option value="avion">Avion</option>
-            <option value="route">Route</option>
+            <option value="flex" data-i18n="transportFlex" selected>Auto / Train / Avion</option>
+            <option value="train" data-i18n="transportTrain">Train</option>
+            <option value="avion" data-i18n="transportPlane">Avion</option>
+            <option value="route" data-i18n="transportRoad">Route</option>
           </select>
         </label>
         <label class="field">
-          <span>Signature séjour</span>
+          <span data-i18n="fieldStay">Signature séjour</span>
           <select name="sejour">
-            <option value="mix" selected>Mix premium</option>
-            <option value="luxe">Luxe marqué</option>
-            <option value="sobre">Sobre & discret</option>
-            <option value="eco">Éco-conscient</option>
+            <option value="mix" data-i18n="stayMix" selected>Mix premium</option>
+            <option value="luxe" data-i18n="stayLuxury">Luxe marqué</option>
+            <option value="sobre" data-i18n="staySubtle">Sobre & discret</option>
+            <option value="eco" data-i18n="stayEco">Éco-conscient</option>
           </select>
         </label>
         <details class="full optional stealth">
-          <summary>Préférences fines</summary>
+          <summary data-i18n="advancedPrefs">Préférences fines</summary>
           <div class="grid compact">
             <label class="field">
-              <span>Vibe</span>
+              <span data-i18n="fieldVibe">Vibe</span>
               <select name="vibe">
-                <option value="relax">Relax</option>
-                <option value="aventure">Aventure</option>
-                <option value="city">City</option>
-                <option value="romantic">Romantique</option>
-                <option value="famille">Famille</option>
-                <option value="mix">Mix</option>
+                <option value="relax" data-i18n="vibeRelax">Relax</option>
+                <option value="aventure" data-i18n="vibeAdventure">Aventure</option>
+                <option value="city" data-i18n="vibeCity">City</option>
+                <option value="romantic" data-i18n="vibeRomantic">Romantique</option>
+                <option value="famille" data-i18n="vibeFamily">Famille</option>
+                <option value="mix" data-i18n="vibeMix">Mix</option>
               </select>
             </label>
             <label class="field">
-              <span>Flex</span>
+              <span data-i18n="fieldFlex">Flex</span>
               <select name="flex">
-                <option value="dates-fixes">Dates fixes</option>
-                <option value="dates-flex">Dates flexibles</option>
-                <option value="destination-flex">Destination ouverte</option>
+                <option value="dates-fixes" data-i18n="flexFixed">Dates fixes</option>
+                <option value="dates-flex" data-i18n="flexFlexible">Dates flexibles</option>
+                <option value="destination-flex" data-i18n="flexOpen">Destination ouverte</option>
               </select>
             </label>
             <label class="field">
-              <span>Voyageurs</span>
+              <span data-i18n="fieldTravelers">Voyageurs</span>
               <select name="travelers">
-                <option value="solo">Solo</option>
-                <option value="couple">Couple</option>
-                <option value="famille">Famille</option>
-                <option value="amis">Amis</option>
-                <option value="business">Business</option>
+                <option value="solo" data-i18n="travelSolo">Solo</option>
+                <option value="couple" data-i18n="travelCouple">Couple</option>
+                <option value="famille" data-i18n="travelFamily">Famille</option>
+                <option value="amis" data-i18n="travelFriends">Amis</option>
+                <option value="business" data-i18n="travelBusiness">Business</option>
               </select>
             </label>
             <label class="field full">
-              <span>Contraintes</span>
-              <textarea name="notes" rows="2" placeholder="Court et précis"></textarea>
+              <span data-i18n="fieldConstraints">Contraintes</span>
+              <textarea name="notes" rows="2" placeholder="Court et précis" data-i18n-placeholder="constraintsPlaceholder"></textarea>
             </label>
           </div>
         </details>
         <div class="actions full solo">
-          <button type="submit" class="primary">Lancer</button>
+          <button type="submit" class="primary" data-i18n="launch">Lancer</button>
         </div>
       </form>
     </section>
@@ -124,23 +133,23 @@
     <section class="panel" aria-labelledby="workflow-title">
       <header class="panel-header solo">
         <div>
-          <p class="eyebrow">Parcours</p>
-          <h2 id="workflow-title">Itinéraire</h2>
+          <p class="eyebrow" data-i18n="sectionWorkflow">Parcours</p>
+          <h2 id="workflow-title" data-i18n="workflowTitle">Itinéraire</h2>
         </div>
       </header>
       <div class="workflow minimal">
         <nav aria-label="Progression des étapes">
           <ol id="stepList" class="steps inline" role="list">
-            <li class="step active" aria-current="step">Profil</li>
-            <li class="step">Vols</li>
-            <li class="step">Séjour</li>
-            <li class="step">Activités</li>
-            <li class="step">Itinéraire</li>
-            <li class="step">Budget</li>
+            <li class="step active" aria-current="step" data-i18n="stepProfile">Profil</li>
+            <li class="step" data-i18n="stepFlights">Vols</li>
+            <li class="step" data-i18n="stepLodging">Séjour</li>
+            <li class="step" data-i18n="stepActivities">Activités</li>
+            <li class="step" data-i18n="stepItinerary">Itinéraire</li>
+            <li class="step" data-i18n="stepBudget">Budget</li>
           </ol>
         </nav>
         <div class="content" id="conversation" aria-live="polite">
-          <p class="muted">Flux réduit, 2 options premium.</p>
+          <p class="muted" data-i18n="readyFlow">Flux prêt. Deux options premium.</p>
         </div>
       </div>
     </section>
@@ -148,18 +157,18 @@
     <section class="panel" aria-labelledby="intel-title">
       <header class="panel-header solo">
         <div>
-          <p class="eyebrow">Scraping</p>
-          <h2 id="intel-title">Sources actives</h2>
+          <p class="eyebrow" data-i18n="sectionIntel">Scraping</p>
+          <h2 id="intel-title" data-i18n="intelTitle">Sources actives</h2>
         </div>
         <div class="actions tight">
-          <button id="btnRefreshIntel" class="ghost" disabled>Rafraîchir</button>
+          <button id="btnRefreshIntel" class="ghost" disabled data-i18n="refresh">Rafraîchir</button>
         </div>
       </header>
       <div class="intel-grid compact">
         <div id="intelCards" class="intel-cards" aria-live="polite"></div>
         <div class="intel-side">
           <div class="live-scrape">
-            <p class="muted live-scrape__head">Flux de scraping</p>
+            <p class="muted live-scrape__head" data-i18n="liveScrape">Flux de scraping</p>
             <ul id="liveScrapeList" class="live-scrape__list" aria-live="polite"></ul>
             <div id="intelError" class="alert" role="status"></div>
           </div>
@@ -171,12 +180,12 @@
     <section class="panel" aria-labelledby="summary-title">
       <header class="panel-header solo">
         <div>
-          <p class="eyebrow">Sortie</p>
-          <h2 id="summary-title">Résumé</h2>
+          <p class="eyebrow" data-i18n="sectionSummary">Sortie</p>
+          <h2 id="summary-title" data-i18n="summaryTitle">Résumé</h2>
         </div>
         <div class="actions tight floating-summary-actions">
-          <button id="btnValidate" class="primary" disabled>Valider</button>
-          <button id="btnExport" class="ghost" disabled>Copier</button>
+          <button id="btnValidate" class="primary" disabled data-i18n="validate">Valider</button>
+          <button id="btnExport" class="ghost" disabled data-i18n="copy">Copier</button>
         </div>
       </header>
       <div id="summary" class="summary" aria-live="polite"></div>
